@@ -1,0 +1,36 @@
+#include "enc.h"
+#include <avr/io.h>
+
+static PORT_t &encport = PORTF;
+static const int encpins_mask = 0xF0;
+
+static const int chan0mux = EVSYS_CHMUX_PORTF_PIN4_gc;
+static const int chan2mux = EVSYS_CHMUX_PORTF_PIN6_gc; // event channels are used in pairs for qdec
+
+static TC0_t &enctim0 = TCE0;
+static TC1_t &enctim1 = TCE1;
+
+void enc_init() {
+	PORTCFG.MPCMASK = encpins_mask; // configure all encoder pins
+	encport.PIN0CTRL = PORT_ISC_LEVEL_gc; // set them to level sensing, required for qdec hardware
+	
+	EVSYS.CH0MUX = chan0mux; // configure the event channel muxes to the correct pins
+	EVSYS.CH2MUX = chan2mux;
+	EVSYS.CH0CTRL = EVSYS.CH2CTRL = EVSYS_QDEN_bm | EVSYS_DIGFILT_8SAMPLES_gc; // turn on quadrature decoding, and digital filtering
+	
+	enctim0.CTRLD = TC_EVACT_QDEC_gc | TC_EVSEL_CH0_gc; // set up timers for quadrature decoding from the correct event channels
+	enctim1.CTRLD = TC_EVACT_QDEC_gc | TC_EVSEL_CH2_gc;
+	enctim0.PER = enctim1.PER = 0xFFFF; // max out the period so we use all 16 bits before overflowing
+	enctim0.CTRLA = enctim1.CTRLA = TC_CLKSEL_DIV1_gc; // div1 clock selection required for qdec to work
+}
+
+uint16_t enc_get(uint8_t num) {
+	if (num == 0)
+		return enctim0.CNT;
+	else
+		return enctim1.CNT;
+}
+
+void enc_reset() {
+	enctim0.CTRLFSET = enctim1.CTRLFSET = TC_CMD_RESET_gc;
+}
