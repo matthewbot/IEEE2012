@@ -52,6 +52,9 @@ uint16_t linesensor_get(int sensor) {
 #pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
 
 ISR(TIMOVFVEC) {
+	for (int i=0; i<8; i++)
+		if (prevmask & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
+			readings[7-i] = 40000; // pin never changed state, so set maximum value
 	sigport.DIRSET = sigpins_mask; // begin charging by setting pins as outputs
 	prevmask = sigpins_mask;
 }
