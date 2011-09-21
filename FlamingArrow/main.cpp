@@ -9,8 +9,15 @@ int main() {
 	while (true) {
 		_delay_ms(10);
 		
-		for (int i=0; i<linesensor_count; i++)
-			debug_printf("%5u,", linesensor_get(i));
-		debug_putch('\n');
+	        debug_printf("%u %u %u %u %u %u %u %u\r\n",
+        	        linesensor_get(0),
+                	linesensor_get(1),
+	                linesensor_get(2),
+        	        linesensor_get(3),
+                	linesensor_get(4),
+	                linesensor_get(5),
+        	        linesensor_get(6),
+                	linesensor_get(7)
+	        );
 	}
 }
