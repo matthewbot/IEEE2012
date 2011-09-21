@@ -23,12 +23,14 @@ void init_interrupts() {
 #include "debug.h"
 #include "motor.h"
 #include "enc.h"
+#include "adc.h"
 #include "linesensor.h"
 
 void init_modules() {
 	debug_init();
 	motor_init();
 	enc_init();
+	adc_init();
 	linesensor_init();
 	
 	debug_puts("Starting up!\n");
