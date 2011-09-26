@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import argparse
+import subprocess
 import sys
 import time
 import traceback
@@ -24,7 +25,7 @@ parser.add_argument(metavar='HEX_FILE',
     type=str, action='store', dest='hex_file')
 args = parser.parse_args()
 
-hex_file_lines = open(args.hex_file, 'rb').readlines()
+hex_file_lines = subprocess.check_output(["srec_cat", args.hex_file, "-Intel", "-Output", "-", "-Intel", "-Line_Length", "44"]).splitlines(True)
 s = serial.Serial(args.port, args.baudrate)
 
 class UnexpectedError(Exception):
