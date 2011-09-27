@@ -59,7 +59,7 @@ TARGET = main
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).cpp adc.cpp debug.cpp  enc.cpp  init.cpp  linesensor.cpp  motor.cpp  util.cpp
+SRC = $(TARGET).cpp adc.cpp debug.cpp  enc.cpp  init.cpp  linesensor.cpp  motor.cpp  util.cpp pid.cpp
 
 
 # List Assembler source files here.
@@ -144,9 +144,9 @@ PRINTF_LIB_MIN = -Wl,-u,vfprintf -lprintf_min
 PRINTF_LIB_FLOAT = -Wl,-u,vfprintf -lprintf_flt
 
 # If this is left blank, then it will use the Standard printf version.
-PRINTF_LIB = 
+#PRINTF_LIB = 
 #PRINTF_LIB = $(PRINTF_LIB_MIN)
-#PRINTF_LIB = $(PRINTF_LIB_FLOAT)
+PRINTF_LIB = $(PRINTF_LIB_FLOAT)
 
 
 # Minimalistic scanf version
