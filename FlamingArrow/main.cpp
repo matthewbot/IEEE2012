@@ -22,5 +22,4 @@ int main() {
 		float rps = e0/563.03/.05;
 		debug_printf("enc: %i rps: %f\r\n", e0, (double)rps);
 		debug_printf("int: %f\r\n", (double)p.i_sum);
-		
 		float out = pid_update(&p, 1.3*sin(t), rps,
