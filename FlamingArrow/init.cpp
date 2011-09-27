@@ -33,5 +33,5 @@ void init_modules() {
 	adc_init();
 	linesensor_init();
 	
-	debug_puts("Starting up!\n");
+	debug_puts("Starting up!\r\n");
 }
