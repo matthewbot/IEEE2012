@@ -27,13 +27,12 @@ void init_interrupts() {
 #include "linesensor.h"
 #include "twi.h"
 #include "controlpanel.h"
+#include "twi.h"
+#include "controlpanel.h"
 
 void init_modules() {
 	debug_init();
 	motor_init();
-	enc_init();
-	adc_init();
-	linesensor_init();
-	twi_init();
+	enctwi_init();
 	controlpanel_init();
 }

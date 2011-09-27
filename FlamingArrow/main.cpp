@@ -9,6 +9,7 @@ int main() {
 	controlpanel();
 
 	while (true) {
+		_delay_ms(10);	while (true) {
 		_delay_ms(10);ain() {
 	init();
 	pid_obj_t p;
@@ -22,5 +23,4 @@ int main() {
 		debug_printf("enc: %i rps: %f\r\n", e0, (double)rps);
 		debug_printf("int: %f\r\n", (double)p.i_sum);
 		
-		float out = pid_update(&p, 1.3*sin(t), rps, .05);
-		debug_printf("out: %f\r
+		float out = pid_update(&p, 1.3*sin(t), rps,
