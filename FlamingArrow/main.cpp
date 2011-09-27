@@ -1,12 +1,15 @@
 #include "init.h"
 #include "debug.h"
 #include "linesensor.h"
+#include "temp.h"
 #include <util/delay.h>
-#include "motor.h"
-#include "enc.h"
-#include "pid.h"
 
 int main() {
+	init();
+	controlpanel();
+
+	while (true) {
+		_delay_ms(10);ain() {
 	init();
 	pid_obj_t p;
 	pid_new(&p, .8, .1, .4, .01);
@@ -20,15 +23,4 @@ int main() {
 		debug_printf("int: %f\r\n", (double)p.i_sum);
 		
 		float out = pid_update(&p, 1.3*sin(t), rps, .05);
-		debug_printf("out: %f\r\n", (double)out);
-		if(out < -1) out = -1;
-		if(out > 1) out = 1;
-		int16_t pwm = 1024*out;
-		debug_printf("pwm: %i\r\n", pwm);
-		motor_setpwm(1, pwm);
-		
-		enc_reset();
-		_delay_ms(50);
-		t += .05;
-	}
-}
+		debug_printf("out: %f\r

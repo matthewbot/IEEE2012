@@ -25,6 +25,8 @@ void init_interrupts() {
 #include "enc.h"
 #include "adc.h"
 #include "linesensor.h"
+#include "twi.h"
+#include "controlpanel.h"
 
 void init_modules() {
 	debug_init();
@@ -32,6 +34,6 @@ void init_modules() {
 	enc_init();
 	adc_init();
 	linesensor_init();
-	
-	debug_puts("Starting up!\r\n");
+	twi_init();
+	controlpanel_init();
 }
