@@ -4,7 +4,7 @@
 
 enum Direction {
 	WRITE,
-	READ	
+	READ
 };
 
 void twi_init();
@@ -16,6 +16,6 @@ void twi_write(uint8_t);
 void twi_send_ack();
 void twi_send_ack_stop();
 void twi_clear_intflags();
-void twi_intflag();
+bool twi_intflag();
 
 #endif /* TWI_H_ */

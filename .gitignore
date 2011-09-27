@@ -1,0 +1,9 @@
+*.o
+*.lst
+*.map
+*.sym
+*.eep
+*.hex
+*.lss
+*.elf
+FlamingArrow/.dep

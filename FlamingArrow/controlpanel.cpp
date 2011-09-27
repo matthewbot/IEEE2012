@@ -4,12 +4,12 @@
 #include "temp.h"
 
 void controlpanel_init() {
-	debug_puts("Starting up\r\n");	
+	debug_puts("Starting up\r\n");
 }
 
 void controlpanel() {
 	char ch = 'a';
-	
+
 	while(ch != 'q') {
 		debug_puts("Main >");
 		debug_getch();
@@ -26,15 +26,15 @@ void controlpanel() {
 			case 'q':
 				break;
 			default:
-				break;	
-		}			
-	}		
+				break;
+		}
+	}
 	debug_puts("Quitting...");
-}	
+}
 
 void controlpanel_motor() {
 	char ch = 'a';
-	
+
 	while (ch != 'q') {
 		debug_puts("Motor >");
 		debug_getch();
@@ -42,36 +42,36 @@ void controlpanel_motor() {
 			default:
 				debug_puts("ACTIONS NOT CODED");
 				break;
-		}		
-	}		
-}	
+		}
+	}
+}
 
 void controlpanel_temp() {
 	char ch = 'a';
-	
+
 	while (ch != 'q') {
 		debug_puts("Temperature >");
 		debug_getch();
 		switch (ch) {
 			case 'o':
-				debug_puts("%f\n", temp_getraw(OBJ)*0.20-273.15);
+				debug_printf("%f\n", temp_getraw(OBJ)*0.20-273.15);
 				break;
 			case 'a':
-				debug_puts("%f\n", temp_getraw(AMB)*0.20-273.15);
+				debug_printf("%f\n", temp_getraw(AMB)*0.20-273.15);
 				break;
 			case 'd':
-				debug_puts("f\n", temp_get());
+				debug_printf("f\n", temp_get(AMB));
 				break;
 			default:
-				debug_puts("ACTIONS NOT CODED");
+				debug_printf("ACTIONS NOT CODED");
 				break;
-		}		
-	}		
-}	
+		}
+	}
+}
 
 void controlpanel_linesensor() {
 	char ch = 'a';
-	
+
 	while (ch != 'q') {
 		debug_puts("Line Sensor >");
 		debug_getch();
@@ -79,6 +79,6 @@ void controlpanel_linesensor() {
 			default:
 				debug_puts("ACTIONS NOT CODED");
 				break;
-		}		
-	}		
-}	
+		}
+	}
+}
