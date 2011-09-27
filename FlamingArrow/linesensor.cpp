@@ -9,7 +9,7 @@ static PORT_t &sigport = PORTD;
 static const int sigpins_mask = 0xFF; // all 8 pins are signal pins
 
 static PORT_t &ctrlport = PORTC;
-static const int ctrlpin = 0;
+static const int ctrlpin = 7;
 
 static TC1_t &tim = TCD1;
 #define TIMOVFVEC TCD1_OVF_vect
@@ -54,7 +54,7 @@ uint16_t linesensor_get(int sensor) {
 ISR(TIMOVFVEC) {
 	for (int i=0; i<8; i++)
 		if (prevmask & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
-			readings[7-i] = 40000; // pin never changed state, so set maximum value
+			readings[i] = 40000; // pin never changed state, so set maximum value
 	sigport.DIRSET = sigpins_mask; // begin charging by setting pins as outputs
 	prevmask = sigpins_mask;
 }
@@ -73,6 +73,6 @@ ISR(SIGINT0VEC) {
 	
 	for (int i=0; i<8; i++) { // record the timer value for each changed pin
 		if (changed & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
-			readings[7-i] = timval;
+			readings[i] = timval;
 	}
 }
