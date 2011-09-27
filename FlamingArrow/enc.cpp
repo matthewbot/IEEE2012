@@ -32,5 +32,5 @@ uint16_t enc_get(uint8_t num) {
 }
 
 void enc_reset() {
-	enctim0.CTRLFSET = enctim1.CTRLFSET = TC_CMD_RESET_gc;
+	enctim0.CNT = enctim1.CNT = 0;
 }
