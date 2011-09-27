@@ -106,6 +106,12 @@
     <Compile Include="controlpanel.cpp">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="pid.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="pid.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="twi.h">
       <SubType>compile</SubType>
     </Compile>

@@ -4,10 +4,10 @@
 static TWI_t &t = TWIC;
 #define twi t.MASTER
 #define MASTER_CLOCK 32000000
-#define SLAVE_CLOCK 100000 // ????????
+#define SLAVE_CLOCK 100000
 
 void twi_init() {
-	twi.BAUD = (uint8_t) MASTER_CLOCK/(2*SLAVE_CLOCK)-5;
+	twi.BAUD = (uint8_t) (MASTER_CLOCK/(2*SLAVE_CLOCK)-5);
 	twi.CTRLA = TWI_MASTER_INTLVL_HI_gc | TWI_MASTER_ENABLE_bm | TWI_MASTER_RIEN_bm;
 }
 
