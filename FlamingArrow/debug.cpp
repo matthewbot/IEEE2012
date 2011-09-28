@@ -15,7 +15,7 @@ static USART_t &uart = USARTC0;
 static PORT_t &uartport = PORTC;
 static const int txpin = 3;
 static const int rxpin = 2;
-static const int bsel = 2158;
+static const int bsel = 2158; // makes 115200 baud
 static const int bscale = 0xA;
 
 static char recvbuf[8];
@@ -24,7 +24,7 @@ static volatile uint8_t recvbuf_pos;
 void debug_init() {
 	ledport.DIRSET = _BV(ledpin);
 	debug_setLED(false);
-	
+
 	uartport.OUTSET = _BV(txpin); // make pin high to avoid transmitting a false start bit on startup
 	uartport.DIRSET = _BV(txpin);
 	uart.CTRLA = USART_RXCINTLVL_LO_gc;
@@ -44,7 +44,7 @@ void debug_setLED(bool on) {
 void debug_putch(char ch) {
 	while (!(uart.STATUS & USART_DREIF_bm)) { }
 	uart.DATA = ch;
-}	
+}
 
 void debug_puts(const char *s) {
 	while (*s)
@@ -53,7 +53,7 @@ void debug_puts(const char *s) {
 
 void debug_printf(const char *fmt, ...) {
 	static char buf[64];
-	
+
 	va_list ap;
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
@@ -63,29 +63,29 @@ void debug_printf(const char *fmt, ...) {
 
 char debug_getch() {
 	while (recvbuf_pos == 0) { }
-	
+
 	util_cli_lo();
 	char ch = recvbuf[0];
 	memmove(recvbuf, recvbuf+1, recvbuf_pos - 1);
 	recvbuf_pos--;
 	util_sei_lo();
-	
+
 	return ch;
 }
 
 size_t debug_gets(char *buf, size_t len) {
 	size_t amt=0;
-	
+
 	while (len) {
 		char ch = debug_getch();
 		if (ch == '\n')
 			break;
-			
+
 		*buf++ = ch;
 		amt++;
 		len--;
 	}
-	
+
 	return amt;
 }
 
@@ -93,6 +93,7 @@ ISR(RXVEC) {
 	uint8_t ch = uart.DATA;
 	if (recvbuf_pos >= sizeof(recvbuf))
 		return;
-		
+
 	recvbuf[recvbuf_pos++] = ch;
 }
+

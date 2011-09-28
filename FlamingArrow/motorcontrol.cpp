@@ -13,34 +13,34 @@ static const float update_hz = 20;
 static const PIDCoefs pidcoefs = { .8, .1, .4, .01 };
 
 struct MotorInfo {
-	PIDState pid;
-	float rps_desired;
-	float rps_measured;
-	int16_t prev_enc;
-	bool enabled;
+	PIDState pid; // state of PID loop
+	volatile float rps_desired;
+	volatile float rps_measured;
+	volatile int16_t prev_enc; // used to find motor velocity
+	volatile bool enabled; // determines whether this motor is under PID control or not
 };
 
 static MotorInfo motinfo[2];
 
 void motorcontrol_init() {
 	pidtim.CTRLA = TC_CLKSEL_DIV64_gc; // timer runs at 1Mhz
-	pidtim.INTCTRLA = TC_OVFINTLVL_MED_gc; // enable medium priority interrupt
-	pidtim.PER = 500000 / update_hz; // period computed from update_hz
+	pidtim.INTCTRLA = TC_OVFINTLVL_MED_gc; // enable medium priority overflow interrupt
+	pidtim.PER = 500000 / update_hz; // period computed, so overflow freq is update_hz
 }
 
-float motorcontrol_getvel(int mot) {
-	return motinfo[mot].rps_measured;
+float motorcontrol_getvel(int motnum) {
+	return motinfo[motnum].rps_measured;
 }
 
 void motorcontrol_setvel(int motnum, float rps) {
 	MotorInfo &mot = motinfo[motnum];
 
-	mot.rps_desired = rps;
+	mot.rps_desired = rps; // update desired rps
 
-	if (!mot.enabled) {
-		pid_initstate(mot.pid);
-		mot.prev_enc = enc_get(motnum);
-		mot.enabled = true;
+	if (!mot.enabled) { // if the motor is currently disabled
+		pid_initstate(mot.pid); // reset the PID state
+		mot.prev_enc = enc_get(motnum); // start measuring encoder ticks from the current position
+		mot.enabled = true; // the motor is now enabled
 	}
 }
 
