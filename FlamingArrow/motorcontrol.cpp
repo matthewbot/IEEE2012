@@ -16,6 +16,7 @@ struct MotorInfo {
 	PIDState pid;
 	float rps_desired;
 	float rps_measured;
+	int16_t prev_enc;
 	bool enabled;
 };
 
@@ -38,6 +39,7 @@ void motorcontrol_setvel(int motnum, float rps) {
 
 	if (!mot.enabled) {
 		pid_initstate(mot.pid);
+		mot.prev_enc = enc_get(motnum);
 		mot.enabled = true;
 	}
 }
@@ -58,9 +60,8 @@ ISR(TIMOVFVEC) {
 			continue; // skip it
 
 		int16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
-		enc_reset(motnum); // reset to begin measuring for the next cycle
-
-		mot.rps_measured = enc/ticks_per_rotation*update_hz; // compute the rotations per second
+		mot.rps_measured = (enc - mot.prev_enc)/ticks_per_rotation*update_hz; // compute the rotations per second
+		mot.prev_enc = enc; // save the encoder position
 
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz); // update the PID loop
 		if (output > 1) // enforce saturation on the output
