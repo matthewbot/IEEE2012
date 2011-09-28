@@ -59,7 +59,7 @@ TARGET = main
 
 
 # List C source files here. (C dependencies are automatically generated.)
-SRC = $(TARGET).cpp adc.cpp debug.cpp  enc.cpp  init.cpp  linesensor.cpp  motor.cpp  util.cpp pid.cpp twi.cpp controlpanel.cpp temp.cpp
+SRC = $(TARGET).cpp adc.cpp debug.cpp  enc.cpp  init.cpp  linesensor.cpp  motor.cpp  util.cpp pid.cpp twi.cpp controlpanel.cpp temp.cpp motorcontrol.cpp
 
 
 # List Assembler source files here.

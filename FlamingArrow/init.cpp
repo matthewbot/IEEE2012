@@ -27,6 +27,7 @@ void init_interrupts() {
 #include "linesensor.h"
 #include "twi.h"
 #include "controlpanel.h"
+#include "motorcontrol.h"
 
 void init_modules() {
 	debug_init();
@@ -36,4 +37,6 @@ void init_modules() {
 	linesensor_init();
 	twi_init();
 	controlpanel_init();
+	motorcontrol_init();
 }
+
