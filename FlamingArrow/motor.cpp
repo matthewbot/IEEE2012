@@ -11,7 +11,7 @@ static TC0_t &pwmtim = TCF0;
 void motor_init() {
 	ctrlport.DIRSET = ctrlpins_mask;
 	pwmport.DIRSET = pwmpins_mask;
-	
+
 	pwmtim.CTRLA = TC_CLKSEL_DIV1_gc; // no divider means timer runs at 32Mhz
 	pwmtim.CTRLB = TC0_CCAEN_bm | TC0_CCBEN_bm | TC0_CCCEN_bm | TC0_CCDEN_bm | TC_WGMODE_SS_gc; // enable all capture compares, single slope PWM
 	pwmtim.PER = 1023; // 32Mhz / ~1024 = 31.25 khz pwm freq
@@ -21,7 +21,7 @@ void motor_setpwm(uint8_t mot, int16_t pwm) {
 	uint8_t in1pin_mask = _BV(2*mot);
 	uint8_t in2pin_mask = in1pin_mask << 1;
 	register16_t &ccreg = (&pwmtim.CCABUF)[mot]; // CCxBUF registers are adjacent in memory
-	
+
 	if (pwm == 0) {
 		ctrlport.OUTCLR = in1pin_mask | in2pin_mask;
 		ccreg = 0;
@@ -35,3 +35,14 @@ void motor_setpwm(uint8_t mot, int16_t pwm) {
 		ccreg = -pwm;
 	}
 }
+
+int16_t motor_getpwm(uint8_t mot) {
+	int16_t pwm = (&pwmtim.CCA)[mot]; // CCx registers are also adjacent
+
+	uint8_t in1pin_mask = _BV(2*mot);
+	if (!(ctrlport.IN & in1pin_mask))
+		pwm = -pwm;
+
+	return pwm;
+}
+

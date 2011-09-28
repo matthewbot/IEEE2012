@@ -28,7 +28,7 @@ int main() {
 		debug_printf("pwm: %i\r\n", pwm);
 		motor_setpwm(1, pwm);
 
-		enc_reset();
+		enc_reset(0);
 		_delay_ms(50);
 		t += .05;
 	}
