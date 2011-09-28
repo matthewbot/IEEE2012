@@ -24,6 +24,7 @@ void controlpanel() {
 				controlpanel_linesensor();
 				break;
 			case 'q':
+				ch = 'a';
 				break;
 			default:
 				break;
@@ -53,17 +54,20 @@ void controlpanel_temp() {
 		debug_puts("Temperature >");
 		debug_getch();
 		switch (ch) {
-			case 'o':
-				debug_printf("%f\n", temp_getraw(OBJ)*0.20-273.15);
+			case '1':
+				debug_printf("Ambient Raw: %f\n", temp_getraw(AMB));
 				break;
-			case 'a':
-				debug_printf("%f\n", temp_getraw(AMB)*0.20-273.15);
+			case '2':
+				debug_printf("Object Raw: %f\n", temp_getraw(OBJ));
 				break;
-			case 'd':
-				debug_printf("f\n", temp_get(AMB));
+			case '3':
+				debug_printf("Ambient: %f\n", temp_get(AMB));
 				break;
+			case '4':
+				debug_printf("Object: %f\n", temp_get(OBJ));
+				break;	
 			default:
-				debug_printf("ACTIONS NOT CODED");
+				debug_puts("ACTIONS NOT CODED");
 				break;
 		}
 	}
