@@ -2,17 +2,23 @@
 #include "debug.h"
 #include "motorcontrol.h"
 #include "motor.h"
+#include "linesensor.h"
 #include <util/delay.h>
 #include <math.h>
+
+uint16_t linesensors[8] = {0};
+
+int linesteer = 0;
+int current = 0;
 
 int main() {
 	init();
 	debug_puts("Setting motor velocities\r\n");
-	motorcontrol_setvel(0, 2.3);
-	motorcontrol_setvel(1, 2.3);
-
+	motor_setpwm(0,0 );
+	motor_setpwm(1,0);
+    line_cal();
 	while (true) {
-		debug_printf("Motor pwm %4d %4d vel %.2f %.2f\r\n", motor_getpwm(0), motor_getpwm(1), motorcontrol_getvel(0), motorcontrol_getvel(1));
-		_delay_ms(1000);
+		line_follow();
+		_delay_ms(100);
 	}
 }

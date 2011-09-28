@@ -1,6 +1,8 @@
 #include "linesensor.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "motor.h"
+#include <util/delay.h>
 
 // configuration
 
@@ -19,6 +21,8 @@ static TC1_t &tim = TCD1;
 
 static volatile uint8_t prevmask;
 static volatile uint16_t readings[8];
+
+int cal_avg = 0;
 
 void linesensor_init() {
 	ctrlport.OUTSET = _BV(ctrlpin); // control pin high to turn on array
@@ -44,6 +48,7 @@ void linesensor_setEnabled(bool enabled) {
 	else
 		ctrlport.OUTCLR = _BV(ctrlpin);
 }
+
 
 uint16_t linesensor_get(int sensor) {
 	return readings[sensor]; // wiring is reversed
@@ -75,4 +80,26 @@ ISR(SIGINT0VEC) {
 		if (changed & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
 			readings[i] = timval;
 	}
+}
+
+void line_cal() {
+	_delay_ms(1000);
+	for(int i = 0; i < 8; i++) {
+		cal_avg += linesensor_get(i)/8;
+	}
+}
+
+void line_follow() {
+	if( (linesensor_get(1) < cal_avg - 500) || (linesensor_get(0) < cal_avg - 500)) {
+			motor_setpwm(1,300 );
+			motor_setpwm(0,0 );
+		}
+		else if((linesensor_get(6) < cal_avg - 500) || (linesensor_get(5) < cal_avg - 500)) {
+			motor_setpwm(0,300 );
+			motor_setpwm(1,0 );
+		}
+		else {
+			motor_setpwm(1,300);
+			motor_setpwm(0,300 );
+		}
 }
