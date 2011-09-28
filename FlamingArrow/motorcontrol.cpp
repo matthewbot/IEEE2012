@@ -10,9 +10,10 @@ static TC1_t &pidtim = TCF1;
 
 static const float ticks_per_rotation = 563.03;
 static const float update_hz = 20;
+static const PIDCoefs pidcoefs = { .8, .1, .4, .01 };
 
 struct MotorInfo {
-	pid_obj_t pid;
+	PIDState pid;
 	float rps_desired;
 	float rps_measured;
 	bool enabled;
@@ -21,9 +22,6 @@ struct MotorInfo {
 static MotorInfo motinfo[2];
 
 void motorcontrol_init() {
-	for (int i=0; i<2; i++)
-		pid_new(&motinfo[i].pid, .8, .1, .4, .01);
-
 	pidtim.CTRLA = TC_CLKSEL_DIV64_gc; // timer runs at 1Mhz
 	pidtim.INTCTRLA = TC_OVFINTLVL_MED_gc; // enable medium priority interrupt
 	pidtim.PER = 500000 / update_hz; // period computed from update_hz
@@ -33,15 +31,23 @@ float motorcontrol_getvel(int mot) {
 	return motinfo[mot].rps_measured;
 }
 
-void motorcontrol_setvel(int mot, float rps) {
-	motinfo[mot].rps_desired = rps;
-	motinfo[mot].enabled = true;
+void motorcontrol_setvel(int motnum, float rps) {
+	MotorInfo &mot = motinfo[motnum];
+
+	mot.rps_desired = rps;
+
+	if (!mot.enabled) {
+		pid_initstate(mot.pid);
+		mot.enabled = true;
+	}
 }
 
-void motorcontrol_disable(int mot) {
-	motinfo[mot].enabled = false;
-	motinfo[mot].rps_measured = 0;
-	motor_setpwm(mot, 0);
+void motorcontrol_disable(int motnum) {
+	MotorInfo &mot = motinfo[motnum];
+
+	mot.enabled = false;
+	mot.rps_measured = 0;
+	motor_setpwm(motnum, 0);
 }
 
 ISR(TIMOVFVEC) {
@@ -56,7 +62,7 @@ ISR(TIMOVFVEC) {
 
 		mot.rps_measured = enc/ticks_per_rotation*update_hz; // compute the rotations per second
 
-		float output = pid_update(&mot.pid, mot.rps_desired, mot.rps_measured, 1/update_hz); // update the PID loop
+		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz); // update the PID loop
 		if (output > 1) // enforce saturation on the output
 			output = 1;
 		else if (output < -1)

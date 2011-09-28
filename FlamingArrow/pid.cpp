@@ -1,23 +1,20 @@
 #include <math.h>
-
 #include "pid.h"
 
-void pid_new(pid_obj_t* pid_obj, float p, float i, float i_decay, float d) {
-	pid_obj->p = p;
-	pid_obj->i = i; pid_obj->i_decay = i_decay; pid_obj->i_sum = 0;
-	pid_obj->d = d; pid_obj->d_active = 0;
+void pid_initstate(PIDState &state) {
+	state.error_sum = 0;
+	state.d_active = false;
 }
 
-float pid_update(pid_obj_t* p, float desired, float measured, float dt) {
+float pid_update(PIDState &s, const PIDCoefs &c, float desired, float measured, float dt) {
 	float error = desired - measured;
-	
-	float res = p->p * error + p->i * p->i_sum + p->d * (p->d_active ? (error - p->d_last)/dt : 0);
-	
-	p->i_sum += error*dt;
-	p->d_last = error;
-	p->d_active = true;
-	
-	p->i_sum = p->i_sum * exp(-dt * p->i_decay);
-	
-	return res;
+	float out = c.p * error + c.i * s.error_sum + c.d * (s.d_active ? (error - s.error_last)/dt : 0);
+
+	s.error_sum += error*dt;
+	s.error_sum *= exp(-dt * c.i_decay);
+	s.error_last = error;
+	s.d_active = true;
+
+	return out;
 }
+
