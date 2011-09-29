@@ -10,7 +10,7 @@ static TC1_t &pidtim = TCF1;
 
 static const float ticks_per_rotation = 563.03;
 static const float update_hz = 20;
-static const PIDCoefs pidcoefs = { .8, .1, .4, .01 };
+static const PIDCoefs pidcoefs = { .6, .1, 0, .01 };
 
 struct MotorInfo {
 	PIDState pid; // state of PID loop
