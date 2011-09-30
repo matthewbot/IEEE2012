@@ -2,6 +2,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include "motor.h"
+#include "motorcontrol.h"
+#include "pid.h"
 #include <util/delay.h>
 
 // configuration
@@ -22,7 +24,11 @@ static TC1_t &tim = TCD1;
 static volatile uint8_t prevmask;
 static volatile uint16_t readings[8];
 
-int cal_avg = 0;
+float pos, line_pid_change;
+float line_desired = 0;
+float line_dt = .01;
+PIDState line_pid;
+static const PIDCoefs line_pidcoefs = {55, 0, 0.01, 0};
 
 void linesensor_init() {
 	ctrlport.OUTSET = _BV(ctrlpin); // control pin high to turn on array
@@ -40,6 +46,9 @@ void linesensor_init() {
 	tim.INTCTRLB = TC_CCAINTLVL_HI_gc; // capture compare A interrupt enabled at high priority, used to end the charging period
 	tim.PER = 40000; // 4Mhz / 40000 = 100hz overflow, 10ms period
 	tim.CCABUF = 2000; // 2000 / 4Mhz = 500us charge period
+	
+	 //Enable PID for linesensor
+	 pid_initstate(line_pid);
 }
 
 void linesensor_setEnabled(bool enabled) {
@@ -82,24 +91,26 @@ ISR(SIGINT0VEC) {
 	}
 }
 
-void line_cal() {
-	_delay_ms(1000);
-	for(int i = 0; i < 8; i++) {
-		cal_avg += linesensor_get(i)/8;
+
+float get_line_pos() {
+	float light_levels[8];
+	for(int i=0; i<8; i++)
+		light_levels[i] = 1./(1. + linesensor_get(i));
+	
+	float sum = 0., total = 0.;
+	for(int i=0; i<8; i++) {
+		sum += light_levels[i]*i;
+		total += light_levels[i];
 	}
+	
+	return sum/total/7 - .5;
 }
 
+//Desired value should be zero after eqn analysis
+
 void line_follow() {
-	if( (linesensor_get(1) < cal_avg - 500) || (linesensor_get(0) < cal_avg - 500)) {
-			motor_setpwm(1,300 );
-			motor_setpwm(0,0 );
-		}
-		else if((linesensor_get(6) < cal_avg - 500) || (linesensor_get(5) < cal_avg - 500)) {
-			motor_setpwm(0,300 );
-			motor_setpwm(1,0 );
-		}
-		else {
-			motor_setpwm(1,300);
-			motor_setpwm(0,300 );
-		}
+	pos = get_line_pos();
+	line_pid_change = pid_update(line_pid, line_pidcoefs, line_desired, pos, line_dt);
+	motorcontrol_setvel(0, 1 - line_pid_change);
+	motorcontrol_setvel(1, 1 + line_pid_change);
 }
