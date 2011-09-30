@@ -97,13 +97,23 @@ float get_line_pos() {
 	for(int i=0; i<8; i++)
 		light_levels[i] = 1./(1. + linesensor_get(i));
 	
+	float min_level = light_levels[0];
+	for(int i=0; i<8; i++)
+		if(light_levels[i] < min_level)
+			min_level = light_levels[i];
+	
+	for(int i=0; i<8; i++)
+		light_levels[i] -= min_level;
+	
 	float sum = 0., total = 0.;
 	for(int i=0; i<8; i++) {
-		sum += light_levels[i]*i;
-		total += light_levels[i];
+		sum += light_levels[i]*light_levels[i]*i;
+		total += light_levels[i]*light_levels[i];
 	}
 	
-	return sum/total/7 - .5;
+	if(total == 0)
+		return 0;
+	return sum/total/7 - .5; // range is [-0.5, +0.5]
 }
 
 //Desired value should be zero after eqn analysis
@@ -111,6 +121,6 @@ float get_line_pos() {
 void line_follow() {
 	pos = get_line_pos();
 	line_pid_change = pid_update(line_pid, line_pidcoefs, line_desired, pos, line_dt);
-	motorcontrol_setvel(0, 1 - line_pid_change);
-	motorcontrol_setvel(1, 1 + line_pid_change);
+	motorcontrol_setvel(0, 1 + line_pid_change);
+	motorcontrol_setvel(1, 1 - line_pid_change);
 }
