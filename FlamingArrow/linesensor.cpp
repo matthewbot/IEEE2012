@@ -1,10 +1,6 @@
 #include "linesensor.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "motor.h"
-#include "motorcontrol.h"
-#include "pid.h"
-#include <util/delay.h>
 
 // configuration
 
@@ -24,12 +20,6 @@ static TC1_t &tim = TCD1;
 static volatile uint8_t prevmask;
 static volatile uint16_t readings[8];
 
-float pos, line_pid_change;
-float line_desired = 0;
-float line_dt = .01;
-PIDState line_pid;
-static const PIDCoefs line_pidcoefs = {55, 0, 0.01, 0};
-
 void linesensor_init() {
 	ctrlport.OUTSET = _BV(ctrlpin); // control pin high to turn on array
 	ctrlport.DIRSET = _BV(ctrlpin);
@@ -46,9 +36,6 @@ void linesensor_init() {
 	tim.INTCTRLB = TC_CCAINTLVL_HI_gc; // capture compare A interrupt enabled at high priority, used to end the charging period
 	tim.PER = 40000; // 4Mhz / 40000 = 100hz overflow, 10ms period
 	tim.CCABUF = 2000; // 2000 / 4Mhz = 500us charge period
-	
-	 //Enable PID for linesensor
-	 pid_initstate(line_pid);
 }
 
 void linesensor_setEnabled(bool enabled) {
@@ -57,7 +44,6 @@ void linesensor_setEnabled(bool enabled) {
 	else
 		ctrlport.OUTCLR = _BV(ctrlpin);
 }
-
 
 uint16_t linesensor_get(int sensor) {
 	return readings[sensor]; // wiring is reversed
@@ -89,38 +75,4 @@ ISR(SIGINT0VEC) {
 		if (changed & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
 			readings[i] = timval;
 	}
-}
-
-
-float get_line_pos() {
-	float light_levels[8];
-	for(int i=0; i<8; i++)
-		light_levels[i] = 1./(1. + linesensor_get(i));
-	
-	float min_level = light_levels[0];
-	for(int i=0; i<8; i++)
-		if(light_levels[i] < min_level)
-			min_level = light_levels[i];
-	
-	for(int i=0; i<8; i++)
-		light_levels[i] -= min_level;
-	
-	float sum = 0., total = 0.;
-	for(int i=0; i<8; i++) {
-		sum += light_levels[i]*light_levels[i]*i;
-		total += light_levels[i]*light_levels[i];
-	}
-	
-	if(total == 0)
-		return 0;
-	return sum/total/7 - .5; // range is [-0.5, +0.5]
-}
-
-//Desired value should be zero after eqn analysis
-
-void line_follow() {
-	pos = get_line_pos();
-	line_pid_change = pid_update(line_pid, line_pidcoefs, line_desired, pos, line_dt);
-	motorcontrol_setvel(0, 1 + line_pid_change);
-	motorcontrol_setvel(1, 1 - line_pid_change);
 }

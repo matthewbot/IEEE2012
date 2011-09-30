@@ -6,12 +6,13 @@
 #include <util/delay.h>
 #include <math.h>
 #include "enc.h"
+#include "linefollow.h"
 
 int main() {
 	init();
 	
 	while (true) {
-		line_follow();
+		linefollow_follow();
 		_delay_ms(10);
 		debug_printf("%u %u %u %u %u %u %u %u\r\n",
 			linesensor_get(0),
