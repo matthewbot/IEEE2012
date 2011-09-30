@@ -26,7 +26,6 @@ parser.add_argument(metavar='HEX_FILE',
 args = parser.parse_args()
 
 hex_file_lines = subprocess.check_output(["srec_cat", args.hex_file, "-Intel", "-Output", "-", "-Intel", "-Line_Length", "44"]).splitlines(True)
-s = serial.Serial(args.port, args.baudrate)
 
 class UnexpectedError(Exception):
     pass
@@ -46,6 +45,9 @@ def expect(*choices):
 
 while True:
     try:
+        print 'Opening serial port...'
+        s = serial.Serial(args.port, args.baudrate)
+        
         print 'Attempting communication...'
         
         while True:
@@ -100,5 +102,10 @@ while True:
     except UnexpectedError:
         traceback.print_exc()
         print 'Communications error, retrying...'
+        continue
+    except serial.SerialException:
+        traceback.print_exc()
+        print 'Serial port error, retrying...'
+        time.sleep(.5)
         continue
     break
