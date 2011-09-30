@@ -1,6 +1,13 @@
+#include <stdlib.h>
 #include "linesensor.h"
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include "debug.h"
+#include "linefollow.h"
+
+#pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
+
+void linesensor_gotReadings();
 
 // configuration
 
@@ -32,7 +39,7 @@ void linesensor_init() {
 
 	tim.CTRLA = TC_CLKSEL_DIV8_gc; // 32Mhz / 8 = 4 Mhz timer
 	tim.CTRLB = TC0_CCAEN_bm; // enable capture compare A
-	tim.INTCTRLA = TC_OVFINTLVL_HI_gc; // overflow interrupt enabled at high priority, used to start the charging period
+	tim.INTCTRLA = TC_OVFINTLVL_MED_gc; // overflow interrupt enabled at high priority, used to start the charging period
 	tim.INTCTRLB = TC_CCAINTLVL_HI_gc; // capture compare A interrupt enabled at high priority, used to end the charging period
 	tim.PER = 40000; // 4Mhz / 40000 = 100hz overflow, 10ms period
 	tim.CCABUF = 2000; // 2000 / 4Mhz = 500us charge period
@@ -45,22 +52,28 @@ void linesensor_setEnabled(bool enabled) {
 		ctrlport.OUTCLR = _BV(ctrlpin);
 }
 
-uint16_t linesensor_get(int sensor) {
-	return readings[sensor]; // wiring is reversed
-}
-
-#pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
-
 ISR(TIMOVFVEC) {
+	sigport.INTCTRL = PORT_INT0LVL_OFF_gc; // disable edge interrupt
+	tim.CTRLA = 0; // stop timer
+	
 	for (int i=0; i<8; i++)
 		if (prevmask & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
 			readings[i] = 40000; // pin never changed state, so set maximum value
+	
+	linesensor_gotReadings();
+	
 	sigport.DIRSET = sigpins_mask; // begin charging by setting pins as outputs
 	prevmask = sigpins_mask;
+	for (int i=0; i<8; i++)
+		readings[i] = 65535;
+	
+	tim.CTRLA = TC_CLKSEL_DIV8_gc; // restart timer
 }
 
 ISR(TIMCCAVEC) {
 	sigport.DIRCLR = sigpins_mask; // begin discharging by setting pins as inputs
+	sigport.INTCTRL = PORT_INT0LVL_HI_gc; // enable edge interrupt at high priority
+	sigport.INTFLAGS = PORT_INT0IF_bm; // clear interrupt flag
 }
 
 ISR(SIGINT0VEC) {
@@ -75,4 +88,19 @@ ISR(SIGINT0VEC) {
 		if (changed & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
 			readings[i] = timval;
 	}
+}
+
+void linesensor_gotReadings() {
+	linefollow_sensorUpdate((uint16_t*)readings);
+	
+	debug_printf("%u %u %u %u %u %u %u %u\r\n",
+		readings[0],
+		readings[1],
+		readings[2],
+		readings[3],
+		readings[4],
+		readings[5],
+		readings[6],
+		readings[7]
+	);
 }

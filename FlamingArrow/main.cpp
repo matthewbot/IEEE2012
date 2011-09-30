@@ -1,28 +1,15 @@
 #include "init.h"
 #include "debug.h"
-#include "motorcontrol.h"
-#include "motor.h"
 #include "linesensor.h"
 #include <util/delay.h>
-#include <math.h>
+#include "motor.h"
 #include "enc.h"
 #include "linefollow.h"
 
 int main() {
 	init();
 	
-	while (true) {
-		linefollow_follow();
-		_delay_ms(10);
-		debug_printf("%u %u %u %u %u %u %u %u\r\n",
-			linesensor_get(0),
-			linesensor_get(1),
-			linesensor_get(2),
-			linesensor_get(3),
-			linesensor_get(4),
-			linesensor_get(5),
-			linesensor_get(6),
-			linesensor_get(7)
-		);
-	}
+	linefollow_setEnabled(true);
+
+	while (true);
 }

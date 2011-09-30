@@ -1,23 +1,20 @@
 #include "linesensor.h"
 #include "motorcontrol.h"
 #include "pid.h"
+#include "debug.h"
 
-float pos, line_pid_change;
-float line_desired = 0;
-float line_dt = .01;
+bool enabled = false;
+
 PIDState line_pid;
-static const PIDCoefs line_pidcoefs = {55, 0, 0.01, 0};
-
+static const PIDCoefs line_pidcoefs = {1, 0, 0.01, 0};
 
 void linefollow_init() {
-	 //Enable PID for linesensor
-	 pid_initstate(line_pid);
 }
 
-float get_line_pos() {
+float get_line_pos(const uint16_t *readings) {
 	float light_levels[8];
 	for(int i=0; i<8; i++)
-		light_levels[i] = 1./(1. + linesensor_get(i));
+		light_levels[i] = 1./(1. + readings[i]);
 	
 	float min_level = light_levels[0];
 	for(int i=0; i<8; i++)
@@ -40,9 +37,20 @@ float get_line_pos() {
 
 //Desired value should be zero after eqn analysis
 
-void linefollow_follow() {
-	pos = get_line_pos();
-	line_pid_change = pid_update(line_pid, line_pidcoefs, line_desired, pos, line_dt);
+void linefollow_sensorUpdate(const uint16_t *readings) {
+	if(!enabled)
+		return;
+	
+	float pos = get_line_pos(readings);
+	float line_pid_change = pid_update(line_pid, line_pidcoefs, 0, pos, .01); // TODO: compute dt
+	
 	motorcontrol_setvel(0, 1 + line_pid_change);
 	motorcontrol_setvel(1, 1 - line_pid_change);
+}
+
+void linefollow_setEnabled(bool enbld) {
+	if(enbld && !enabled)
+		 pid_initstate(line_pid); //Enable PID for linesensor
+	
+	enabled = enbld;
 }
