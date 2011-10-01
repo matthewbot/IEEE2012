@@ -1,6 +1,9 @@
-
 #ifndef TWI_H_
 #define TWI_H_
+
+#include <stdint.h>
+
+#include <avr/io.h>
 
 enum Direction {
 	WRITE,

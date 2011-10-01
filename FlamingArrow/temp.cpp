@@ -1,7 +1,9 @@
-#include <avr/io.h>
-#include "temp.h"
-#include "twi.h"
 #include <avr/interrupt.h>
+#include <avr/io.h>
+
+#include "twi.h"
+
+#include "temp.h"
 
 #define TEMP_AMB_REG 0x06
 #define TEMP_OBJ_REG 0x07
@@ -9,7 +11,6 @@
 
 const uint8_t temp_addr = 0x5A;
 
-static uint8_t ambient_temp = 0;
 volatile static int count = 0;
 volatile static bool got = false;
 

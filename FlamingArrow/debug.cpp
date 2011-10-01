@@ -1,9 +1,12 @@
-#include "debug.h"
-#include "util.h"
-#include <avr/io.h>
-#include <avr/interrupt.h>
 #include <stdio.h>
 #include <string.h>
+
+#include <avr/interrupt.h>
+#include <avr/io.h>
+
+#include "util.h"
+
+#include "debug.h"
 
 // debug LED
 static PORT_t &ledport = PORTR;
@@ -24,7 +27,7 @@ static volatile uint8_t recvbuf_pos;
 void debug_init() {
 	ledport.DIRSET = _BV(ledpin);
 	debug_setLED(false);
-
+	
 	uartport.OUTSET = _BV(txpin); // make pin high to avoid transmitting a false start bit on startup
 	uartport.DIRSET = _BV(txpin);
 	uart.CTRLA = USART_RXCINTLVL_LO_gc;
@@ -53,7 +56,7 @@ void debug_puts(const char *s) {
 
 void debug_printf(const char *fmt, ...) {
 	static char buf[64];
-
+	
 	va_list ap;
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
@@ -63,29 +66,29 @@ void debug_printf(const char *fmt, ...) {
 
 char debug_getch() {
 	while (recvbuf_pos == 0) { }
-
+	
 	util_cli_lo();
 	char ch = recvbuf[0];
 	memmove(recvbuf, recvbuf+1, recvbuf_pos - 1);
 	recvbuf_pos--;
 	util_sei_lo();
-
+	
 	return ch;
 }
 
 size_t debug_gets(char *buf, size_t len) {
 	size_t amt=0;
-
+	
 	while (len) {
 		char ch = debug_getch();
 		if (ch == '\n')
 			break;
-
+		
 		*buf++ = ch;
 		amt++;
 		len--;
 	}
-
+	
 	return amt;
 }
 
@@ -93,7 +96,6 @@ ISR(RXVEC) {
 	uint8_t ch = uart.DATA;
 	if (recvbuf_pos >= sizeof(recvbuf))
 		return;
-
+	
 	recvbuf[recvbuf_pos++] = ch;
 }
-

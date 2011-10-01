@@ -5,7 +5,6 @@ void init();
 
 void init_clocks();
 void init_interrupts();
-void init_modules();	
+void init_modules();
 
-	
 #endif

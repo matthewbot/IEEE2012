@@ -1,15 +1,14 @@
-#include "linesensor.h"
+#include <stdint.h>
+
 #include "motorcontrol.h"
 #include "pid.h"
-#include "debug.h"
+
+#include "linefollow.h"
 
 bool enabled = false;
 
 PIDState line_pid;
 static const PIDCoefs line_pidcoefs = {1, 0, 0.01, 0};
-
-void linefollow_init() {
-}
 
 float get_line_pos(const uint16_t *readings) {
 	float light_levels[8];
@@ -50,7 +49,7 @@ void linefollow_sensorUpdate(const uint16_t *readings) {
 
 void linefollow_setEnabled(bool enbld) {
 	if(enbld && !enabled)
-		 pid_initstate(line_pid); //Enable PID for linesensor
+		pid_initstate(line_pid); //Enable PID for linesensor
 	
 	enabled = enbld;
 }

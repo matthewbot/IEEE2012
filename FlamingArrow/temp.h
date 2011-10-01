@@ -1,10 +1,12 @@
 #ifndef TEMP_H_
 #define TEMP_H_
 
+#include <stdint.h>
+
 enum Temp_type {
 	AMB,
-	OBJ	
-};	
+	OBJ
+};
 
 uint16_t temp_getraw(Temp_type);
 float temp_get(Temp_type);

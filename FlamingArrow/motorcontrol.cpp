@@ -1,9 +1,11 @@
-#include "motorcontrol.h"
+#include <avr/interrupt.h>
+#include <avr/io.h>
+
+#include "enc.h"
 #include "motor.h"
 #include "pid.h"
-#include "enc.h"
-#include <avr/io.h>
-#include <avr/interrupt.h>
+
+#include "motorcontrol.h"
 
 static TC1_t &pidtim = TCF1;
 #define TIMOVFVEC TCF1_OVF_vect

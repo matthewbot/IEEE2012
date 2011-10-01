@@ -1,4 +1,5 @@
 #include <avr/io.h>
+
 #include "twi.h"
 
 static TWI_t &t = TWIC;
@@ -46,9 +47,9 @@ void twi_clear_intflags() {
 }
 
 bool twi_intflag() {
-	if (twi.STATUS << TWI_MASTER_WIF_bm)
+	if (twi.STATUS & TWI_MASTER_WIF_bm)
 		return true;
-	if (twi.STATUS << TWI_MASTER_RIF_bm)
+	if (twi.STATUS & TWI_MASTER_RIF_bm)
 		return true;
 	else
 		return false;

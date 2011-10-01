@@ -3,10 +3,9 @@
 
 #include <stdint.h>
 
-void enc_init();
-
 static const int enc_count = 2;
 
+void enc_init();
 int16_t enc_get(uint8_t num);
 void enc_reset(uint8_t num);
 

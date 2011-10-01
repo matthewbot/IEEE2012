@@ -1,5 +1,6 @@
-#include "enc.h"
 #include <avr/io.h>
+
+#include "enc.h"
 
 static PORT_t &encport = PORTF;
 static const int encpins_mask = 0xF0;

@@ -1,12 +1,7 @@
-#include "init.h"
-#include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/io.h>
 
-void init() {
-	init_clocks();
-	init_modules();
-	init_interrupts();
-}
+#include "init.h"
 
 void init_clocks() {
 	OSC.CTRL = OSC_RC32MEN_bm | OSC_RC2MEN_bm; // enable 32 Mhz clock (while leaving the current 2 Mhz clock enabled)
@@ -28,7 +23,6 @@ void init_interrupts() {
 #include "twi.h"
 #include "controlpanel.h"
 #include "motorcontrol.h"
-#include "linefollow.h"
 
 void init_modules() {
 	debug_init();
@@ -39,6 +33,10 @@ void init_modules() {
 	twi_init();
 	controlpanel_init();
 	motorcontrol_init();
-	linefollow_init();
 }
 
+void init() {
+	init_clocks();
+	init_modules();
+	init_interrupts();
+}

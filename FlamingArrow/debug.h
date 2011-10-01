@@ -1,8 +1,7 @@
 #ifndef DEBUG_H_
 #define DEBUG_H_
 
-#include <stdarg.h>
-#include <stdlib.h>
+#include <stddef.h>
 
 void debug_init();
 void debug_setLED(bool on);

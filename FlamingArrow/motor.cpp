@@ -1,5 +1,6 @@
-#include "motor.h"
 #include <avr/io.h>
+
+#include "motor.h"
 
 static PORT_t &ctrlport = PORTK;
 static const int ctrlpins_mask = 0xFF;

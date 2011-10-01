@@ -1,9 +1,12 @@
 #include <stdlib.h>
-#include "linesensor.h"
-#include <avr/io.h>
+
 #include <avr/interrupt.h>
+#include <avr/io.h>
+
 #include "debug.h"
 #include "linefollow.h"
+
+#include "linesensor.h"
 
 #pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
 
