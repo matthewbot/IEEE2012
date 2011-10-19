@@ -25,6 +25,9 @@ parser.add_argument(metavar='HEX_FILE',
     type=str, action='store', dest='hex_file')
 args = parser.parse_args()
 
+# display more obvious error message if the file doesn't exist
+open(args.hex_file, 'rb')
+
 hex_file_lines = subprocess.check_output(["srec_cat", args.hex_file, "-Intel", "-Output", "-", "-Intel", "-Line_Length", "44"]).splitlines(True)
 
 class UnexpectedError(Exception):
