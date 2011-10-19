@@ -4,73 +4,76 @@
 
 #include "debug.h"
 #include "temp.h"
+#include "linefollow.h"
 
 #include "controlpanel.h"
 
 void controlpanel_init() {
-	puts("Starting up\n");
+	printf("Starting up\n");
 }
 
 void controlpanel_motor() {
-	char ch = 'a';
-	
-	while (ch != 'q') {
-		puts("Motor >");
-		getchar();
+	while (true) {
+		printf("Motor > ");
+		char ch = getchar();
+		printf("%c\n", ch);
 		switch (ch) {
+			case 'b':
+				return;
 			default:
-				puts("ACTIONS NOT CODED");
+				printf("Unknown. Commands: Back.\n");
 				break;
 		}
 	}
 }
 
 void controlpanel_temp() {
-	char ch = 'a';
-	
-	while (ch != 'q') {
-		puts("Temperature >");
-		getchar();
+	while (true) {
+		printf("Temperature > ");
+		char ch = getchar();
+		printf("%c\n", ch);
 		switch (ch) {
-			case '1':
-				printf("Ambient Raw: %f\n", (double)temp_getraw(AMB));
-				break;
-			case '2':
-				printf("Object Raw: %f\n", (double)temp_getraw(OBJ));
-				break;
-			case '3':
+			case 'a':
 				printf("Ambient: %f\n", (double)temp_get(AMB));
 				break;
-			case '4':
+			case 'o':
 				printf("Object: %f\n", (double)temp_get(OBJ));
 				break;
+			case 'b':
+				return;
 			default:
-				puts("ACTIONS NOT CODED");
+				printf("Unknown. Commands: Ambient, Object, Back.\n");
 				break;
 		}
 	}
 }
 
 void controlpanel_linesensor() {
-	char ch = 'a';
-	
-	while (ch != 'q') {
-		puts("Line Sensor >");
-		getchar();
+	while (true) {
+		printf("Line Sensor > ");
+		char ch = getchar();
+		printf("%c\n", ch);
 		switch (ch) {
+			case 'f':
+				linefollow_setEnabled(true);
+				break;
+			case 's':
+				linefollow_setEnabled(false);
+				break;
+			case 'b':
+				return;
 			default:
-				puts("ACTIONS NOT CODED");
+				printf("Unknown. Commands: Follow, Stop following, Back.\n");
 				break;
 		}
 	}
 }
 
 void controlpanel() {
-	char ch = 'a';
-	
-	while(ch != 'q') {
-		puts("Main >");
-		getchar();
+	while(true) {
+		printf("Main > ");
+		char ch = getchar();
+		printf("%c\n", ch);
 		switch (ch) {
 			case 'm':
 				controlpanel_motor();
@@ -82,11 +85,11 @@ void controlpanel() {
 				controlpanel_linesensor();
 				break;
 			case 'q':
-				ch = 'a';
-				break;
+				printf("Quitting...\n");
+				return;
 			default:
+				printf("Unknown. Submenus: Motor, Temp, Line sensor. Commands: Quit.\n");
 				break;
 		}
 	}
-	puts("Quitting...");
 }

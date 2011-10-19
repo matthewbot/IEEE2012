@@ -1,12 +1,9 @@
-#include <util/delay.h>
-
 #include "init.h"
-#include "linefollow.h"
+#include "controlpanel.h"
 
 int main() {
 	init();
 	
-	linefollow_setEnabled(true);
-	
-	while (true);
+	while (true)
+		controlpanel();
 }
