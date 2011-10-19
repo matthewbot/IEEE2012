@@ -8,7 +8,7 @@
 bool enabled = false;
 
 PIDState line_pid;
-static const PIDCoefs line_pidcoefs = {1, 0, 0.01, 0};
+static const PIDCoefs line_pidcoefs = {10, 0, 0.01, 0};
 
 float get_line_pos(const uint16_t *readings) {
 	float light_levels[8];
