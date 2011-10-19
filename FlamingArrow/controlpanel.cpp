@@ -1,10 +1,12 @@
 #include <stdio.h>
 
 #include <avr/io.h>
+#include <util/delay.h>
 
 #include "debug.h"
 #include "temp.h"
 #include "linefollow.h"
+#include "motor.h"
 
 #include "controlpanel.h"
 
@@ -18,10 +20,38 @@ void controlpanel_motor() {
 		char ch = getchar();
 		printf("%c\n", ch);
 		switch (ch) {
+			case 'w':
+				motor_setpwm(0, 1024);
+				motor_setpwm(1, 1024);
+				_delay_ms(50);
+				motor_setpwm(0, 0);
+				motor_setpwm(1, 0);
+				break;
+			case 'a':
+				motor_setpwm(0, -1024);
+				motor_setpwm(1, 1024);
+				_delay_ms(50);
+				motor_setpwm(0, 0);
+				motor_setpwm(1, 0);
+				break;
+			case 's':
+				motor_setpwm(0, -1024);
+				motor_setpwm(1, -1024);
+				_delay_ms(50);
+				motor_setpwm(0, 0);
+				motor_setpwm(1, 0);
+				break;
+			case 'd':
+				motor_setpwm(0, 1024);
+				motor_setpwm(1, -1024);
+				_delay_ms(50);
+				motor_setpwm(0, 0);
+				motor_setpwm(1, 0);
+				break;
 			case 'b':
 				return;
 			default:
-				printf("Unknown. Commands: Back.\n");
+				printf("Unknown. Commands: WASD, Back.\n");
 				break;
 		}
 	}
