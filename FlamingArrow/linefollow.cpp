@@ -48,8 +48,13 @@ void linefollow_sensorUpdate(const uint16_t *readings) {
 }
 
 void linefollow_setEnabled(bool enbld) {
-	if(enbld && !enabled)
+	if(enbld && !enabled) // false -> true
 		pid_initstate(line_pid); //Enable PID for linesensor
+	
+	if(!enbld && enabled) { // true -> false
+		motorcontrol_disable(0);
+		motorcontrol_disable(1);
+	}
 	
 	enabled = enbld;
 }
