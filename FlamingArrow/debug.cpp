@@ -24,47 +24,15 @@ static const int bscale = 0xA;
 static char recvbuf[8];
 static volatile uint8_t recvbuf_pos;
 
-void debug_init() {
-	ledport.DIRSET = _BV(ledpin);
-	debug_setLED(false);
-	
-	uartport.OUTSET = _BV(txpin); // make pin high to avoid transmitting a false start bit on startup
-	uartport.DIRSET = _BV(txpin);
-	uart.CTRLA = USART_RXCINTLVL_LO_gc;
-	uart.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
-	uart.CTRLC = USART_CHSIZE_8BIT_gc;
-	uart.BAUDCTRLA = bsel & 0xFF;
-	uart.BAUDCTRLB = (bscale << USART_BSCALE_gp) | (bsel >> 8);
-}
-
-void debug_setLED(bool on) {
-	if (on)
-		ledport.OUTCLR = _BV(ledpin);
-	else
-		ledport.OUTSET = _BV(ledpin);
-}
-
-void debug_putch(char ch) {
+static int myput(char ch, FILE* file) {
+	if(ch == '\n')
+		myput('\r', file);
 	while (!(uart.STATUS & USART_DREIF_bm)) { }
 	uart.DATA = ch;
+	return 0;
 }
 
-void debug_puts(const char *s) {
-	while (*s)
-		debug_putch(*s++);
-}
-
-void debug_printf(const char *fmt, ...) {
-	static char buf[64];
-	
-	va_list ap;
-	va_start(ap, fmt);
-	vsnprintf(buf, sizeof(buf), fmt, ap);
-	debug_puts(buf);
-	va_end(ap);
-}
-
-char debug_getch() {
+static int myget(FILE* file) {
 	while (recvbuf_pos == 0) { }
 	
 	util_cli_lo();
@@ -76,20 +44,26 @@ char debug_getch() {
 	return ch;
 }
 
-size_t debug_gets(char *buf, size_t len) {
-	size_t amt=0;
+void debug_init() {
+	ledport.DIRSET = _BV(ledpin);
+	debug_setLED(false);
 	
-	while (len) {
-		char ch = debug_getch();
-		if (ch == '\n')
-			break;
-		
-		*buf++ = ch;
-		amt++;
-		len--;
-	}
+	uartport.OUTSET = _BV(txpin); // make pin high to avoid transmitting a false start bit on startup
+	uartport.DIRSET = _BV(txpin);
+	uart.CTRLA = USART_RXCINTLVL_LO_gc;
+	uart.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
+	uart.CTRLC = USART_CHSIZE_8BIT_gc;
+	uart.BAUDCTRLA = bsel & 0xFF;
+	uart.BAUDCTRLB = (bscale << USART_BSCALE_gp) | (bsel >> 8);
 	
-	return amt;
+	fdevopen(myput, myget);
+}
+
+void debug_setLED(bool on) {
+	if (on)
+		ledport.OUTCLR = _BV(ledpin);
+	else
+		ledport.OUTSET = _BV(ledpin);
 }
 
 ISR(RXVEC) {

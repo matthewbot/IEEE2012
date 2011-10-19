@@ -96,7 +96,7 @@ ISR(SIGINT0VEC) {
 void linesensor_gotReadings() {
 	linefollow_sensorUpdate((uint16_t*)readings);
 	
-	/* debug_printf("%u %u %u %u %u %u %u %u\r\n",
+	/* printf("%u %u %u %u %u %u %u %u\n",
 		readings[0],
 		readings[1],
 		readings[2],
