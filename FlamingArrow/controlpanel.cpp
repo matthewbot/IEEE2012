@@ -3,10 +3,11 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#include "debug.h"
-#include "temp.h"
 #include "linefollow.h"
 #include "motor.h"
+#include "enc.h"
+#include "temp.h"
+#include "motorcontrol.h"
 
 #include "controlpanel.h"
 
@@ -78,6 +79,21 @@ void controlpanel_temp() {
 	}
 }
 
+static bool printLineSensorUpdates = false;
+
+void controlpanel_lineSensorUpdate(const uint16_t *readings) {
+	if(printLineSensorUpdates)
+		printf("LS %u %u %u %u %u %u %u %u\n",
+			readings[0],
+			readings[1],
+			readings[2],
+			readings[3],
+			readings[4],
+			readings[5],
+			readings[6],
+			readings[7]);
+}
+
 void controlpanel_linesensor() {
 	while (true) {
 		printf("Line Sensor > ");
@@ -90,10 +106,15 @@ void controlpanel_linesensor() {
 			case 's':
 				linefollow_setEnabled(false);
 				break;
+			case 'p':
+				printLineSensorUpdates = true;
+                                getchar();
+				printLineSensorUpdates = false;
+				break;
 			case 'b':
 				return;
 			default:
-				printf("Unknown. Commands: Follow, Stop following, Back.\n");
+				printf("Unknown. Commands: Follow, Stop following, Print updates, Back.\n");
 				break;
 		}
 	}

@@ -9,6 +9,7 @@ d = pygame.display.set_mode((640, 480))
 s = serial.Serial("/dev/ttyACM0", 115200)
 
 s.read(s.inWaiting())
+s.write('lfp')
 
 last_guess = None
 
@@ -17,9 +18,11 @@ while True:
     try:
         data = map(int, line.split(' '))
         assert len(data) == 8
-        assert min(data) > 0 and max(data) <= 40000
+        assert min(data) >= 0 and max(data) <= 40000
     except:
         print "bad line", repr(line)
+        if 'Starting up' in line:
+            s.write('lfp')
         continue
     
     data = [1/(x + 1) for x in data]

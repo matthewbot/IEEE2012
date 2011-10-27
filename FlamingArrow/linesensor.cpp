@@ -5,6 +5,7 @@
 
 #include "debug.h"
 #include "linefollow.h"
+#include "controlpanel.h"
 
 #include "linesensor.h"
 
@@ -96,14 +97,5 @@ ISR(SIGINT0VEC) {
 void linesensor_gotReadings() {
 	linefollow_sensorUpdate((uint16_t*)readings);
 	
-	/* printf("%u %u %u %u %u %u %u %u\n",
-		readings[0],
-		readings[1],
-		readings[2],
-		readings[3],
-		readings[4],
-		readings[5],
-		readings[6],
-		readings[7]
-	); */
+	controlpanel_lineSensorUpdate((uint16_t*)readings);
 }
