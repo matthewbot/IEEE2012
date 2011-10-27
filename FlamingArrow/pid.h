@@ -1,6 +1,8 @@
 #ifndef PID_H_
 #define PID_H_
 
+#include <stdlib.h>
+
 struct PIDCoefs {
 	float p, i, d;
 	float i_decay;
@@ -13,6 +15,6 @@ struct PIDState {
 };
 
 void pid_initstate(PIDState &state);
-float pid_update(PIDState &state, const PIDCoefs &coefs, float desired, float measured, float dt);
+float pid_update(PIDState &state, const PIDCoefs &coefs, float desired, float measured, float dt, float *d=NULL);
 
 #endif /* PID_H_ */

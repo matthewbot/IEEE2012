@@ -49,10 +49,28 @@ void controlpanel_motor() {
 				motor_setpwm(0, 0);
 				motor_setpwm(1, 0);
 				break;
+			case 'f':
+				motorcontrol_setvel(0, 0);
+				motorcontrol_setvel(1, 0);
+				motorcontrol_setDebug(true);
+				_delay_ms(2000);
+				for(uint16_t i=0; i<10000; i++) {
+					motorcontrol_setvel(0, 0.0001*i);
+					motorcontrol_setvel(1, 0.0001*i);
+					_delay_ms(1);
+				}
+				getchar();
+				motorcontrol_setDebug(false);
+				motorcontrol_disable(0);
+				motorcontrol_disable(1);
+				break;
+			case 'e':
+				printf("%i %i\n", enc_get(0), enc_get(1));
+				break;
 			case 'b':
 				return;
 			default:
-				printf("Unknown. Commands: WASD, Back.\n");
+				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
 				break;
 		}
 	}

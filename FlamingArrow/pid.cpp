@@ -7,10 +7,13 @@ void pid_initstate(PIDState &state) {
 	state.d_active = false; // the d term starts off inactive since we need two error samples to compute a derivative
 }
 
-float pid_update(PIDState &s, const PIDCoefs &c, float desired, float measured, float dt) {
+float pid_update(PIDState &s, const PIDCoefs &c, float desired, float measured, float dt, float *computed_d) {
 	float error = desired - measured; // compute error
 	// compute output. D term is only included if its active
-	float out = c.p * error + c.i * s.error_sum + c.d * (s.d_active ? (error - s.error_last)/dt : 0);
+	float d = (s.d_active == 0 ? (error - s.error_last)/dt : 0);
+	if(computed_d)
+		*computed_d = d;
+	float out = c.p * error + c.i * s.error_sum + c.d * d;
 
 	s.error_sum += error*dt; // integrate the error
 	s.error_sum *= exp(-dt * c.i_decay); // we give the integrator a decay factor to help with wind-up at the expense of steady-state error
