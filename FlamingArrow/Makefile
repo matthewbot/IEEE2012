@@ -380,7 +380,7 @@ gccversion :
 
 # Program the device.
 program: $(TARGET).hex $(TARGET).eep
-	$(AVRDUDE) $(AVRDUDE_FLAGS) $(AVRDUDE_WRITE_FLASH) $(AVRDUDE_WRITE_EEPROM)
+	python ../chip45boot2.py $(TARGET).hex
 
 program_stk500: $(TARGET).hex $(TARGET).eep
 	$(STK500_PATH)\$(STK500) $(STK500_FLAGS) $(STK500_WRITE_FLASH)
