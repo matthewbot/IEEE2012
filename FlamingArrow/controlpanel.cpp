@@ -53,12 +53,13 @@ void controlpanel_motor() {
 				motorcontrol_setvel(0, 0);
 				motorcontrol_setvel(1, 0);
 				motorcontrol_setDebug(true);
-				_delay_ms(2000);
-				for(uint16_t i=0; i<10000; i++) {
-					motorcontrol_setvel(0, 0.0001*i);
-					motorcontrol_setvel(1, 0.0001*i);
-					_delay_ms(1);
-				}
+				_delay_ms(1000);
+				{ float t = 0;
+				while(true) {
+					t += .01;
+					motorcontrol_setvel(0, 2+sin(t*3));
+					_delay_ms(10);
+				} }
 				getchar();
 				motorcontrol_setDebug(false);
 				motorcontrol_disable(0);

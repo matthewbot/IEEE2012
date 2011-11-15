@@ -32,7 +32,7 @@ while True:
     pygame.draw.line(d, (0, 0, 0), (d.get_width()-1, 0), (d.get_width()-1, d.get_height()-1))
     
     def conv(x):
-        return int((x/2) * d.get_height())
+        return d.get_height() - int((x/4) * d.get_height())
     
     if old_data is not None:
         for i in xrange(len(data)):
