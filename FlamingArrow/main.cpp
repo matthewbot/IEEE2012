@@ -6,5 +6,5 @@ int main() {
 	init();
 	
 	while (true)
-		linefollow_setEnabled(true);
+		controlpanel();
 }

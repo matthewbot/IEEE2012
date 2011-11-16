@@ -9,6 +9,7 @@
 #include "enc.h"
 #include "temp.h"
 #include "motorcontrol.h"
+#include "drive.h"
 
 #include "controlpanel.h"
 
@@ -154,6 +155,18 @@ void controlpanel_motor() {
 					motorcontrol_setDebug(false);
 					printf("done");
 				}
+				break;
+			case 'i':
+				drive_fwd(5, 1);
+				break;
+			case 'j':
+				drive_l_turn(90, 1);
+				break;
+			case 'k':
+				drive_bck(5, 1);
+				break;
+			case 'l':
+				drive_r_turn(90, 1);
 				break;
 			default:
 				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
