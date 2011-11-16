@@ -106,7 +106,7 @@ void controlpanel_motor() {
 					uint16_t time;
 					scanf("%d", &time);
 					printf("%u\n", time);
-					enc_reset(motor);					
+					enc_reset(motor);
 					motor_setpwm(motor, 700);
 					for (int i = 0; i < time; i++) {
 						_delay_ms(1);
