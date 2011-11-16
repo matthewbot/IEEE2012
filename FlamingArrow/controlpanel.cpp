@@ -10,6 +10,7 @@
 #include "temp.h"
 #include "motorcontrol.h"
 #include "drive.h"
+#include "sensor.h"
 
 #include "controlpanel.h"
 
@@ -75,7 +76,7 @@ void controlpanel_motor() {
 			case 'b':
 				return;
 			case 't':
-				printf("Motor Test > ");				
+				printf("Motor Test > ");
 				for (int i = -1024; i <= 1024; i++) {
 					motor_setpwm(0, i);
 					motor_setpwm(1, i);
@@ -89,7 +90,7 @@ void controlpanel_motor() {
 						rps[j] = (enc_get(j)/2500.0f)/.01;
 					}
 					printf("%f %f %u\n", (double)rps[0], (double)rps[1], i);
-					
+
 				}
 				motor_off(0);
 				motor_off(1);
@@ -297,6 +298,37 @@ void controlpanel_linesensor() {
 	}
 }
 
+#include "adc.h"
+
+void controlpanel_sensor() {
+	while (true) {
+		printf("Sensor > ");
+		char ch = getchar();
+		printf("%c\n", ch);
+		switch (ch) {
+			case 'c':
+				printf("CapADC: %f\n", (double)sensor_readCapADC());
+				break;
+
+			case 'v':
+				printf("VoltageADC: %f\n", (double)sensor_readVoltageADC());
+				break;
+
+			case 's':
+				printf("SignalADC: %f\n", (double)sensor_readSignalADC());
+				break;
+
+			case 't':
+				for (int i=0; i<8; i++)
+					printf("%d ", adc_sample(i));
+				break;
+
+			case 'b':
+				return;
+		}
+	}
+}
+
 void controlpanel() {
 	while(true) {
 		printf("Main > ");
@@ -311,6 +343,9 @@ void controlpanel() {
 				break;
 			case 'l':
 				controlpanel_linesensor();
+				break;
+			case 's':
+				controlpanel_sensor();
 				break;
 			case 'q':
 				printf("Quitting...\n");

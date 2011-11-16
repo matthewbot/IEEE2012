@@ -24,6 +24,7 @@ void init_interrupts() {
 #include "controlpanel.h"
 #include "motorcontrol.h"
 #include "drive.h"
+#include "sensor.h"
 
 void init_modules() {
 	debug_init();
@@ -34,6 +35,7 @@ void init_modules() {
 	twi_init();
 	controlpanel_init();
 	motorcontrol_init();
+	sensor_init();
 }
 
 void init() {

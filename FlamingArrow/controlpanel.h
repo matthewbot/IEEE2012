@@ -11,5 +11,6 @@ void controlpanel_move(int32_t speed);
 void controlpanel_temp();
 void controlpanel_lineSensorUpdate(const uint16_t *readings);
 void controlpanel_linesensor();
+void controlpanel_sensor();
 
 #endif /* CONTROLPANEL_H_ */
