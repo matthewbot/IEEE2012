@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <math.h>
 #include <stdint.h>
 
 #include "motorcontrol.h"
@@ -8,7 +10,7 @@
 bool enabled = false;
 
 PIDState line_pid;
-static const PIDCoefs line_pidcoefs = {10, 0, 0.01, 0};
+static const PIDCoefs line_pidcoefs = {8, 0, 0.15, 0};
 
 float get_line_pos(const uint16_t *readings) {
 	float light_levels[8];
@@ -31,7 +33,7 @@ float get_line_pos(const uint16_t *readings) {
 	
 	if(total == 0)
 		return 0;
-	return sum/total/7 - .5; // range is [-0.5, +0.5]
+	return 2*(sum/total/7 - .5); // range is [-1, +1]
 }
 
 //Desired value should be zero after eqn analysis
@@ -42,9 +44,11 @@ void linefollow_sensorUpdate(const uint16_t *readings) {
 	
 	float pos = get_line_pos(readings);
 	float line_pid_change = pid_update(line_pid, line_pidcoefs, 0, pos, .01); // TODO: compute dt
-	
-	motorcontrol_setvel(0, 1 + line_pid_change);
-	motorcontrol_setvel(1, 1 - line_pid_change);
+
+	float turn_speed = -pos*pos*pos;
+	//printf("%f %f %f\n", speed, pos, fabs(pos));
+	motorcontrol_setvel(0, 3 + turn_speed);
+	motorcontrol_setvel(1, 3 - turn_speed);
 }
 
 void linefollow_setEnabled(bool enbld) {

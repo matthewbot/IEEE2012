@@ -16,7 +16,7 @@ static TC1_t &pidtim = TCF1;
 
 static const float ticks_per_rotation = 2500; // maybe
 static const float update_hz = 50;
-static const PIDCoefs pidcoefs = { .1, 1, .003, .01 };
+static const PIDCoefs pidcoefs = { 1, 1, .003*0, .01 };
 
 static const float wheel_circumference = 8; // CALIBRATE!! Centimeters
 
@@ -110,7 +110,7 @@ ISR(TIMOVFVEC) {
 	}
 	
 	if(debug)
-		printf("MC %f %f %f %f  %f %f %f\n",
-			motinfo[0].rps_desired, motinfo[0].rps_measured, motinfo[0].pid.error_sum, d[0]*.3+.5);
+		printf("MC %f %f %f %f %f\n",
+			motinfo[0].rps_desired, motinfo[0].rps_measured, motinfo[0].pid.error_sum, motinfo[0].pid.error_last);
 }
 
