@@ -3,6 +3,8 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
+#include <math.h>
+
 #include "enc.h"
 #include "motor.h"
 #include "pid.h"
@@ -15,6 +17,8 @@ static TC1_t &pidtim = TCF1;
 static const float ticks_per_rotation = 2500; // maybe
 static const float update_hz = 50;
 static const PIDCoefs pidcoefs = { .1, 1, .003, .01 };
+
+static const float wheel_circumference = 8; // CALIBRATE!! Centimeters
 
 volatile static bool debug = false;
 
@@ -34,13 +38,14 @@ void motorcontrol_init() {
 	pidtim.PER = 500000 / update_hz; // period computed, so overflow freq is update_hz
 }
 
-float motorcontrol_getvel(int motnum) {
+float motorcontrol_getvel(int motnum) {		// Returns rps not velocity
 	return motinfo[motnum].rps_measured;
 }
 
-void motorcontrol_setvel(int motnum, float rps) {
+void motorcontrol_setvel(int motnum, float vel) {	// Desired vel in Centimeters/Second
 	MotorInfo &mot = motinfo[motnum];
-
+	
+	float rps = vel/wheel_circumference;		// Gives revs/sec
 	mot.rps_desired = rps; // update desired rps
 
 	if (!mot.enabled) { // if the motor is currently disabled
@@ -48,6 +53,15 @@ void motorcontrol_setvel(int motnum, float rps) {
 		mot.prev_enc = enc_get(motnum); // start measuring encoder ticks from the current position
 		mot.enabled = true; // the motor is now enabled
 	}
+}
+
+void motorcontrol_stop(int motnum) {		// for turning off an individual motor from setvel
+	motorcontrol_setvel(motnum, 0);
+}
+
+void motorcontrol_stop() {			// for turning off both left and right motors from setvel
+	motorcontrol_setvel(0, 0);
+	motorcontrol_setvel(1, 0);
 }
 
 void motorcontrol_disable(int motnum) {
@@ -60,6 +74,16 @@ void motorcontrol_disable(int motnum) {
 
 void motorcontrol_setDebug(bool new_debug) {
 	debug = new_debug;
+}
+
+float sign(float in) {
+	if (in > 0) {
+		return 1.0;
+	} else if (in < 0) {
+		return -1.0;
+	} else {
+		return 0;
+	}
 }
 
 ISR(TIMOVFVEC) {
@@ -75,6 +99,8 @@ ISR(TIMOVFVEC) {
 		mot.prev_enc = enc; // save the encoder position
 
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz, &d[motnum]); // update the PID loop
+
+		output += sign(mot.rps_desired)*((fabs(mot.rps_desired))/0.0128 + 577.125)/1024;
 		if (output > 1) // enforce saturation on the output
 			output = 1;
 		else if (output < -1)

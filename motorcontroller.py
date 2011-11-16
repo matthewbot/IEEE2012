@@ -24,7 +24,7 @@ while True:
     except:
         print "bad line", repr(line)
         if 'Starting up' in line:
-            s.write('mf')
+            s.write('mr')			# Changed from mf to mr temporarily
         continue
     
     print data

@@ -23,6 +23,7 @@ void init_interrupts() {
 #include "twi.h"
 #include "controlpanel.h"
 #include "motorcontrol.h"
+#include "drive.h"
 
 void init_modules() {
 	debug_init();

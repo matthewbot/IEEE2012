@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/eeprom.h>
 
 #include "linefollow.h"
 #include "motor.h"
@@ -10,6 +11,8 @@
 #include "motorcontrol.h"
 
 #include "controlpanel.h"
+
+int32_t EEMEM lookup[100];
 
 void controlpanel_init() {
 	printf("Starting up\n");
@@ -69,6 +72,88 @@ void controlpanel_motor() {
 				break;
 			case 'b':
 				return;
+			case 't':
+				printf("Motor Test > ");				
+				for (int i = -1024; i <= 1024; i++) {
+					motor_setpwm(0, i);
+					motor_setpwm(1, i);
+					_delay_ms(10);
+					for (int j = 0; j < 2; j++) {
+						enc_reset(j);
+					}
+					_delay_ms(10);
+					float rps[2];
+					for (int j = 0; j < 2; j++) {
+						rps[j] = (enc_get(j)/2500.0f)/.01;
+					}
+					printf("%f %f %u\n", (double)rps[0], (double)rps[1], i);
+					
+				}
+				motor_off(0);
+				motor_off(1);
+				break;
+			case 'c':
+				{
+					printf("Motor Calibration > \n");
+					bool done = false;
+					printf("Choose motor 0 or 1 > ");
+					uint16_t motor;
+					scanf("%d", &motor);
+					printf("%u\n", motor);
+					printf("Choose time > ");
+					uint16_t time;
+					scanf("%d", &time);
+					printf("%u\n", time);
+					enc_reset(motor);					
+					motor_setpwm(motor, 700);
+					for (int i = 0; i < time; i++) {
+						_delay_ms(1);
+					}
+					motor_off(motor);
+					_delay_ms(1000);
+					uint16_t steps = enc_get(motor);
+					printf("%u\n", steps);
+				}
+				break;
+			case 'r':			// Rapid speed changes
+				{
+					uint16_t i = 0;
+					motorcontrol_setDebug(true);
+					_delay_ms(2000);
+					while(i < 4) {
+						printf("%u\n", i);
+						motorcontrol_setvel(0, i);
+						motorcontrol_setvel(1, i);
+						i = i + 1;
+						_delay_ms(1000);
+					}
+
+					motorcontrol_setvel(0, 0.001);
+					motorcontrol_setvel(1, 0.001);
+					_delay_ms(1000);
+					printf("vel = 1");
+					motorcontrol_setvel(0, 4);
+					motorcontrol_setvel(1, 4);
+					_delay_ms(1000);
+					printf("vel = 4");
+					motorcontrol_setvel(0, 0.001);
+					motorcontrol_setvel(1, 0.001);
+					_delay_ms(1000);
+					motorcontrol_setvel(0, 4);
+					motorcontrol_setvel(1, 4);
+					_delay_ms(1000);
+					motorcontrol_setvel(0, 0.001);
+					motorcontrol_setvel(1, 0.001);
+					_delay_ms(1000);
+					motorcontrol_setvel(0, 4);
+					motorcontrol_setvel(1, 4);
+					_delay_ms(1000);
+					motorcontrol_setvel(0, 0);
+					motorcontrol_setvel(1, 0);
+					motorcontrol_setDebug(false);
+					printf("done");
+				}
+				break;
 			default:
 				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
 				break;
