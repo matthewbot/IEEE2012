@@ -134,7 +134,9 @@ ISR(TIMOVFVEC) {
 		mot.rps_measured = (difference)/ticks_per_rotation*update_hz; // compute the rotations per second
 		mot.prev_enc = enc; // save the encoder position
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz, &d[motnum]); // update the PID loop
-		//output += sign(mot.rps_desired)*((fabs(mot.rps_desired))*mot.m + mot.b)/1024;
+		printf("%f ", output);
+		output += sign(mot.rps_desired)*((fabs(mot.rps_desired))*mot.m + mot.b)/1024;
+		printf("%f\n", output);
 		if (output > 1) // enforce saturation on the output
 			output = 1;
 		else if (output < -1)
