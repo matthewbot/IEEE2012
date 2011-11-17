@@ -47,26 +47,33 @@ float get_line_pos(const uint16_t *readings, float *lineness) {
 
 //Desired value should be zero after eqn analysis
 
+float turn_speed = 0.;
+bool on_line = false;
+
 void linefollow_sensorUpdate(const uint16_t *readings) {
 	if(!enabled)
 		return;
 	
 	float lineness;
 	float pos = get_line_pos(readings, &lineness);
-	if(lineness < 0.0001) {
-		motorcontrol_setvel(0, 30);
-		motorcontrol_setvel(1, -30);
-		pid_initstate(line_pid);
-		return;
+
+	if(on_line && lineness < 0.00013)
+		on_line = false;
+	else if(!on_line && lineness > 0.00023)
+		on_line = true;
+
+	if(on_line) {
+		float line_pid_change = pid_update(line_pid, line_pidcoefs, 0, pos, .01); // TODO: compute dt
+
+		turn_speed = line_pid_change*line_pid_change*line_pid_change;
+	} else {
+		turn_speed = 30*sign(turn_speed);
 	}
 
-	float line_pid_change = pid_update(line_pid, line_pidcoefs, 0, pos, .01); // TODO: compute dt
-
-	float turn_speed = line_pid_change*line_pid_change*line_pid_change;
 	//printf("%f %f %f\n", speed, pos, fabs(pos));
 	printf("%f\n", (double)lineness);
-	motorcontrol_setvel(0, 30 + turn_speed);
-	motorcontrol_setvel(1, 30 - turn_speed);
+	motorcontrol_setvel(0, 15 + turn_speed);
+	motorcontrol_setvel(1, 15 - turn_speed);
 }
 
 void linefollow_setEnabled(bool enbld) {

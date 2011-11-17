@@ -100,16 +100,6 @@ void motorcontrol_setDebug(bool new_debug) {
 	debug = new_debug;
 }
 
-float sign(float in) {
-	if (in > 0) {
-		return 1.0;
-	} else if (in < 0) {
-		return -1.0;
-	} else {
-		return 0;
-	}
-}
-
 ISR(TIMOVFVEC) {
 	float d[2];
 	for (int motnum=0; motnum<2; motnum++) { // for each motor
