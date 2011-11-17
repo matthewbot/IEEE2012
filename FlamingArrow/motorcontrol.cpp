@@ -32,6 +32,7 @@ struct MotorInfo {
 	float b;	// intercept for open-loop lookup
 	volatile float rps_desired;
 	volatile float rps_measured;
+	float prev_rps;
 	volatile uint16_t prev_enc; // used to find motor velocity
 	volatile bool enabled; // determines whether this motor is under PID control or not
 };
@@ -46,6 +47,8 @@ void motorcontrol_init() {
 	motinfo[0].b = 577.125;
 	motinfo[1].m = 78.1250;
 	motinfo[1].b = 577.125;
+	motinfo[0].prev_rps = 0;
+	motinfo[1].prev_rps = 0;
 }
 
 float motorcontrol_getvel(int motnum) {		// Returns rps not velocity
@@ -54,36 +57,27 @@ float motorcontrol_getvel(int motnum) {		// Returns rps not velocity
 
 void motorcontrol_setvel(int motnum, float vel) {	// Desired vel in Centimeters/Second
 	MotorInfo &mot = motinfo[motnum];
-	
+
 	float rps = vel/wheel_circumference;		// Gives revs/sec
 	mot.rps_desired = rps; // update desired rps
 
 	if (!mot.enabled) { // if the motor is currently disabled
-		pid_initstate(mot.pid); // reset the PID state
 		mot.prev_enc = enc_get(motnum); // start measuring encoder ticks from the current position
-		mot.enabled = true; // the motor is now enabled
 	}
+	if (sign(mot.prev_rps) != sign(mot.rps_desired)) {
+		pid_initstate(mot.pid); // reset the PID state
+	}
+	mot.prev_rps = mot.rps_desired;
+	mot.enabled = true; // the motor is now enabled
 }
 
 void motorcontrol_setvel2(float vel0, float vel1) {
-	MotorInfo &mot0 = motinfo[0];
-	MotorInfo &mot1 = motinfo[1];
+	cli();
 
-	float rps0 = vel0/wheel_circumference;
-	float rps1 = vel1/wheel_circumference;
-	mot0.rps_desired = rps0;
-	mot1.rps_desired = rps1;
+	motorcontrol_setvel(0, vel0);
+	motorcontrol_setvel(1, vel1);	
 
-	if (!mot0.enabled) { // if the motor is currently disabled
-		pid_initstate(mot0.pid); // reset the PID state
-		mot0.prev_enc = enc_get(0); // start measuring encoder ticks from the current position
-	}
-	if (!mot1.enabled) { // if the motor is currently disabled
-		pid_initstate(mot1.pid); // reset the PID state
-		mot1.prev_enc = enc_get(1); // start measuring encoder ticks from the current position
-	}
-	mot0.enabled = true;
-	mot1.enabled = true;
+	sei();
 }
 
 void motorcontrol_stop(int motnum) {		// for turning off an individual motor from setvel

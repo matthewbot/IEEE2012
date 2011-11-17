@@ -10,6 +10,7 @@ void motorcontrol_stop(int motnum);
 void motorcontrol_stop();
 void motorcontrol_disable(int mot);
 void motorcontrol_setDebug(bool new_debug);
+float sign(float in);
 
 #endif
 
