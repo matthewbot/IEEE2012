@@ -1,4 +1,8 @@
+#define __STDC_LIMIT_MACROS
+
 #include <stdio.h>
+
+#include <stdint.h>
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
@@ -26,7 +30,7 @@ struct MotorInfo {
 	PIDState pid; // state of PID loop
 	volatile float rps_desired;
 	volatile float rps_measured;
-	volatile int16_t prev_enc; // used to find motor velocity
+	volatile uint16_t prev_enc; // used to find motor velocity
 	volatile bool enabled; // determines whether this motor is under PID control or not
 };
 
@@ -55,13 +59,33 @@ void motorcontrol_setvel(int motnum, float vel) {	// Desired vel in Centimeters/
 	}
 }
 
+void motorcontrol_setvel2(float vel0, float vel1) {
+	MotorInfo &mot0 = motinfo[0];
+	MotorInfo &mot1 = motinfo[1];
+
+	float rps0 = vel0/wheel_circumference;
+	float rps1 = vel1/wheel_circumference;
+	mot0.rps_desired = rps0;
+	mot1.rps_desired = rps1;
+
+	if (!mot0.enabled) { // if the motor is currently disabled
+		pid_initstate(mot0.pid); // reset the PID state
+		mot0.prev_enc = enc_get(0); // start measuring encoder ticks from the current position
+	}
+	if (!mot1.enabled) { // if the motor is currently disabled
+		pid_initstate(mot1.pid); // reset the PID state
+		mot1.prev_enc = enc_get(1); // start measuring encoder ticks from the current position
+	}
+	mot0.enabled = true;
+	mot1.enabled = true;
+}
+
 void motorcontrol_stop(int motnum) {		// for turning off an individual motor from setvel
 	motorcontrol_setvel(motnum, 0);
 }
 
 void motorcontrol_stop() {			// for turning off both left and right motors from setvel
-	motorcontrol_setvel(0, 0);
-	motorcontrol_setvel(1, 0);
+	motorcontrol_setvel2(0, 0);
 }
 
 void motorcontrol_disable(int motnum) {
@@ -94,12 +118,16 @@ ISR(TIMOVFVEC) {
 		if (!mot.enabled) // if its not enabled
 			continue; // skip it
 
-		int16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
-		mot.rps_measured = (enc - mot.prev_enc)/ticks_per_rotation*update_hz; // compute the rotations per second
+		uint16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
+		int16_t difference = (int16_t)enc - (int16_t)mot.prev_enc;
+		if (difference > INT16_MAX/2) {	// if encoder wrapped around
+			difference -= INT16_MAX;
+		} else if (difference < INT16_MIN/2) {
+			difference += INT16_MAX;
+		}
+		mot.rps_measured = (difference)/ticks_per_rotation*update_hz; // compute the rotations per second
 		mot.prev_enc = enc; // save the encoder position
-
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz, &d[motnum]); // update the PID loop
-
 		output += sign(mot.rps_desired)*((fabs(mot.rps_desired))/0.0128 + 577.125)/1024;
 		if (output > 1) // enforce saturation on the output
 			output = 1;

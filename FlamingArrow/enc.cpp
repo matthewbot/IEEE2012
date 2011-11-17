@@ -25,7 +25,7 @@ void enc_init() {
 	enctim0.CTRLA = enctim1.CTRLA = TC_CLKSEL_DIV1_gc; // div1 clock selection required for qdec to work
 }
 
-int16_t enc_get(uint8_t num) {
+uint16_t enc_get(uint8_t num) {
 	if (num == 0)
 		return enctim0.CNT;
 	else
