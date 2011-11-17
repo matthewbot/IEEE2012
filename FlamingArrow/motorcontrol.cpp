@@ -44,8 +44,8 @@ void motorcontrol_init() {
 	pidtim.PER = 500000 / update_hz; // period computed, so overflow freq is update_hz
 	motinfo[0].m = 78.1250;
 	motinfo[0].b = 577.125;
-	motinfo[1].m = 46.8750;
-	motinfo[1].b = 714;
+	motinfo[1].m = 78.1250;
+	motinfo[1].b = 577.125;
 }
 
 float motorcontrol_getvel(int motnum) {		// Returns rps not velocity
