@@ -25,7 +25,6 @@ void motor_setpwm(uint8_t mot, int16_t pwm) {
 	uint8_t in2pin_mask = in1pin_mask << 1;
 	register16_t &ccreg = (&pwmtim.CCABUF)[mot]; // CCxBUF registers are adjacent in memory
 
-	printf("%d\n", pwm);
 	if (pwm == 0) {
 		ctrlport.OUTCLR = in1pin_mask | in2pin_mask;
 		ccreg = 0;
