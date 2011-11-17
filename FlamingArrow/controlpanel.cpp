@@ -157,13 +157,13 @@ void controlpanel_motor() {
 				}
 				break;
 			case 'i':
-				drive_fwd(11, 10);
+				drive_fwd(30, 15);
 				break;
 			case 'j':
 				drive_l_turn(90, 10);
 				break;
 			case 'k':
-				drive_bck(11, 10);
+				drive_bck(30, 10);
 				break;
 			case 'l':
 				drive_r_turn(90, 10);
