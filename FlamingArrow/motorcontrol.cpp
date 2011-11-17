@@ -14,11 +14,11 @@
 static TC1_t &pidtim = TCF1;
 #define TIMOVFVEC TCF1_OVF_vect
 
-static const float ticks_per_rotation = 2500; // maybe
+static const float ticks_per_rotation = 2500; // accurate
 static const float update_hz = 50;
 static const PIDCoefs pidcoefs = { 1, 1, .003*0, .01 };
 
-static const float wheel_circumference = 8; // CALIBRATE!! Centimeters
+static const float wheel_circumference = 16.1368; // Centimeters (may need to re-cal)
 
 volatile static bool debug = false;
 

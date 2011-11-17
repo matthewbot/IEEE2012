@@ -24,8 +24,8 @@ void drive_fwd(float dist, float vel) {	// Drive forward 'dist' desired in Centi
 }
 
 void drive_bck(float dist, float vel) {
-	motorcontrol_setvel(l_motor, -l_polarity*vel);	// Turns on motors at their velocities
-	motorcontrol_setvel(r_motor, -r_polarity*vel);
+	motorcontrol_setvel(l_motor, -1*l_polarity*vel);	// Turns on motors at their velocities
+	motorcontrol_setvel(r_motor, -1*r_polarity*vel);
 	uint16_t time = (int)(vel/dist)*1000;
 	for (int i = 0; i < time; i++) {
 		_delay_ms(1);		// wait 'time' number of Seconds
@@ -34,7 +34,7 @@ void drive_bck(float dist, float vel) {
 }
 
 void drive_l_turn(float degrees, float vel) {
-	motorcontrol_setvel(l_motor, -l_polarity*vel);
+	motorcontrol_setvel(l_motor, -1*l_polarity*vel);
 	motorcontrol_setvel(r_motor, r_polarity*vel);
 	uint16_t time = (int)(degrees/360)*turn_360_const*1000;
 	for (int i = 0; i < time; i++) {
@@ -45,7 +45,7 @@ void drive_l_turn(float degrees, float vel) {
 
 void drive_r_turn(float degrees, float vel) {
 	motorcontrol_setvel(l_motor, l_polarity*vel);
-	motorcontrol_setvel(r_motor, -r_polarity*vel);
+	motorcontrol_setvel(r_motor, -1*r_polarity*vel);
 	uint16_t time = (int)(degrees/360)*turn_360_const*1000;
 	for (int i = 0; i < time; i++) {
 		_delay_ms(1);
@@ -54,7 +54,7 @@ void drive_r_turn(float degrees, float vel) {
 }
 
 void drive_l_piv_bck(float degrees, float vel) {		// Pivots backwards facing left (about right wheel)
-	motorcontrol_setvel(l_motor, -l_polarity*vel);
+	motorcontrol_setvel(l_motor, -1*l_polarity*vel);
 	uint16_t time = (int)(degrees/360)*pivot_360_const*1000;
 	for (int i = 0; i < time; i++) {
 		_delay_ms(1);
@@ -72,7 +72,7 @@ void drive_l_piv_fwd(float degrees, float vel) {		// Pivots forwards facing left
 }
 
 void drive_r_piv_bck(float degrees, float vel) {		// Pivots backwards facing right (about left wheel)
-	motorcontrol_setvel(r_motor, -r_polarity*vel);
+	motorcontrol_setvel(r_motor, -1*r_polarity*vel);
 	uint16_t time = (int)(degrees/360)*pivot_360_const*1000;
 	for (int i = 0; i < time; i++) {
 		_delay_ms(1);

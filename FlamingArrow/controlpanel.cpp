@@ -157,16 +157,16 @@ void controlpanel_motor() {
 				}
 				break;
 			case 'i':
-				drive_fwd(5, 1);
+				drive_fwd(5, 10);
 				break;
 			case 'j':
-				drive_l_turn(90, 1);
+				drive_l_turn(90, 10);
 				break;
 			case 'k':
-				drive_bck(5, 1);
+				drive_bck(5, 5);
 				break;
 			case 'l':
-				drive_r_turn(90, 1);
+				drive_r_turn(90, 10);
 				break;
 			default:
 				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
