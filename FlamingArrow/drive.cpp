@@ -4,8 +4,8 @@
 #include "drive.h"
 
 // Motion Constants:
-static const float turn_360_const = 10; // NEED TO CALIBRATE. Time in Seconds it takes to turn 360 Degrees
-static const float pivot_360_const = 20; // NEED TO CALIBRATE.
+static const float turn_360_const = 5.7; // Time in Seconds it takes to turn 360 Degrees
+static const float pivot_360_const = 11.5; // NEED TO CALIBRATE.
 // Motor ports:
 static const uint16_t l_motor = 0;
 static const uint16_t r_motor = 1;
