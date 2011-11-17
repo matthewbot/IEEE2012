@@ -28,6 +28,8 @@ volatile static bool debug = false;
 
 struct MotorInfo {
 	PIDState pid; // state of PID loop
+	float m;	// slope for open-loop lookup
+	float b;	// intercept for open-loop lookup
 	volatile float rps_desired;
 	volatile float rps_measured;
 	volatile uint16_t prev_enc; // used to find motor velocity
@@ -40,6 +42,10 @@ void motorcontrol_init() {
 	pidtim.CTRLA = TC_CLKSEL_DIV64_gc; // timer runs at 1Mhz
 	pidtim.INTCTRLA = TC_OVFINTLVL_MED_gc; // enable medium priority overflow interrupt
 	pidtim.PER = 500000 / update_hz; // period computed, so overflow freq is update_hz
+	motinfo[0].m = 78.1250;
+	motinfo[0].b = 577.125;
+	motinfo[1].m = 46.8750;
+	motinfo[1].b = 714;
 }
 
 float motorcontrol_getvel(int motnum) {		// Returns rps not velocity
@@ -128,7 +134,7 @@ ISR(TIMOVFVEC) {
 		mot.rps_measured = (difference)/ticks_per_rotation*update_hz; // compute the rotations per second
 		mot.prev_enc = enc; // save the encoder position
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz, &d[motnum]); // update the PID loop
-		output += sign(mot.rps_desired)*((fabs(mot.rps_desired))/0.0128 + 577.125)/1024;
+		//output += sign(mot.rps_desired)*((fabs(mot.rps_desired))*mot.m + mot.b)/1024;
 		if (output > 1) // enforce saturation on the output
 			output = 1;
 		else if (output < -1)
