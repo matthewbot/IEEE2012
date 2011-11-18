@@ -201,8 +201,8 @@ void controlpanel_move_setspeed() {
 			default:
 				printf("Unknown. Commands: Fast, meDium, Slow, Back.\n");
 				break;
-		controlpanel_move(speed);
 		}
+		controlpanel_move(speed);
 	}
 }
 
