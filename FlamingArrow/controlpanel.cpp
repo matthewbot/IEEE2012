@@ -156,20 +156,80 @@ void controlpanel_motor() {
 					printf("done");
 				}
 				break;
+			case 'h':
+				drive_fwd(30, 1);
 			case 'i':
-				drive_l_piv_fwd(90, 10);
+				drive_bck(30, 15);
 				break;
 			case 'j':
-				drive_l_piv_bck(90, 10);
+				drive_fwd(30, 10);
 				break;
 			case 'k':
-				drive_r_piv_fwd(90, 10);
+				drive_fwd(30, 20);
 				break;
 			case 'l':
-				drive_r_piv_bck(90, 10);
+				drive_fwd(30, 30);
+				break;
+			case 'm':
+				controlpanel_move_setspeed();
 				break;
 			default:
 				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
+				break;
+		}
+	}
+}
+
+void controlpanel_move_setspeed() {
+	while(true) {
+		printf("f: fast, d: medium, s: slow > ");
+		char ch = getchar();
+		int32_t speed = 0;
+		printf("%c\n", ch);
+		switch (ch) {
+			case 'f':
+				speed = 40;
+				break;
+			case 'd':
+				speed = 25;
+				break;
+			case 's':
+				speed = 10;
+				break;
+			case 'b':
+				return;
+			default:
+				printf("Unknown. Commands: Fast, meDium, Slow, Back.\n");
+				break;
+		controlpanel_move(speed);
+		}
+	}
+}
+
+void controlpanel_move(int32_t speed) {
+	while (true) {
+		printf("WASD: > ");
+		char ch = getchar();
+		uint16_t default_dist = 5;
+		uint16_t default_turn = 20;
+		printf("%c\n", ch);
+		switch (ch) {
+			case 'w':
+				drive_fwd(default_dist, speed);
+				break;
+			case 'a':
+				drive_l_turn(default_turn, speed);
+				break;
+			case 's':
+				drive_bck(default_dist, speed);
+				break;
+			case 'd':
+				drive_r_turn(default_turn, speed);
+				break;
+			case 'b':
+				return;
+			default:
+				printf("WASD controls, b for back: \n");
 				break;
 		}
 	}
