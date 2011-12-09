@@ -28,7 +28,7 @@ args = parser.parse_args()
 # display more obvious error message if the file doesn't exist
 open(args.hex_file, 'rb')
 
-hex_file_lines = subprocess.check_output(["srec_cat", args.hex_file, "-Intel", "-Output", "-", "-Intel", "-Line_Length", "44"]).splitlines(True)
+hex_file_lines = subprocess.Popen(["srec_cat", args.hex_file, "-Intel", "-Output", "-", "-Intel", "-Line_Length", "44"],stdout=subprocess.PIPE).communicate()[0].splitlines(True)
 
 class UnexpectedError(Exception):
     pass
@@ -50,9 +50,9 @@ while True:
     try:
         print 'Opening serial port...'
         s = serial.Serial(args.port, args.baudrate)
-        
+
         print 'Attempting communication...'
-        
+
         while True:
             data = ''
             s.setDTR(True)
@@ -68,13 +68,13 @@ while True:
             else:
                 continue
             break
-        
+
         print 'Communication established!'
-        
+
         # test communication
         s.write('\n')
         expect('\x13-\n\r>\x11')
-        
+
         # start programming
         if args.eeprom:
             s.write('pe\n')
@@ -82,7 +82,7 @@ while True:
         else:
             s.write('pf\n')
             expect('\x13pf+\n\r\x11')
-        
+
         # send data, displaying progress
         for i, line in enumerate(hex_file_lines):
             s.write(line)
@@ -96,11 +96,11 @@ while True:
                 sys.stdout.write('*')
             sys.stdout.flush()
         sys.stdout.write('\n')
-        
+
         # start program
         s.write('g\n')
         expect('\x13g+\n\r\x11')
-        
+
         print 'Success!'
     except UnexpectedError:
         traceback.print_exc()

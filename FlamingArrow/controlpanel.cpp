@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/eeprom.h>
+#include <math.h>
 
 #include "linefollow.h"
 #include "motor.h"

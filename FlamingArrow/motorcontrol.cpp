@@ -12,7 +12,7 @@
 #include "enc.h"
 #include "motor.h"
 #include "pid.h"
-
+#include "util.h"
 #include "motorcontrol.h"
 
 static TC1_t &pidtim = TCF1;
@@ -75,7 +75,7 @@ void motorcontrol_setvel2(float vel0, float vel1) {
 	cli();
 
 	motorcontrol_setvel(0, vel0);
-	motorcontrol_setvel(1, vel1);	
+	motorcontrol_setvel(1, vel1);
 
 	sei();
 }
@@ -126,7 +126,7 @@ ISR(TIMOVFVEC) {
 
 		motor_setpwm(motnum, (int16_t)(output*motor_maxpwm)); // convert output to pwm, set it to the motor
 	}
-	
+
 	if(debug)
 		printf("MC %f %f %f %f %f\n",
 			motinfo[0].rps_desired, motinfo[0].rps_measured, motinfo[0].pid.error_sum, motinfo[0].pid.error_last);
