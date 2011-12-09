@@ -6,7 +6,7 @@
 
 #include "util.h"
 
-#include "debug.h"
+#include "debug/debug.h"
 
 // debug LED
 static PORT_t &ledport = PORTR;

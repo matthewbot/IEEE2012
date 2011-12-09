@@ -5,8 +5,10 @@
 
 enum Motor {
 	MOTOR_LEFT,
-	MOTOR_RIGHT
+	MOTOR_RIGHT,
 };
+
+static const int motor_count = 2;
 
 static const int16_t motor_maxpwm = 1024;
 

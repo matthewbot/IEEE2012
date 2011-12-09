@@ -1,5 +1,5 @@
-#include "sensor.h"
-#include "adc.h"
+#include "hw/sensor.h"
+#include "hw/adc.h"
 #include <avr/io.h>
 
 static PORT_t &ctrlport = PORTC;

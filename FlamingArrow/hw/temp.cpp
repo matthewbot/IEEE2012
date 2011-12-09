@@ -1,9 +1,9 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
-#include "twi.h"
+#include "hw/twi.h"
 
-#include "temp.h"
+#include "hw/temp.h"
 
 #define TEMP_AMB_REG 0x06
 #define TEMP_OBJ_REG 0x07

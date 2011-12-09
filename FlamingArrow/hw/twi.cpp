@@ -1,6 +1,6 @@
 #include <avr/io.h>
 
-#include "twi.h"
+#include "hw/twi.h"
 
 static TWI_t &t = TWIC;
 #define twi t.MASTER

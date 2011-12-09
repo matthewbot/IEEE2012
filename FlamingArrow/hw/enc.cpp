@@ -1,6 +1,7 @@
+#define __STDC_LIMIT_MACROS
+#include <stdint.h>
 #include <avr/io.h>
-
-#include "enc.h"
+#include "hw/enc.h"
 
 static PORT_t &encport = PORTF;
 static const int encpins_mask = 0xF0;
@@ -38,3 +39,14 @@ void enc_reset(uint8_t num) {
 	else
 		enctim1.CNT = 0;
 }
+
+int16_t enc_diff(uint16_t a, uint16_t b) {
+	int16_t diff = (int16_t)a - (int16_t)b;
+	if (diff > INT16_MAX/2) {	// if encoder wrapped around
+		diff -= INT16_MAX;
+	} else if (diff < INT16_MIN/2) {
+		diff += INT16_MAX;
+	}
+	return diff;
+}
+

@@ -15,16 +15,16 @@ void init_interrupts() {
 	sei();
 }
 
-#include "debug.h"
-#include "motor.h"
-#include "enc.h"
-#include "adc.h"
-#include "linesensor.h"
-#include "twi.h"
-#include "controlpanel.h"
-#include "motorcontrol.h"
-#include "drive.h"
-#include "sensor.h"
+#include "debug/debug.h"
+#include "hw/motor.h"
+#include "hw/enc.h"
+#include "hw/adc.h"
+#include "hw/linesensor.h"
+#include "hw/twi.h"
+#include "debug/controlpanel.h"
+#include "control/motorcontrol.h"
+#include "control/drive.h"
+#include "hw/sensor.h"
 
 void init_modules() {
 	debug_init();

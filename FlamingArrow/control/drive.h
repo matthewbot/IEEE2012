@@ -1,6 +1,9 @@
 #ifndef DRIVE_H_
 #define DRIVE_H_
 
+void drive(float leftvel, float rightvel);
+void drive_stop();
+
 void drive_fwd(float dist, float vel);
 void drive_bck(float dist, float vel);
 void drive_l_turn(float degrees, float vel);

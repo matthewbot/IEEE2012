@@ -2,11 +2,11 @@
 #include <math.h>
 #include <stdint.h>
 
-#include "motorcontrol.h"
+#include "control/motorcontrol.h"
 #include "pid.h"
 #include "util.h"
 
-#include "linefollow.h"
+#include "control/linefollow.h"
 
 bool enabled = false;
 
@@ -17,21 +17,21 @@ float get_line_pos(const uint16_t *readings, float *lineness) {
 	float light_levels[8];
 	for(int i=0; i<8; i++)
 		light_levels[i] = 1./(1. + readings[i]);
-	
+
 	float min_level = light_levels[0];
 	for(int i=0; i<8; i++)
 		if(light_levels[i] < min_level)
 			min_level = light_levels[i];
-	
+
 	for(int i=0; i<8; i++)
 		light_levels[i] -= min_level;
-	
+
 	float sum = 0., total = 0.;
 	for(int i=0; i<8; i++) {
 		sum += light_levels[i]*light_levels[i]*i;
 		total += light_levels[i]*light_levels[i];
 	}
-	
+
 	if(lineness) {
 		*lineness = 0.;
 		for(int i=0; i<8; i++) {
@@ -39,7 +39,7 @@ float get_line_pos(const uint16_t *readings, float *lineness) {
 				*lineness = light_levels[i];
 		}
 	}
-	
+
 	if(total == 0)
 		return 0;
 	return 2*(sum/total/7 - .5); // range is [-1, +1]
@@ -53,7 +53,7 @@ bool on_line = false;
 void linefollow_sensorUpdate(const uint16_t *readings) {
 	if(!enabled)
 		return;
-	
+
 	float lineness;
 	float pos = get_line_pos(readings, &lineness);
 
@@ -72,20 +72,15 @@ void linefollow_sensorUpdate(const uint16_t *readings) {
 
 	//printf("%f %f %f\n", speed, pos, fabs(pos));
 	printf("%f\n", (double)lineness);
-	motorcontrol_setvel(0, 15 + turn_speed);
-	motorcontrol_setvel(1, 15 - turn_speed);
+	//motorcontrol_setvel(0, 15 + turn_speed);
+	//motorcontrol_setvel(1, 15 - turn_speed);
 }
 
-void linefollow_setEnabled(bool enbld) {
-	if(enbld && !enabled) // false -> true
+void linefollow_setEnabled(bool newenabled) {
+	if (enabled == newenabled)
+		return;
+
+	if (newenabled)
 		pid_initstate(line_pid); //Enable PID for linesensor
-	
-	if(!enbld && enabled) { // true -> false
-		util_cli_lo();
-		motorcontrol_disable(0);
-		motorcontrol_disable(1);
-		util_sei_lo();
-	}
-	
-	enabled = enbld;
+	enabled = newenabled;
 }

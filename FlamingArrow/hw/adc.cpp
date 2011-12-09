@@ -1,6 +1,6 @@
 #include <avr/io.h>
 
-#include "adc.h"
+#include "hw/adc.h"
 
 void adc_init() {
 	ADCA.CTRLA = ADC_ENABLE_bm;

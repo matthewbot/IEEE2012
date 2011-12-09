@@ -5,17 +5,15 @@
 #include <avr/eeprom.h>
 #include <math.h>
 
-#include "linefollow.h"
-#include "motor.h"
-#include "enc.h"
-#include "temp.h"
-#include "motorcontrol.h"
-#include "drive.h"
-#include "sensor.h"
+#include "control/linefollow.h"
+#include "hw/motor.h"
+#include "hw/enc.h"
+#include "hw/temp.h"
+#include "control/motorcontrol.h"
+#include "control/drive.h"
+#include "hw/sensor.h"
 
-#include "controlpanel.h"
-
-int32_t EEMEM lookup[100];
+#include "debug/controlpanel.h"
 
 void controlpanel_init() {
 	printf("Starting up\n");
@@ -56,14 +54,14 @@ void controlpanel_motor() {
 				motor_setpwm(1, 0);
 				break;
 			case 'f':
-				motorcontrol_setvel(0, 0);
-				motorcontrol_setvel(1, 0);
+				motorcontrol_setrps(0, 0);
+				motorcontrol_setrps(1, 0);
 				motorcontrol_setDebug(true);
 				_delay_ms(1000);
 				{ float t = 0;
 				while(true) {
 					t += .01;
-					motorcontrol_setvel(0, 2+sin(t*3));
+					motorcontrol_setrps(0, 2+sin(t*3));
 					_delay_ms(10);
 				} }
 				getchar();
@@ -299,7 +297,7 @@ void controlpanel_linesensor() {
 	}
 }
 
-#include "adc.h"
+#include "hw/adc.h"
 
 void controlpanel_sensor() {
 	while (true) {

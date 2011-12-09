@@ -3,15 +3,11 @@
 #include <avr/interrupt.h>
 #include <avr/io.h>
 
-#include "debug.h"
-#include "linefollow.h"
-#include "controlpanel.h"
+#include "debug/debug.h"
+#include "control/linefollow.h"
+#include "debug/controlpanel.h"
 
-#include "linesensor.h"
-
-#pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
-
-void linesensor_gotReadings();
+#include "hw/linesensor.h"
 
 // configuration
 
@@ -29,7 +25,9 @@ static TC1_t &tim = TCD1;
 // variables
 
 static volatile uint8_t prevmask;
+static volatile uint8_t readingctr;
 static volatile uint16_t readings[8];
+static volatile uint16_t readingsbuf[8];
 
 void linesensor_init() {
 	ctrlport.OUTSET = _BV(ctrlpin); // control pin high to turn on array
@@ -56,28 +54,31 @@ void linesensor_setEnabled(bool enabled) {
 		ctrlport.OUTCLR = _BV(ctrlpin);
 }
 
+void linesensor_read(uint16_t *buf) {
+	uint8_t ctr = readingctr;
+	while (readingctr == ctr) { } // wait for reading counter to change
+
+	for (int i=0; i<8; i++) // copy buffered readings
+		buf[i] = readingsbuf[i];
+}
+
+#pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
+
 ISR(TIMOVFVEC) {
-	sigport.INTCTRL = PORT_INT0LVL_OFF_gc; // disable edge interrupt
-	tim.CTRLA = 0; // stop timer
-	
-	for (int i=0; i<8; i++)
-		if (prevmask & (uint8_t)_BV(i)) // casting to uint8_t allows gcc to use bit testing instructions
-			readings[i] = 40000; // pin never changed state, so set maximum value
-	
-	linesensor_gotReadings();
-	
-	sigport.DIRSET = sigpins_mask; // begin charging by setting pins as outputs
+	for (int i=0; i<8; i++) { // for each pin
+		if (prevmask & (uint8_t)_BV(i)) // if it never got a reading
+			readingsbuf[i] = linesensor_maxval; // give it maxval
+		else
+			readingsbuf[i] = readings[i]; // otherwise give it a reading
+	}
+	readingctr++;
 	prevmask = sigpins_mask;
-	for (int i=0; i<8; i++)
-		readings[i] = 65535;
-	
-	tim.CTRLA = TC_CLKSEL_DIV8_gc; // restart timer
+
+	sigport.DIRSET = sigpins_mask; // begin charging by setting pins as outputs
 }
 
 ISR(TIMCCAVEC) {
 	sigport.DIRCLR = sigpins_mask; // begin discharging by setting pins as inputs
-	sigport.INTCTRL = PORT_INT0LVL_HI_gc; // enable edge interrupt at high priority
-	sigport.INTFLAGS = PORT_INT0IF_bm; // clear interrupt flag
 }
 
 ISR(SIGINT0VEC) {
@@ -94,8 +95,3 @@ ISR(SIGINT0VEC) {
 	}
 }
 
-void linesensor_gotReadings() {
-	linefollow_sensorUpdate((uint16_t*)readings);
-	
-	controlpanel_lineSensorUpdate((uint16_t*)readings);
-}

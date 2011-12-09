@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 
-#include "motor.h"
+#include "hw/motor.h"
 
 static PORT_t &ctrlport = PORTK;
 static const int ctrlpins_mask = 0xFF;
