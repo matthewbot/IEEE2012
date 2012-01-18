@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 static const int enc_count = 2;
+static const float enc_per_rotation = 2500; // accurate
 
 void enc_init();
 uint16_t enc_get(uint8_t num);

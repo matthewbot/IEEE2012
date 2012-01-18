@@ -47,7 +47,7 @@ void linesensor_init() {
 	tim.CCABUF = 2000; // 2000 / 4Mhz = 500us charge period
 }
 
-void linesensor_setEnabled(bool enabled) {
+void linesensor_setLEDs(bool enabled) {
 	if (enabled)
 		ctrlport.OUTSET = _BV(ctrlpin);
 	else

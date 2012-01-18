@@ -2,9 +2,22 @@
 #define LINEFOLLOW_H_
 
 #include <stdint.h>
+#include "hw/linesensor.h"
 
 void linefollow_init();
-void linefollow_setEnabled(bool enbld=true);
-void linefollow_sensorUpdate(const uint16_t *readings);
+
+struct LineFollowResults {
+	float raw_light[linesensor_count];
+	float raw_min;
+	float light[linesensor_count];
+	float squaresum;
+	float squaretotal;
+	float max;
+	float steer; // range is [-1, +1]
+};
+
+void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results);
+
+void linefollow_bump(float offset=0);
 
 #endif /* LINEFOLLOW_H_ */

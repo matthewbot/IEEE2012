@@ -2,15 +2,19 @@
 #define DRIVE_H_
 
 void drive(float leftvel, float rightvel);
+void drive_dist(float leftvel, float rightvel, float dist, int distm);
 void drive_stop();
+void drive_off();
 
-void drive_fwd(float dist, float vel);
-void drive_bck(float dist, float vel);
-void drive_l_turn(float degrees, float vel);
-void drive_r_turn(float degrees, float vel);
-void drive_l_piv_bck(float degrees, float vel);
-void drive_l_piv_fwd(float degrees, float vel);
-void drive_r_piv_bck(float degrees, float vel);
-void drive_r_piv_fwd(float degrees, float vel);
+void drive_fd(float vel);
+void drive_fd_dist(float dist, float vel);
+void drive_bk(float vel);
+void drive_bk_dist(float dist, float vel);
+void drive_lturn(float vel);
+void drive_lturn_deg(float deg, float vel);
+void drive_rturn(float vel);
+void drive_rturn_deg(float deg, float vel);
+
+void drive_steer(float steer, float vel);
 
 #endif

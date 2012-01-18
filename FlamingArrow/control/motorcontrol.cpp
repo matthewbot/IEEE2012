@@ -18,7 +18,6 @@
 static TC1_t &pidtim = TCF1;
 #define TIMOVFVEC TCF1_OVF_vect
 
-static const float ticks_per_rotation = 2500; // accurate
 static const float update_hz = 50;
 static const PIDCoefs pidcoefs = { 1, 1, .003*0, .01 };
 
@@ -82,7 +81,7 @@ ISR(TIMOVFVEC) {
 
 		uint16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
 		int16_t diff = enc_diff(enc, mot.prev_enc); // compute the difference
-		mot.rps_measured = diff/ticks_per_rotation*update_hz; // compute the rotations per second
+		mot.rps_measured = diff/enc_per_rotation*update_hz; // compute the rotations per second
 		mot.prev_enc = enc; // save the encoder position
 
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz); // update the PID loop
