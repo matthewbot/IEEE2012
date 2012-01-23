@@ -18,6 +18,8 @@ inline float sign(float in) {
 	}
 }
 
+inline int min(int a, int b) { return (a < b) ? a : b; }
+
 inline float degtorad(float deg) { return deg * M_PI / 180; }
 inline float radtodeg(float rad) { return rad * 180 / M_PI; }
 

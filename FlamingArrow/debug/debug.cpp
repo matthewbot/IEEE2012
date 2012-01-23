@@ -41,6 +41,9 @@ static int myget(FILE* file) {
 	recvbuf_pos--;
 	util_sei_lo();
 	
+	if (ch == '\r')
+		ch = '\n';
+	
 	return ch;
 }
 

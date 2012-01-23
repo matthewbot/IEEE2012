@@ -11,14 +11,9 @@
 #include "hw/adc.h"
 #include "control/motorcontrol.h"
 #include "control/drive.h"
-#include "hw/sensor.h"
+#include "hw/sensors.h"
 
 #include "debug/controlpanel.h"
-
-static void sintest();
-static void speedtest();
-static void caltest();
-static void rapidtest();
 
 void controlpanel_init() {
 	printf("Starting up\n");
@@ -30,11 +25,14 @@ void controlpanel() {
 		char ch = getchar();
 		printf("%c\n", ch);
 		switch (ch) {
-			case 'm':
-				controlpanel_motor();
+			case 'd':
+				controlpanel_drive();
 				break;
 			case 's':
 				controlpanel_sensor();
+				break;
+			case 'a':
+				controlpanel_algorithm();
 				break;
 			case 'q':
 				printf("Quitting...\n");
@@ -46,58 +44,57 @@ void controlpanel() {
 	}
 }
 
-void controlpanel_motor() {
+void controlpanel_drive() {
+	float speed=20;
 	while (true) {
-		printf("Motor > ");
+		printf("Drive > ");
 		char ch = getchar();
 		printf("%c\n", ch);
 		switch (ch) {
-			case 'w':
-				drive_fd(20);
-				break;
-			case 'a':
-				drive_lturn(10);
-				break;
-			case 's':
-				drive_bk(20);
-				break;
-			case 'd':
-				drive_rturn(10);
-				break;
-				
-			case 'W':
-				drive_fd_dist(16, 20);
-				break;
-			case 'A':
-				drive_lturn_deg(90, 10);
-				break;
-			case 'S':
-				drive_bk_dist(16, 20);
-				break;
-			case 'D':
-				drive_rturn_deg(90, 10);
-				break;
-				
 			case ' ':
 				drive_stop();
 				break;
-			case 'f':
-				sintest();
+			
+			case 'w':
+				drive_fd(speed);
 				break;
+			case 'a':
+				drive_lturn(speed);
+				break;
+			case 's':
+				drive_bk(speed);
+				break;
+			case 'd':
+				drive_rturn(speed);
+				break;
+				
+			case 'W':
+				drive_fd_dist(16, speed);
+				break;
+			case 'A':
+				drive_lturn_deg(90, speed);
+				break;
+			case 'S':
+				drive_bk_dist(16, speed);
+				break;
+			case 'D':
+				drive_rturn_deg(90, speed);
+				break;
+				
+			case '+':
+				speed += 2;
+				printf("Speed: %f\n", (double)speed);
+				break;
+			case '-':
+				speed -= 2;
+				printf("Speed: %f\n", (double)speed);
+				break;
+				
 			case 'e':
 				printf("L %i R %i\n", enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
 				break;
-			case 'b':
+			case 'q':
 				return;
-			case 't':
-				speedtest();
-				break;
-			case 'c':
-				caltest();
-				break;
-			case 'r':
-				rapidtest();
-				break;
 
 			default:
 				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
@@ -108,6 +105,10 @@ void controlpanel_motor() {
 	motorcontrol_setEnabled(false);
 }
 
+
+//void controlpanel_sensor() { }
+//void controlpanel_algorithm() { }
+
 void controlpanel_sensor() {
 	uint16_t linebuf[linesensor_count];
 	
@@ -116,16 +117,20 @@ void controlpanel_sensor() {
 		char ch = getchar();
 		printf("%c\n", ch);
 		switch (ch) {
+			case 'b':
+				printf("Bump: %d\n", sensors_readBump());
+				break;
+			
 			case 'c':
-				printf("CapADC: %f\n", (double)sensor_readCapADC());
+				printf("CapADC: %f\n", (double)sensors_readCapADC());
 				break;
 
 			case 'v':
-				printf("VoltageADC: %f\n", (double)sensor_readVoltageADC());
+				printf("VoltageADC: %f\n", (double)sensors_readVoltageADC());
 				break;
 
 			case 's':
-				printf("SignalADC: %f\n", (double)sensor_readSignalADC());
+				printf("SignalADC: %f\n", (double)sensors_readSignalADC());
 				break;
 
 			case 'a':
@@ -141,89 +146,62 @@ void controlpanel_sensor() {
 				printf("\n");
 				break;
 
-			case 'b':
+			case 'L': {
+				LineFollowResults results;
+				
+				linesensor_read(linebuf);
+				linefollow_computeResults(linebuf, results);
+				
+				printf("raw: ");
+				for (int i=0; i<linesensor_count; i++)
+					printf("%f ", (double)results.raw_light[i]);
+				printf("\nraw min: %f\n", (double)results.raw_min);
+				
+				printf("light: ");
+				for (int i=0; i<linesensor_count; i++)
+					printf("%f ", (double)results.light[i]);
+				printf("\n");
+				
+				printf("squaresum: %e\n", (double)results.squaresum);
+				printf("squaretotal: %e\n", (double)results.squaretotal);
+				printf("max: %f\n", (double)results.max);
+				printf("steer: %f\n", (double)results.steer);
+				break;
+			}
+			
+			case 'q':
 				return;
 		}
 	}
 }
 
-static void sintest() {
-	motorcontrol_setrps(0, 0);
-	motorcontrol_setrps(1, 0);
-	motorcontrol_setDebug(true);
-	_delay_ms(1000);
-	{ 
-		float t = 0;
-		while(true) {
-			t += .01;
-			motorcontrol_setrps(0, 2+sin(t*3));
-			_delay_ms(10);
+void controlpanel_algorithm() {
+	while (true) {
+		printf("Algorithm > ");
+		char ch = getchar();
+		printf("%c\n", ch);
+		switch (ch) {
+			case 'b':
+				linefollow_bump();
+				drive_stop();
+				break;
+				
+			case 's': {
+				char linebuf[10];
+				int steer;
+				printf("Steer (%%): ");
+				gets(linebuf);
+				sscanf(linebuf, "%d", &steer);
+				printf("%d\n", steer);
+				drive_steer(steer/100.0f, 20);
+				getchar();
+				drive_stop();
+				break;
+			}
+			
+			case 'q':
+				return;
 		}
 	}
-	getchar();
-	motorcontrol_setDebug(false);
-	motorcontrol_setEnabled(false);
-}
-
-static void speedtest() {
-	printf("Motor Test > ");
-	for (int i = -1024; i <= 1024; i++) {
-		motor_setpwm(0, i);
-		motor_setpwm(1, i);
-		_delay_ms(10);
-		for (int j = 0; j < 2; j++) {
-			enc_reset(j);
-		}
-		_delay_ms(10);
-		float rps[2];
-		for (int j = 0; j < 2; j++) {
-			rps[j] = (enc_get(j)/2500.0f)/.01;
-		}
-		printf("%f %f %u\n", (double)rps[0], (double)rps[1], i);
-
-	}
-	motor_off(0);
-	motor_off(1);
-}
-
-static void caltest() {
-	printf("Motor Calibration > \n");
-	printf("Choose motor 0 or 1 > ");
-	uint16_t motor;
-	scanf("%d", &motor);
-	printf("%u\n", motor);
-	printf("Choose time > ");
-	uint16_t time;
-	scanf("%d", &time);
-	printf("%u\n", time);
-	enc_reset(motor);
-	motor_setpwm(motor, 700);
-	for (unsigned int i = 0; i < time; i++) {
-		_delay_ms(1);
-	}
-	motor_off(motor);
-	_delay_ms(1000);
-	uint16_t steps = enc_get(motor);
-	printf("%u\n", steps);
-}
-
-static void rapidtest() {
-	printf("Motor Calibration > \n");
-	printf("Choose motor 0 or 1 > ");
-	uint16_t motor;
-	scanf("%d", &motor);
-	printf("%u\n", motor);
-	printf("Choose time > ");
-	uint16_t time;
-	scanf("%d", &time);
-	printf("%u\n", time);
-	enc_reset(motor);
-	motor_setpwm(motor, 700);
-	for (unsigned int i = 0; i < time; i++) {
-		_delay_ms(1);
-	}
-	motor_off(motor);
-	_delay_ms(1000);
-	uint16_t steps = enc_get(motor);
-	printf("%u\n", steps);
-}
+}	
+//*/

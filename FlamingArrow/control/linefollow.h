@@ -20,4 +20,6 @@ void linefollow_computeResults(const uint16_t *readings, LineFollowResults &resu
 
 void linefollow_bump(float offset=0);
 
+void linefollow_wait_line();
+
 #endif /* LINEFOLLOW_H_ */

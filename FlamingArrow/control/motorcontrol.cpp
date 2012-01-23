@@ -52,9 +52,9 @@ float motorcontrol_getrps(int motnum) {
 void motorcontrol_setrps(int motnum, float rps) {	// Desired vel in Centimeters/Second
 	MotorInfo &mot = motinfo[motnum];
 
-	if (sign(mot.rps_desired) != sign(rps)) { // if the sign of the rps changed
-		pid_initstate(mot.pid); // reset the PID state
-	}
+//	if (sign(mot.rps_desired) != sign(rps)) { // if the sign of the rps changed
+//		pid_initstate(mot.pid); // reset the PID state
+//	}
 
 	mot.rps_desired = rps; // update desired rps
 }
@@ -94,9 +94,5 @@ ISR(TIMOVFVEC) {
 
 		motor_setpwm(motnum, (int16_t)(output*motor_maxpwm)); // convert output to pwm, set it to the motor
 	}
-
-	if(debug)
-		printf("MC %f %f %f %f %f\n",
-			motinfo[0].rps_desired, motinfo[0].rps_measured, motinfo[0].pid.error_sum, motinfo[0].pid.error_last);
 }
 
