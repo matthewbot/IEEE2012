@@ -14,7 +14,7 @@ static TC1_t &enctim1 = TCE1;
 
 void enc_init() {
 	PORTCFG.MPCMASK = encpins_mask; // configure all encoder pins
-	encport.PIN0CTRL = PORT_ISC_LEVEL_gc; // set them to level sensing, required for qdec hardware
+	encport.PIN0CTRL = PORT_ISC_LEVEL_gc | PORT_OPC_PULLUP_gc; // set them to level sensing, required for qdec hardware
 
 	EVSYS.CH0MUX = chan0mux; // configure the event channel muxes to the correct pins
 	EVSYS.CH2MUX = chan2mux;
@@ -28,9 +28,9 @@ void enc_init() {
 
 uint16_t enc_get(uint8_t num) {
 	if (num == 0)
-		return enctim0.CNT;
+		return -enctim0.CNT;
 	else
-		return enctim1.CNT;
+		return -enctim1.CNT;
 }
 
 void enc_reset(uint8_t num) {

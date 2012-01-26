@@ -31,6 +31,10 @@ static volatile uint8_t readingctr;
 static volatile uint16_t readings[8];
 static volatile uint16_t readingsbuf[8][8];
 
+// utility functions
+
+static void linesensor_wait();
+
 void linesensor_init() {
 	ctrlport.OUTSET = _BV(ctrlpin); // control pin high to turn on array
 	ctrlport.DIRSET = _BV(ctrlpin);
@@ -56,11 +60,15 @@ void linesensor_setLEDs(bool enabled) {
 		ctrlport.OUTCLR = _BV(ctrlpin);
 }
 
-#include <stdio.h>
-
 void linesensor_read(uint16_t *buf) {
-	uint8_t ctr = readingctr;
-	while (readingctr == ctr) { } // wait for reading counter to change
+	int pos = readingctr & 0x7;
+	for (int i=0; i<8; i++) {
+		buf[i] = readingsbuf[7-i][pos];
+	}
+}
+
+void linesensor_read_min(uint16_t *buf) {
+	linesensor_wait();
 
 	for (int i=0; i<8; i++) { // copy minimum of the buffered readings
 		uint16_t minval = linesensor_maxval;
@@ -70,9 +78,12 @@ void linesensor_read(uint16_t *buf) {
 				minval = val;
 		}
 		buf[i] = minval;
-		
-		//buf[i] = readingsbuf[7-i][0];
 	}
+}
+
+static void linesensor_wait() {
+	uint8_t ctr = readingctr;
+	while (readingctr == ctr) { } // wait for reading counter to change
 }
 
 #pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR

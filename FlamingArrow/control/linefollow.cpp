@@ -9,21 +9,15 @@
 #include <math.h>
 #include <stdint.h>
 
-static const PIDCoefs pidcoefs = {4, 0, 0.1, 0};
-static uint16_t readings[linesensor_count];
-static LineFollowResults results;
-
 void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results) {
 	for (int i=0; i<8; i++)
-		results.raw_light[i] = 1./(1. + readings[i]);
+		results.light[i] = 1./(1. + readings[i]);
 
-	results.raw_min = results.raw_light[0];
-	for (int i=0; i<8; i++)
-		if (results.raw_light[i] < results.raw_min)
-			results.raw_min = results.raw_light[i];
-
-	for (int i=0; i<8; i++)
-		results.light[i] = results.raw_light[i] /*- results.raw_min*/;
+	results.light_max = 0;
+	for (int i=0; i<8; i++) {
+		if (results.light[i] > results.light_max)
+			results.light_max = results.light[i];
+	}
 
 	results.squaresum = results.squaretotal = 0;
 	for (int i=0; i<8; i++) {
@@ -32,64 +26,61 @@ void linefollow_computeResults(const uint16_t *readings, LineFollowResults &resu
 		results.squaretotal += l*l;
 	}
 
-	results.max = 0;
-	for (int i=0; i<8; i++) {
-		if (results.light[i] > results.max)
-			results.max = results.light[i];
-	}
-
 	results.steer = 2*(results.squaresum/results.squaretotal/7 - .5); 
+	
+	if (results.squaretotal > 1e-06) {
+		results.feature = FEATURE_INTERSECTION;
+	} else if (results.squaretotal > 5e-05) {
+		results.feature = results.steer > 0 ? FEATURE_RIGHTTURN : FEATURE_LEFTTURN;			
+	} else if (results.light_max < 0.0001) {
+		results.feature = FEATURE_NOLINE;
+	} else {
+		results.feature = FEATURE_NONE;
+	}
 }
 
+static uint16_t readings[linesensor_count];
+static LineFollowResults results;
+
 void linefollow_bump(float offset) {
-	PIDState pid;
-	pid_initstate(pid);
-	
-	int lostctr=0;
-	float prevout=0;
+	bool turnright=false;
 
 	while (!sensors_readBump()) {
 		linesensor_read(readings);
 		linefollow_computeResults(readings, results);
-		
-		if (results.squaretotal > 1e-06) {
+		if (results.feature == FEATURE_INTERSECTION) {
 			printf("!!!!!!Intersection!\n");
 			return;
 		}
+		
+		if (results.feature == FEATURE_RIGHTTURN) {
+			printf("!!!!!!Right turn!\n");
+			turnright = true;
+		} else if (results.feature == FEATURE_LEFTTURN) {
+			printf("!!!!!!Left turn!\n");
+			turnright = false;
+		}
 
-		if (results.max < 0.0001) {
-			lostctr++;
-			if (lostctr > 3) {
-				printf("!!!!!!Lost line\n");
-				drive_stop();
-				_delay_ms(200);
-				drive_bk(10);
-				_delay_ms(100);
-				linefollow_wait_line();
+		if (results.feature == FEATURE_NOLINE) {
+			printf("!!!!!!Lost line\n");
+			
+			if (turnright)
+				drive_rturn(10);
+			else
+				drive_lturn(10);
 				
-				drive_rturn_deg(50, 10);
-				
-				
-				if (results.max < 0.0001)
-					drive_lturn_deg(140, 10);
-				
-			}
-		} else {
-			lostctr = 0;
+			linefollow_wait_line();
+			continue;
 		}
 		
-		//float out = -pid_update(pid, pidcoefs, offset, results.steer, .01); 
-		float out = results.steer - offset;
-		prevout = out;
+		float steer = results.steer - offset;
 		
-		//printf("out: %f\nmax: %f\n", (double)out, (double)results.max);
-		if (out > 1)
-			out = 1;
-		else if (out < -1)
-			out = -1;
+		if (steer > 1)
+			steer = 1;
+		else if (steer < -1)
+			steer = -1;
 		
-		
-		drive_steer(out, 40);
+		drive_steer(steer, 40);
 		
 		_delay_ms(25);
 	}
@@ -100,7 +91,7 @@ void linefollow_wait_line() {
 		linesensor_read(readings);
 		linefollow_computeResults(readings, results);
 		
-		if (results.max > 0.00005)
+		if (results.feature != FEATURE_NOLINE)
 			break;
 			
 		_delay_ms(20);

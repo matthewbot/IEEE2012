@@ -68,6 +68,26 @@ void controlpanel_drive() {
 				drive_rturn(speed);
 				break;
 				
+			case 'u':
+				motor_setpwm(MOTOR_LEFT, motor_maxpwm/2);
+				break;
+			case 'j':
+				motor_setpwm(MOTOR_LEFT, 0);
+				break;
+			case 'n':
+				motor_setpwm(MOTOR_LEFT, -motor_maxpwm/2);
+				break;
+				
+			case 'i':
+				motor_setpwm(MOTOR_RIGHT, motor_maxpwm/2);
+				break;
+			case 'k':
+				motor_setpwm(MOTOR_RIGHT, 0);
+				break;
+			case 'm':
+				motor_setpwm(MOTOR_RIGHT, -motor_maxpwm/2);
+				break;
+				
 			case 'W':
 				drive_fd_dist(16, speed);
 				break;
@@ -152,20 +172,24 @@ void controlpanel_sensor() {
 				linesensor_read(linebuf);
 				linefollow_computeResults(linebuf, results);
 				
-				printf("raw: ");
-				for (int i=0; i<linesensor_count; i++)
-					printf("%f ", (double)results.raw_light[i]);
-				printf("\nraw min: %f\n", (double)results.raw_min);
-				
 				printf("light: ");
 				for (int i=0; i<linesensor_count; i++)
 					printf("%f ", (double)results.light[i]);
 				printf("\n");
+				printf("max: %f\n", (double)results.light_max);
 				
 				printf("squaresum: %e\n", (double)results.squaresum);
 				printf("squaretotal: %e\n", (double)results.squaretotal);
-				printf("max: %f\n", (double)results.max);
 				printf("steer: %f\n", (double)results.steer);
+				
+				static const char *featurestrs[] = {
+					"NONE",
+					"INTERSECTION",
+					"LEFTTURN",
+					"RIGHTTURN",
+					"NOLINE"
+				};
+				printf("feature: %s\n", featurestrs[results.feature]);
 				break;
 			}
 			

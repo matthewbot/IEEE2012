@@ -6,4 +6,7 @@
 void debug_init();
 void debug_setLED(bool on);
 
+void debug_resetTimer();
+uint16_t debug_getTimer();
+
 #endif

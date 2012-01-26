@@ -6,14 +6,22 @@
 
 void linefollow_init();
 
+enum LineFollowFeature {
+	FEATURE_NONE,
+	FEATURE_INTERSECTION,
+	FEATURE_RIGHTTURN,
+	FEATURE_LEFTTURN,
+	FEATURE_NOLINE
+};
+
 struct LineFollowResults {
-	float raw_light[linesensor_count];
-	float raw_min;
 	float light[linesensor_count];
+	float light_max;
 	float squaresum;
 	float squaretotal;
-	float max;
 	float steer; // range is [-1, +1]
+	
+	LineFollowFeature feature;
 };
 
 void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results);

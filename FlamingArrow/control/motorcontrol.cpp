@@ -19,7 +19,9 @@ static TC1_t &pidtim = TCF1;
 #define TIMOVFVEC TCF1_OVF_vect
 
 static const float update_hz = 50;
-static const PIDCoefs pidcoefs = { 1, 1, .003*0, .01 };
+static const PIDCoefs pidcoefs = { 1, 1, .003*0, 0 };
+//static const PIDCoefs pidcoefs = { 1, 0, 0, .01 };
+
 
 volatile static bool enabled;
 volatile static bool debug;
@@ -51,11 +53,6 @@ float motorcontrol_getrps(int motnum) {
 
 void motorcontrol_setrps(int motnum, float rps) {	// Desired vel in Centimeters/Second
 	MotorInfo &mot = motinfo[motnum];
-
-//	if (sign(mot.rps_desired) != sign(rps)) { // if the sign of the rps changed
-//		pid_initstate(mot.pid); // reset the PID state
-//	}
-
 	mot.rps_desired = rps; // update desired rps
 }
 
@@ -85,7 +82,7 @@ ISR(TIMOVFVEC) {
 		mot.prev_enc = enc; // save the encoder position
 
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz); // update the PID loop
-		output += sign(mot.rps_desired)*(fabs(mot.rps_desired)*mot.m + mot.b)/1024; // compute feedforward term
+		//output += sign(mot.rps_desired)*(fabs(mot.rps_desired)*mot.m + mot.b)/1024; // compute feedforward term
 
 		if (output > 1) // enforce saturation on the output
 			output = 1;
