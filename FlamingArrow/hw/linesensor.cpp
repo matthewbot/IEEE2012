@@ -85,6 +85,7 @@ ISR(TIMOVFVEC) {
 	prevmask = sigpins_mask;
 
 	sigport.DIRSET = sigpins_mask; // begin charging by setting pins as outputs
+	readingctr++;
 }
 
 ISR(TIMCCAVEC) {
@@ -92,6 +93,7 @@ ISR(TIMCCAVEC) {
 }
 
 ISR(SIGINT0VEC) {
+	debug_setLED(true);
 	uint16_t timval = tim.CNT;
 	sigport.INTFLAGS = PORT_INT0IF_bm; // clear interrupt flag
 

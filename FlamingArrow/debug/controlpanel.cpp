@@ -14,6 +14,7 @@
 #include "hw/sensors.h"
 
 #include "debug/controlpanel.h"
+#include "debug/debug.h"
 
 void controlpanel_init() {
 	printf("Starting up\n");
@@ -170,7 +171,9 @@ void controlpanel_sensor() {
 				LineFollowResults results;
 				
 				linesensor_read(linebuf);
+				debug_resetTimer();
 				linefollow_computeResults(linebuf, results);
+				uint16_t computeResults_time = debug_getTimer();
 				
 				printf("light: ");
 				for (int i=0; i<linesensor_count; i++)
@@ -190,6 +193,7 @@ void controlpanel_sensor() {
 					"NOLINE"
 				};
 				printf("feature: %s\n", featurestrs[results.feature]);
+				printf("Compute Results Time: %u\n", computeResults_time);
 				break;
 			}
 			

@@ -1,0 +1,15 @@
+need front sensor for boxes
+
+go fwd until range finder descision point
+	ping sensor
+	execute 45 * turn left/right
+	catch corner of line
+line follow until farther corner is detected
+ping new box sensor
+if same side, go forward and catch new corner
+if other side, turn 45, dead recon until corner
+go fwd till final corner
+if right corner
+	go fwd till line
+if left corner
+	pivot and drive to catch line

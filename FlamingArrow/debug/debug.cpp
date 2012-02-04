@@ -82,7 +82,7 @@ void debug_init() {
 	uart_xbee.BAUDCTRLA = bsel_xbee & 0xFF;
 	uart_xbee.BAUDCTRLB = (bscale_xbee << USART_BSCALE_gp) | (bsel_xbee >> 8);
 	
-	tim.CTRLA = TC_CLKSEL_DIV64_gc; // 32Mhz / 32 = 1 Mhz timer
+	tim.CTRLA = TC_CLKSEL_DIV1024_gc; // 32Mhz / 32 = 1 Mhz timer
 	tim.PER = 0xFFFF; // 1Mhz / 65536
 	
 	fdevopen(myput, myget);
@@ -100,7 +100,7 @@ void debug_resetTimer() {
 }
 
 uint16_t debug_getTimer() {
-	return tim.CNT / 1000;
+	return tim.CNT;
 }
 
 static void receive(uint8_t ch) {
