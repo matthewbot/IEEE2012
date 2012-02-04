@@ -12,10 +12,8 @@ static const float wheel_circumference = 16.3; // Centimeters (may need to re-ca
 static const float wheelbase_radius = 11; // distance between wheels (needs cal)
 
 void drive(float left, float right) {
-	float l, r;
-	motorcontrol_setrps(MOTOR_LEFT, l = left / wheel_circumference);
-	motorcontrol_setrps(MOTOR_RIGHT, r = right / wheel_circumference);
-	//printf("rps: %f %f\n", (double)l, (double)r);
+	motorcontrol_setrps(MOTOR_LEFT, left / wheel_circumference);
+	motorcontrol_setrps(MOTOR_RIGHT, right / wheel_circumference);
 	motorcontrol_setEnabled(true);
 }
 
@@ -76,7 +74,6 @@ void drive_rturn_deg(float deg, float vel) {
 void drive_steer(float steer, float vel) {
 	float s = 1-fabsf(steer);
 	vel *= .7*s*s*s + .3;
-	//printf("vel: %f\n", (double)vel);
 	
 	float lvel, rvel;
 	if (steer > 0) {

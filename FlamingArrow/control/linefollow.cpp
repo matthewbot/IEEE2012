@@ -39,10 +39,21 @@ void linefollow_computeResults(const uint16_t *readings, LineFollowResults &resu
 	}
 }
 
+void linefollow_drive(LineFollowResults &results, float offset) {
+	float steer = results.steer - offset;
+	
+	if (steer > 1)
+		steer = 1;
+	else if (steer < -1)
+		steer = -1;
+	
+	drive_steer(steer, 40);
+}
+
 static uint16_t readings[linesensor_count];
 static LineFollowResults results;
 
-void linefollow_bump(float offset) {
+void linefollow_intersection(float offset) {
 	bool turnright=false;
 
 	while (!sensors_readBump()) {
@@ -73,14 +84,7 @@ void linefollow_bump(float offset) {
 			continue;
 		}
 		
-		float steer = results.steer - offset;
-		
-		if (steer > 1)
-			steer = 1;
-		else if (steer < -1)
-			steer = -1;
-		
-		drive_steer(steer, 40);
+		linefollow_drive(results, offset);
 		
 		_delay_ms(25);
 	}

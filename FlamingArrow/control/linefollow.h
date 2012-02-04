@@ -26,7 +26,8 @@ struct LineFollowResults {
 
 void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results);
 
-void linefollow_bump(float offset=0);
+void linefollow_intersection(float offset=0);
+void linefollow_drive(LineFollowResults &results, float offset);
 
 void linefollow_wait_line();
 

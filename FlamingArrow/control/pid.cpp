@@ -14,9 +14,13 @@ float pid_update(PIDState &s, const PIDCoefs &c, float desired, float measured, 
 	if(computed_d)
 		*computed_d = d;
 	float out = c.p * error + c.i * s.error_sum + c.d * d;
-
+	
 	s.error_sum += error*dt; // integrate the error
-	s.error_sum *= exp(-dt * c.i_decay); // we give the integrator a decay factor to help with wind-up at the expense of steady-state error
+	if (s.error_sum > c.maxi)
+		s.error_sum = c.maxi;
+	else if (s.error_sum < -c.maxi)
+		s.error_sum = -c.maxi;
+		
 	s.error_last = error; // save this sample to compute the next derivative
 	s.d_active = true; // D term is now active
 

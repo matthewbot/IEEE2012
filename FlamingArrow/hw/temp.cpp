@@ -1,71 +1,55 @@
+#include "hw/twi.h"
+#include "hw/temp.h"
+
 #include <avr/interrupt.h>
 #include <avr/io.h>
-
-#include "hw/twi.h"
-
-#include "hw/temp.h"
+#include <stdio.h>
+#include <util/delay.h>
 
 #define TEMP_AMB_REG 0x06
 #define TEMP_OBJ_REG 0x07
 #define TWI_INT_VEC TWIC_TWIM_vect
 
-const uint8_t temp_addr = 0x5A;
+static const uint8_t temp_addr = 0x5A;
 
-volatile static int count = 0;
-volatile static bool got = false;
-
-uint16_t temp_getraw(Temp_type temp_type) {
-
-	uint16_t current_temp = 0;
-
-	twi_start_addr(temp_addr, WRITE);
-	while(!twi_ack()) {}; // Wait for acknowledge
-
-	switch(temp_type) {
-		case AMB:
-			twi_write(TEMP_AMB_REG);
-			break;
-		case OBJ:
-			twi_write(TEMP_OBJ_REG);
-			break;
-	}
-	while(!twi_ack()) {}; // Wait for acknowledge
-
-	twi_repeated_start();
-
-	twi_start_addr(temp_addr, READ);
-	while(!twi_ack()) {}; // Wait for acknowledge
-
-	while(!twi_intflag()) {}; // Wait to get a temperature reading
-	current_temp = twi_get() << 8;
-	twi_clear_intflags();
-
-	twi_send_ack();
-	current_temp |= twi_get();
-
-	twi_send_ack_stop();
-
-	return current_temp;
+static void debug(const char *s) {
+	printf("%s. STATUS %x\n", s, TWIE.MASTER.STATUS);
 }
 
-float temp_get(Temp_type temp_type) {
-	uint16_t sum_amb = 0, sum_obj = 0;
-
-	for (int i=0; i<10; i++) {
-		sum_amb += temp_getraw(AMB)*0.02 - 273.15;
-		sum_obj += temp_getraw(OBJ)*0.02 - 273.15;
-	}
-
-	switch(temp_type) {
-		case AMB:
-			return sum_amb/10.0;
-			break;
-		case OBJ:
-			return sum_obj/10.0;
-			break;
-	}
+bool temp_getROM16(uint8_t reg, uint16_t &val) {
+	return temp_get16(reg | 0x20, val);
 }
 
-float temp_getdifference() {
-	return (temp_get(OBJ) - temp_get(AMB));
+bool temp_get16(uint8_t reg, uint16_t &val) {
+	printf("Baud %u\n", (unsigned int)TWIE.MASTER.BAUD);
+	
+	//debug("Sending start");
+	if (!twi_start(temp_addr, DIR_WRITE)) {
+		debug("Start fail");
+		return false;
+	}
+	
+	//debug("Writing register");
+	twi_write(reg);
+	
+	TWIE.MASTER.CTRLC = TWI_MASTER_CMD_REPSTART_gc;
+	
+	//debug("Repeated start");
+	if (!twi_start(temp_addr, DIR_READ)) {
+		debug("Repeat start fail");
+		return false;
+	}
+	
+	//debug("Reading byte 0");
+	val = twi_read() << 8;
+	//debug("Sending ack");
+	twi_ack();
+	//debug("Reading byte 1");
+	val |= twi_read();
+	//debug("Sending stop");
+	twi_stop();
+	
+	printf("Done!");
+	return true;
 }
+

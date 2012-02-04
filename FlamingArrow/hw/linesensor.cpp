@@ -29,7 +29,7 @@ static TC1_t &tim = TCD1;
 static volatile uint8_t prevmask;
 static volatile uint8_t readingctr;
 static volatile uint16_t readings[8];
-static volatile uint16_t readingsbuf[8][8];
+static volatile uint16_t readingsbuf[8];
 
 // utility functions
 
@@ -61,23 +61,10 @@ void linesensor_setLEDs(bool enabled) {
 }
 
 void linesensor_read(uint16_t *buf) {
-	int pos = readingctr & 0x7;
-	for (int i=0; i<8; i++) {
-		buf[i] = readingsbuf[7-i][pos];
-	}
-}
-
-void linesensor_read_min(uint16_t *buf) {
 	linesensor_wait();
-
-	for (int i=0; i<8; i++) { // copy minimum of the buffered readings
-		uint16_t minval = linesensor_maxval;
-		for (int pos=0; pos<4; pos++) {
-			uint16_t val = readingsbuf[7-i][pos];
-			if (val < minval)
-				minval = val;
-		}
-		buf[i] = minval;
+	
+	for (int i=0; i<8; i++) {
+		buf[i] = readingsbuf[7-i];
 	}
 }
 
@@ -89,12 +76,11 @@ static void linesensor_wait() {
 #pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
 
 ISR(TIMOVFVEC) {
-	int pos = readingctr++ & 3;
 	for (int i=0; i<8; i++) { // for each pin
 		if (prevmask & (uint8_t)_BV(i)) // if it never got a reading
-			readingsbuf[i][pos] = linesensor_maxval; // give it maxval
+			readingsbuf[i] = linesensor_maxval; // give it maxval
 		else
-			readingsbuf[i][pos] = readings[i]; // otherwise give it a reading
+			readingsbuf[i] = readings[i]; // otherwise give it a reading
 	}
 	prevmask = sigpins_mask;
 

@@ -193,6 +193,15 @@ void controlpanel_sensor() {
 				break;
 			}
 			
+			case 't': {
+				uint16_t reg;
+				if (temp_get16(0x07, reg))
+					printf("temperature reg: %u\n", reg);
+				else
+					printf("failed to get register\n");
+				break;
+			}
+			
 			case 'q':
 				return;
 		}
@@ -205,8 +214,8 @@ void controlpanel_algorithm() {
 		char ch = getchar();
 		printf("%c\n", ch);
 		switch (ch) {
-			case 'b':
-				linefollow_bump();
+			case 'i':
+				linefollow_intersection();
 				drive_stop();
 				break;
 				

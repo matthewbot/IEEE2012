@@ -6,19 +6,16 @@
 #include <avr/io.h>
 
 enum Direction {
-	WRITE,
-	READ
+	DIR_WRITE,
+	DIR_READ
 };
 
 void twi_init();
-void twi_start_addr(register8_t, Direction);
-bool twi_ack();
-void twi_repeated_start();
-uint8_t twi_get();
-void twi_write(uint8_t);
-void twi_send_ack();
-void twi_send_ack_stop();
-void twi_clear_intflags();
-bool twi_intflag();
+bool twi_start(uint8_t addr, Direction dir);
+void twi_stop();
+
+uint8_t twi_read();
+void twi_ack();
+void twi_write(uint8_t data);
 
 #endif /* TWI_H_ */

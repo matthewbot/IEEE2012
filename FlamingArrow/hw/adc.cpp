@@ -9,7 +9,7 @@ void adc_init() {
 	
 	ADCB.CTRLA = ADC_ENABLE_bm;
 	ADCB.REFCTRL = ADC_REFSEL_VCC_gc | ADC_BANDGAP_bm | ADC_TEMPREF_bm;
-	ADCB.PRESCALER = ADC_PRESCALER_DIV16_gc;
+	ADCB.PRESCALER = ADC_PRESCALER_DIV32_gc;
 }
 
 uint16_t adc_sample(uint8_t pin) {
@@ -26,4 +26,8 @@ uint16_t adc_sample(uint8_t pin) {
 	while (!(adc->CH0.INTFLAGS & ADC_CH_CHIF_bm)) { } // wait for it to complete
 	adc->CH0.INTFLAGS = ADC_CH_CHIF_bm; // clear completion flag
 	return adc->CH0.RES;
+}
+
+float adc_sample_float(uint8_t pin) {
+	return adc_sample(pin) / 4096.0f;
 }

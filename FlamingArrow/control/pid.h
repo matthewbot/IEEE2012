@@ -5,7 +5,7 @@
 
 struct PIDCoefs {
 	float p, i, d;
-	float i_decay;
+	float maxi;
 };
 
 struct PIDState {

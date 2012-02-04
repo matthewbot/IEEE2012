@@ -11,6 +11,7 @@
 
 #include "hw/enc.h"
 #include "hw/motor.h"
+#include "debug/debug.h"
 #include "pid.h"
 #include "util.h"
 #include "control/motorcontrol.h"
@@ -21,7 +22,6 @@ static TC1_t &pidtim = TCF1;
 static const float update_hz = 50;
 static const PIDCoefs pidcoefs = { 1, 1, .003*0, 0 };
 //static const PIDCoefs pidcoefs = { 1, 0, 0, .01 };
-
 
 volatile static bool enabled;
 volatile static bool debug;
@@ -74,6 +74,7 @@ ISR(TIMOVFVEC) {
 		return;
 
 	for (int motnum=0; motnum<motor_count; motnum++) { // for each motor
+		debug_resetTimer();
 		MotorInfo &mot = motinfo[motnum]; // get its motor information
 
 		uint16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
@@ -90,6 +91,9 @@ ISR(TIMOVFVEC) {
 			output = -1;
 
 		motor_setpwm(motnum, (int16_t)(output*motor_maxpwm)); // convert output to pwm, set it to the motor
+		
+		uint16_t time = debug_getTimer();
+		printf("%u %f %f %f\n", time, (double)output, (double)mot.rps_desired, (double)mot.rps_measured);
 	}
 }
 

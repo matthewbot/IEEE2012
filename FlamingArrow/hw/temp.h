@@ -3,13 +3,9 @@
 
 #include <stdint.h>
 
-enum Temp_type {
-	AMB,
-	OBJ
-};
+void temp_test();
 
-uint16_t temp_getraw(Temp_type);
-float temp_get(Temp_type);
-float temp_getdifference();
+bool temp_getROM16(uint8_t addr, uint16_t &val);
+bool temp_get16(uint8_t addr, uint16_t &val);
 
 #endif /* TEMP_H_ */
