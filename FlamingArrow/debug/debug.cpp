@@ -21,6 +21,7 @@ static const int rxpin_usb = 2;
 static const int bsel_usb = 2158; // makes 115200 baud
 static const int bscale_usb = 0xA;
 
+// xbee uart
 static PORT_t &uartport_xbee = PORTE;
 #define RXVEC_XBEE USARTE1_RXC_vect
 static USART_t &uart_xbee = USARTE1;
@@ -28,6 +29,7 @@ static const int bsel_xbee = 3333;
 static const int bscale_xbee = 0xC;
 static const int txpin_xbee = 7;
 static const int rxpin_xbee = 6;
+static bool xbee_enabled = false;
 
 // debug timer
 static TC1_t &tim = TCC1;
@@ -40,8 +42,12 @@ static int myput(char ch, FILE* file) {
 		myput('\r', file);
 	while (!(uart_usb.STATUS & USART_DREIF_bm)) { }
 	uart_usb.DATA = ch;
-	while (!(uart_xbee.STATUS & USART_DREIF_bm)) { }
-	uart_xbee.DATA = ch;
+	
+	if (xbee_enabled) {
+		while (!(uart_xbee.STATUS & USART_DREIF_bm)) { }
+		uart_xbee.DATA = ch;
+	}
+	
 	return 0;
 }
 
@@ -103,6 +109,10 @@ uint16_t debug_getTimer() {
 	return tim.CNT;
 }
 
+void debug_setXBeeEnabled(bool enabled) {
+	xbee_enabled = enabled;
+}
+
 static void receive(uint8_t ch) {
 	if (recvbuf_pos >= sizeof(recvbuf))
 		return;
@@ -115,6 +125,6 @@ ISR(RXVEC_USB) {
 }
 
 ISR(RXVEC_XBEE) {
-	debug_setLED(true);
+	debug_setXBeeEnabled(true);
 	receive(uart_xbee.DATA);
 }

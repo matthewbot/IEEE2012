@@ -41,10 +41,10 @@ void motorcontrol_init() {
 	pidtim.CTRLA = TC_CLKSEL_DIV64_gc; // timer runs at 1Mhz
 	pidtim.INTCTRLA = TC_OVFINTLVL_MED_gc; // enable medium priority overflow interrupt
 	pidtim.PER = 500000 / update_hz; // period computed, so overflow freq is update_hz
-	motinfo[0].m = 78.1250;
-	motinfo[0].b = 577.125;
-	motinfo[1].m = 78.1250;
-	motinfo[1].b = 577.125;
+	motinfo[0].m = 51.307;
+	motinfo[0].b = 473.6371;
+	motinfo[1].m = 48.755;
+	motinfo[1].b = 476.1585;
 }
 
 float motorcontrol_getrps(int motnum) {
@@ -74,7 +74,7 @@ ISR(TIMOVFVEC) {
 		return;
 
 	for (int motnum=0; motnum<motor_count; motnum++) { // for each motor
-		debug_resetTimer();
+		//debug_resetTimer();
 		MotorInfo &mot = motinfo[motnum]; // get its motor information
 
 		uint16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
@@ -83,7 +83,7 @@ ISR(TIMOVFVEC) {
 		mot.prev_enc = enc; // save the encoder position
 
 		float output = pid_update(mot.pid, pidcoefs, mot.rps_desired, mot.rps_measured, 1/update_hz); // update the PID loop
-		//output += sign(mot.rps_desired)*(fabs(mot.rps_desired)*mot.m + mot.b)/1024; // compute feedforward term
+		output += sign(mot.rps_desired)*(fabs(mot.rps_desired)*mot.m + mot.b)/1024; // compute feedforward term
 
 		if (output > 1) // enforce saturation on the output
 			output = 1;
@@ -91,9 +91,6 @@ ISR(TIMOVFVEC) {
 			output = -1;
 
 		motor_setpwm(motnum, (int16_t)(output*motor_maxpwm)); // convert output to pwm, set it to the motor
-		
-		uint16_t time = debug_getTimer();
-		printf("%u %f %f %f\n", time, (double)output, (double)mot.rps_desired, (double)mot.rps_measured);
 	}
 }
 

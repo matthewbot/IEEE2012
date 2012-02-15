@@ -11,7 +11,7 @@
 
 void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results) {
 	for (int i=0; i<8; i++)
-		results.light[i] = 1./(1. + readings[i]);
+		results.light[i] = 1.0f/(1 + readings[i]);
 
 	results.light_max = 0;
 	for (int i=0; i<8; i++) {
@@ -22,8 +22,9 @@ void linefollow_computeResults(const uint16_t *readings, LineFollowResults &resu
 	results.squaresum = results.squaretotal = 0;
 	for (int i=0; i<8; i++) {
 		float l = results.light[i];
-		results.squaresum += l*l*i;
-		results.squaretotal += l*l;
+		float ll = l*l;
+		results.squaresum += ll*i;
+		results.squaretotal += ll;
 	}
 
 	results.steer = 2*(results.squaresum/results.squaretotal/7 - .5); 
@@ -76,9 +77,9 @@ void linefollow_intersection(float offset) {
 			printf("!!!!!!Lost line\n");
 			
 			if (turnright)
-				drive_rturn(10);
+				drive_rturn(30);
 			else
-				drive_lturn(10);
+				drive_lturn(30);
 				
 			linefollow_wait_line();
 			continue;

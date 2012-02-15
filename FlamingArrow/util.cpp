@@ -8,6 +8,6 @@ void msleep(unsigned long ms) {
 		ms -= 10;
 	}
 	
-	while (ms-- >= 0)
+	while (ms-- > 0)
 		_delay_ms(1);
 }

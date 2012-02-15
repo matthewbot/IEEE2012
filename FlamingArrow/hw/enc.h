@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-static const float enc_per_rotation = 2500; // accurate
+static const float enc_per_rotation = 1920;
 
 void enc_init();
 uint16_t enc_get(uint8_t num);

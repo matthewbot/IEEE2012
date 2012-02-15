@@ -3,6 +3,7 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
+#include <string.h>
 
 #include "control/linefollow.h"
 #include "hw/motor.h"
@@ -12,7 +13,9 @@
 #include "control/motorcontrol.h"
 #include "control/drive.h"
 #include "hw/sensors.h"
+#include "util.h"
 
+#include "debug/debug.h"
 #include "debug/controlpanel.h"
 #include "debug/debug.h"
 
@@ -35,9 +38,16 @@ void controlpanel() {
 			case 'a':
 				controlpanel_algorithm();
 				break;
+			case 't':
+				controlpanel_tests();
+				break;
 			case 'q':
 				printf("Quitting...\n");
 				return;
+			case 'x':
+				printf("Disabling XBee\n");
+				debug_setXBeeEnabled(false);
+				break;
 			default:
 				printf("Unknown. Submenus: Motor, Temp, Line sensor. Commands: Quit.\n");
 				break;
@@ -78,6 +88,15 @@ void controlpanel_drive() {
 			case 'n':
 				motor_setpwm(MOTOR_LEFT, -motor_maxpwm/2);
 				break;
+			case 'U':
+				motor_setpwm(MOTOR_LEFT, motor_maxpwm);
+				break;
+			case 'J':
+				motor_setpwm(MOTOR_LEFT, 0);
+				break;
+			case 'N':
+				motor_setpwm(MOTOR_LEFT, -motor_maxpwm);
+				break;
 				
 			case 'i':
 				motor_setpwm(MOTOR_RIGHT, motor_maxpwm/2);
@@ -87,6 +106,15 @@ void controlpanel_drive() {
 				break;
 			case 'm':
 				motor_setpwm(MOTOR_RIGHT, -motor_maxpwm/2);
+				break;
+			case 'I':
+				motor_setpwm(MOTOR_RIGHT, motor_maxpwm);
+				break;
+			case 'K':
+				motor_setpwm(MOTOR_RIGHT, 0);
+				break;
+			case 'M':
+				motor_setpwm(MOTOR_RIGHT, -motor_maxpwm);
 				break;
 				
 			case 'W':
@@ -113,6 +141,11 @@ void controlpanel_drive() {
 				
 			case 'e':
 				printf("L %i R %i\n", enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
+				break;
+			case 'E':
+				printf("Encoders reset\n");
+				enc_reset(MOTOR_LEFT);
+				enc_reset(MOTOR_RIGHT);
 				break;
 			case 'q':
 				return;
@@ -143,16 +176,85 @@ void controlpanel_sensor() {
 				break;
 			
 			case 'c':
-				printf("CapADC: %f\n", (double)sensors_readCapADC());
+				printf("CapADC: %u\n", sensors_readCapADC());
 				break;
 
 			case 'v':
-				printf("VoltageADC: %f\n", (double)sensors_readVoltageADC());
+				printf("VoltageADC: %u\n", sensors_readVoltageADC());
 				break;
 
 			case 's':
-				printf("SignalADC: %f\n", (double)sensors_readSignalADC());
+				printf("SignalADC: %u\n", sensors_readSignalADC());
 				break;
+				
+			case 'S': {
+				uint16_t data[8];
+				memset(data, 0, sizeof(data));
+				for (int i=0; i<1000; i++) {
+					uint16_t val = sensors_readVoltageADC();
+					val <<= 1;
+					
+					data[val >> 9]++;
+				}
+				
+				for (int i=0; i<8; i++) {
+					printf("%u ", data[i]);
+				}
+				printf("\n");
+				
+				int leftpos=0;
+				while (data[leftpos] < 5)
+					leftpos++;
+				
+				printf("Leftpos: %d\n", leftpos);
+					
+				int rightpos=7;
+				while (data[rightpos] < 5)
+					rightpos--;
+					
+				printf("Rightpos: %d\n", rightpos);
+					
+				int val = min(data[leftpos], data[rightpos]);
+				
+				printf("Val: %d\n", val);
+				
+				bool square=true;
+				for (int pos=leftpos+1; pos <= rightpos-1; pos++) {
+					printf("%d %d\n", pos, val - (int)data[pos]);
+					if (val - (int)data[pos] < 50) {
+						square = false;
+						break;
+					}
+				}
+				
+				printf("Square %d\n", square);
+				
+				break;
+			}
+				
+			case 'C': {
+				printf("Charging cap...\n");
+				
+				unsigned int ctr=0;
+				sensors_config(SENSOR_CHARGE);
+				while (sensors_readCapADC() < 1500) { ctr++; }
+				
+				printf("Time to get 1500: %u\n", ctr);
+				
+				_delay_ms(500);
+				printf("Final CapADC: %u\n", sensors_readCapADC());
+				sensors_config(SENSOR_MEASURE);
+				printf("Done\n");
+				break;
+			}
+				
+			case 'D':
+				printf("Discharing cap...\n");
+				sensors_config(SENSOR_DISCHARGE);
+				_delay_ms(1000);
+				sensors_config(SENSOR_MEASURE);
+				printf("Done\n");
+				break;				
 
 			case 'a':
 				for (int i=0; i<8; i++)
@@ -241,4 +343,44 @@ void controlpanel_algorithm() {
 		}
 	}
 }	
-//*/
+
+void controlpanel_tests() {
+	while (true) {
+		printf("Tests > ");
+		char ch = getchar();
+		printf("%c\n", ch);
+		switch (ch) {
+			case 'P':
+				controlpanel_pwmtest();
+				break;
+				
+			case 'q':
+				return;
+		}
+	}
+}
+
+void controlpanel_pwmtest() {
+	for (int16_t pwm = 0; pwm < motor_maxpwm; pwm++)
+		controlpanel_pwmtest_single(pwm);
+		
+	motor_setpwm(MOTOR_LEFT, 0);
+	motor_setpwm(MOTOR_RIGHT, 0);
+	_delay_ms(2000);
+	
+	for (int16_t pwm = 0; pwm > -motor_maxpwm; pwm--)
+		controlpanel_pwmtest_single(pwm);
+		
+	motor_setpwm(MOTOR_LEFT, 0);
+	motor_setpwm(MOTOR_RIGHT, 0);
+}
+
+void controlpanel_pwmtest_single(int16_t pwm) {
+	enc_reset(MOTOR_LEFT);
+	enc_reset(MOTOR_RIGHT);
+	motor_setpwm(MOTOR_LEFT, pwm);
+	motor_setpwm(MOTOR_RIGHT, pwm);
+	_delay_ms(10);
+	printf("%d %d %d\n", pwm, enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
+}
+
