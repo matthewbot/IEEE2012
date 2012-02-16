@@ -2,103 +2,144 @@
 #include "control/motorcontrol.h"
 #include "control/pid.h"
 #include "control/drive.h"
-#include "hw/sensors.h"
-#include "util.h"
-#include <util/delay.h>
-#include <stdio.h>
+#include "debug/debug.h"
+#include "hw/tick.h"
 #include <math.h>
 #include <stdint.h>
 
-void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results) {
-	for (int i=0; i<8; i++)
-		results.light[i] = 1.0f/(1 + readings[i]);
+static PIDGains pidgains = {1, 0, 0};
+static float thresh = 3;
 
-	results.light_max = 0;
-	for (int i=0; i<8; i++) {
-		if (results.light[i] > results.light_max)
-			results.light_max = results.light[i];
-	}
+static volatile bool enabled;
+static volatile float vel;
+static volatile bool debug;
+static volatile float linepos;
+static volatile LineFollowFeature lastfeature;
+static volatile LineFollowTurn lastturn;
+static PIDState pidstate;
 
-	results.squaresum = results.squaretotal = 0;
-	for (int i=0; i<8; i++) {
-		float l = results.light[i];
-		float ll = l*l;
-		results.squaresum += ll*i;
-		results.squaretotal += ll;
-	}
+void linefollow_start(float newvel, bool newdebug, float newlinepos) {
+	pid_initState(pidstate);
+	vel = newvel;
+	debug = newdebug;
+	linepos = newlinepos;
+	lastturn = TURN_NONE;
+	lastfeature = FEATURE_NONE;
+	enabled = true;
+}
 
-	results.steer = 2*(results.squaresum/results.squaretotal/7 - .5); 
+void linefollow_stop() {
+	enabled = false;
+	motorcontrol_setEnabled(false);
+}
+
+bool linefollow_isDone() {
+	return !enabled;
+}
+
+void linefollow_waitDone() {
+	while (enabled) { }
+}
+
+LineFollowFeature linefollow_getLastFeature() {
+	return lastfeature;
+}
+
+void linefollow_setDebug(bool newdebug) {
+	debug = newdebug;
+}
+
+static float pow4(float val) {
+	float pow2 = val*val;
+	return pow2*pow2;
+}
+
+LineFollowResults linefollow_readSensor() {	
+	uint16_t readings[linesensor_count];
+	linesensor_read(readings);
 	
-	if (results.squaretotal > 1e-06) {
+	LineFollowResults results;
+	results.thresh_count = 0;
+	float sum=0;
+	float tot=0;
+	
+	for (int i=0; i<linesensor_count; i++) {
+		float light = 1E16 / pow4(readings[i]); // maps line to ~35, dark to <<0
+		results.light[i] = light;
+		results.thresh[i] = light > thresh;
+		
+		if (results.thresh[i]) {
+			results.thresh_count++;
+		
+			sum += i*light;
+			tot += light;
+		}
+	}
+	
+	if (results.thresh_count)
+		results.center = sum/(tot*(linesensor_count-1)/2.0) - 1;
+	else
+		results.center = 0;
+		
+	if (results.thresh[0]) {
+		results.turn = TURN_LEFT;
+	} else if (results.thresh[linesensor_count-1]) {
+		results.turn = TURN_RIGHT;
+	} else {
+		results.turn = TURN_NONE;
+	}
+
+	if (results.thresh_count > 6) {
 		results.feature = FEATURE_INTERSECTION;
-	} else if (results.squaretotal > 5e-05) {
-		results.feature = results.steer > 0 ? FEATURE_RIGHTTURN : FEATURE_LEFTTURN;			
-	} else if (results.light_max < 0.0001) {
+	} else if (results.thresh_count == 0) { 
 		results.feature = FEATURE_NOLINE;
 	} else {
 		results.feature = FEATURE_NONE;
 	}
-}
-
-void linefollow_drive(LineFollowResults &results, float offset) {
-	float steer = results.steer - offset;
 	
-	if (steer > 1)
-		steer = 1;
-	else if (steer < -1)
-		steer = -1;
-	
-	drive_steer(steer, 40);
+	return results;
 }
 
-static uint16_t readings[linesensor_count];
-static LineFollowResults results;
-
-void linefollow_intersection(float offset) {
-	bool turnright=false;
-
-	while (!sensors_readBump()) {
-		linesensor_read(readings);
-		linefollow_computeResults(readings, results);
-		if (results.feature == FEATURE_INTERSECTION) {
-			printf("!!!!!!Intersection!\n");
-			return;
-		}
-		
-		if (results.feature == FEATURE_RIGHTTURN) {
-			printf("!!!!!!Right turn!\n");
-			turnright = true;
-		} else if (results.feature == FEATURE_LEFTTURN) {
-			printf("!!!!!!Left turn!\n");
-			turnright = false;
-		}
-
-		if (results.feature == FEATURE_NOLINE) {
-			printf("!!!!!!Lost line\n");
-			
-			if (turnright)
-				drive_rturn(30);
-			else
-				drive_lturn(30);
-				
-			linefollow_wait_line();
-			continue;
-		}
-		
-		linefollow_drive(results, offset);
-		
-		_delay_ms(25);
-	}
-}
-
-void linefollow_wait_line() {
+void linefollow_waitLine() {
 	while (true) {
-		linesensor_read(readings);
-		linefollow_computeResults(readings, results);
-		
-		if (results.feature != FEATURE_NOLINE)
+		LineFollowResults results = linefollow_readSensor();
+		if (results.feature != FEATURE_NONE)
 			break;
-			
-		_delay_ms(20);
+		tick_wait();
 	}
+}
+
+void linefollow_setThresh(float newthresh) {
+	thresh = newthresh;
+}
+
+void linefollow_setGains(const PIDGains &newpidgains) {
+	pidgains = newpidgains;
+}
+
+PIDGains linefollow_getGains() {
+	return pidgains;
+}
+
+void linefollow_tick() {
+	if (!enabled)
+		return;
+	
+	LineFollowResults results = linefollow_readSensor();
+	lastturn = results.turn;
+	if (results.feature != FEATURE_NONE) {
+		lastfeature = results.feature;
+		enabled = false;
+		motorcontrol_setEnabled(false);
+		return;
+	}
+	
+	PIDDebug piddebug;
+	float error = linepos - results.center;
+	float out = pid_update(pidstate, pidgains, error, TICK_DT, &piddebug);
+	
+	if (debug)
+		pid_printDebug(out, error, piddebug);
+	
+	drive_steer(out, vel);
 }

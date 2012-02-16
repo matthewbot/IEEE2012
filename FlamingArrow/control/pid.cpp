@@ -1,29 +1,34 @@
+#include "control/pid.h"
+#include "debug/debug.h"
 #include <math.h>
 
-#include "pid.h"
-
-void pid_initstate(PIDState &state) {
-	state.error_sum = 0; // integrator starts at zero
-	state.d_active = false; // the d term starts off inactive since we need two error samples to compute a derivative
+void pid_initState(PIDState &state) {
+	state.sum = 0;
+	state.prev = 0;
 }
 
-float pid_update(PIDState &s, const PIDCoefs &c, float desired, float measured, float dt, float *computed_d) {
-	float error = desired - measured; // compute error
-	// compute output. D term is only included if its active
-	float d = (s.d_active == 0 ? (error - s.error_last)/dt : 0);
-	if(computed_d)
-		*computed_d = d;
-	float out = c.p * error + c.i * s.error_sum + c.d * d;
+float pid_update(PIDState &state, const PIDGains &gains, float error, float dt, PIDDebug *debug) {
+	float p = gains.p*error;
 	
-	s.error_sum += error*dt; // integrate the error
-	if (s.error_sum > c.maxi)
-		s.error_sum = c.maxi;
-	else if (s.error_sum < -c.maxi)
-		s.error_sum = -c.maxi;
-		
-	s.error_last = error; // save this sample to compute the next derivative
-	s.d_active = true; // D term is now active
+	state.sum += error*dt;
+	if (state.sum > gains.maxi)
+		state.sum = gains.maxi;
+	else if (state.sum < -gains.maxi)
+		state.sum = -gains.maxi;
+	float i = gains.i*state.sum;
+	
+	float d = gains.d*(error - state.prev)/dt;
+	state.prev = error;
 
-	return out;
+	if (debug) {
+		debug->p_out = p;
+		debug->i_out = i;
+		debug->d_out = d;
+	}
+
+	return p+i+d;
 }
 
+void pid_printDebug(float out, float error, const PIDDebug &d) {
+	debug_out("E % .3f O % .3f P % .3f I % .3f D % .3f\n", error, out, d.p_out, d.i_out, d.d_out);
+}

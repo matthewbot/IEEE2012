@@ -1,6 +1,5 @@
-#include <avr/io.h>
-
 #include "hw/adc.h"
+#include <avr/io.h>
 
 void adc_init() {
 	ADCA.CTRLA = ADC_ENABLE_bm;
@@ -28,6 +27,10 @@ uint16_t adc_sample(uint8_t pin) {
 	return adc->CH0.RES;
 }
 
-float adc_sample_float(uint8_t pin) {
+float adc_sampleFloat(uint8_t pin) {
 	return adc_sample(pin) / 4096.0f;
+}
+
+float adc_getBattery() {
+	return adc_sample(ADC_BATTERY) * 0.008f;
 }

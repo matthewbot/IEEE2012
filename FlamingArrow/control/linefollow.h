@@ -1,34 +1,47 @@
 #ifndef LINEFOLLOW_H_
 #define LINEFOLLOW_H_
 
-#include <stdint.h>
+#include "control/pid.h"
 #include "hw/linesensor.h"
-
-void linefollow_init();
+#include <stdint.h>
 
 enum LineFollowFeature {
 	FEATURE_NONE,
 	FEATURE_INTERSECTION,
-	FEATURE_RIGHTTURN,
-	FEATURE_LEFTTURN,
 	FEATURE_NOLINE
+};
+
+enum LineFollowTurn {
+	TURN_NONE,
+	TURN_LEFT,
+	TURN_RIGHT
 };
 
 struct LineFollowResults {
 	float light[linesensor_count];
-	float light_max;
-	float squaresum;
-	float squaretotal;
-	float steer; // range is [-1, +1]
-	
+	bool thresh[linesensor_count];
+	uint8_t thresh_count;
+	float center;
+	LineFollowTurn turn;
 	LineFollowFeature feature;
 };
 
-void linefollow_computeResults(const uint16_t *readings, LineFollowResults &results);
+void linefollow_start(float vel, bool debug=false, float linepos=0);
+void linefollow_stop();
+bool linefollow_isDone();
+void linefollow_waitDone();
 
-void linefollow_intersection(float offset=0);
-void linefollow_drive(LineFollowResults &results, float offset);
+LineFollowFeature linefollow_getLastFeature();
+LineFollowTurn linefollow_getLastTurn();
 
-void linefollow_wait_line();
+void linefollow_setThresh(float thresh);
+void linefollow_setGains(const PIDGains &gains);
+PIDGains linefollow_getGains();
+
+LineFollowResults linefollow_readSensor();
+void linefollow_waitLine();
+
+void linefollow_tick();
+
 
 #endif /* LINEFOLLOW_H_ */

@@ -1,7 +1,6 @@
-#define __STDC_LIMIT_MACROS
-#include <stdint.h>
-#include <avr/io.h>
 #include "hw/enc.h"
+#include <avr/io.h>
+#include <stdint.h>
 
 static PORT_t &encport = PORTF;
 static const int encpins_mask = 0xF0;

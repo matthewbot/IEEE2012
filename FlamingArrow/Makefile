@@ -101,7 +101,7 @@ CSTANDARD = #-std=gnu99
 
 
 # Place -D or -U options here
-CDEFS = -DF_CPU=$(F_CPU)UL
+CDEFS = -DF_CPU=$(F_CPU)UL -D__STDC_LIMIT_MACROS
 
 
 # Place -I options here
@@ -120,7 +120,7 @@ CFLAGS = -g$(DEBUG)
 CFLAGS += $(CDEFS) $(CINCS)
 CFLAGS += -O$(OPT)
 CFLAGS += -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums
-CFLAGS += -Wall #-Wstrict-prototypes
+CFLAGS += -Wall -Wno-format #-Wstrict-prototypes
 CFLAGS += -Wa,-adhlns=$(<:.cpp=.lst)
 CFLAGS += $(patsubst %,-I%,$(EXTRAINCDIRS))
 CFLAGS += $(CSTANDARD)
@@ -156,9 +156,9 @@ SCANF_LIB_MIN = -Wl,-u,vfscanf -lscanf_min
 SCANF_LIB_FLOAT = -Wl,-u,vfscanf -lscanf_flt
 
 # If this is left blank, then it will use the Standard scanf version.
-SCANF_LIB =
+#SCANF_LIB =
 #SCANF_LIB = $(SCANF_LIB_MIN)
-#SCANF_LIB = $(SCANF_LIB_FLOAT)
+SCANF_LIB = $(SCANF_LIB_FLOAT)
 
 
 MATH_LIB = -lm

@@ -1,42 +1,32 @@
-#include <stdio.h>
-
+#include "debug/controlpanel.h"
+#include "debug/debug.h"
+#include "debug/tests.h"
+#include "control/linefollow.h"
+#include "control/motorcontrol.h"
+#include "control/drive.h"
+#include "hw/motor.h"
+#include "hw/enc.h"
+#include "hw/adc.h"
+#include "util.h"
 #include <avr/io.h>
 #include <util/delay.h>
 #include <math.h>
 #include <string.h>
-
-#include "control/linefollow.h"
-#include "hw/motor.h"
-#include "hw/enc.h"
-#include "hw/temp.h"
-#include "hw/adc.h"
-#include "control/motorcontrol.h"
-#include "control/drive.h"
-#include "hw/sensors.h"
-#include "util.h"
-
-#include "debug/debug.h"
-#include "debug/controlpanel.h"
-#include "debug/debug.h"
+#include <stdarg.h>
+#include <stdio.h>
 
 void controlpanel_init() {
 	printf("Starting up\n");
 }
 
 void controlpanel() {
-	while(true) {
-		printf("Main > ");
-		char ch = getchar();
-		printf("%c\n", ch);
-		switch (ch) {
+	while (true) {
+		switch (controlpanel_promptChar("Main")) {
 			case 'd':
 				controlpanel_drive();
 				break;
 			case 's':
 				controlpanel_sensor();
-				break;
-			case 'a':
-				controlpanel_algorithm();
 				break;
 			case 't':
 				controlpanel_tests();
@@ -44,23 +34,23 @@ void controlpanel() {
 			case 'q':
 				printf("Quitting...\n");
 				return;
-			case 'x':
-				printf("Disabling XBee\n");
-				debug_setXBeeEnabled(false);
-				break;
 			default:
-				printf("Unknown. Submenus: Motor, Temp, Line sensor. Commands: Quit.\n");
+				printf("Unknown. Commands: drive, sensors, tests\n");
 				break;
 		}
 	}
 }
 
+static void pwm(int mot, int16_t pwm) {
+	motorcontrol_setEnabled(false);
+	motor_setpwm(mot, pwm);
+}
+
 void controlpanel_drive() {
 	float speed=20;
 	while (true) {
-		printf("Drive > ");
-		char ch = getchar();
-		printf("%c\n", ch);
+		char ch=controlpanel_promptChar("Drive");
+		
 		switch (ch) {
 			case ' ':
 				drive_stop();
@@ -80,41 +70,38 @@ void controlpanel_drive() {
 				break;
 				
 			case 'u':
-				motor_setpwm(MOTOR_LEFT, motor_maxpwm/2);
+				pwm(MOTOR_LEFT, motor_maxpwm/2);
 				break;
 			case 'j':
-				motor_setpwm(MOTOR_LEFT, 0);
+			case 'J':
+				pwm(MOTOR_LEFT, 0);
 				break;
 			case 'n':
-				motor_setpwm(MOTOR_LEFT, -motor_maxpwm/2);
+				pwm(MOTOR_LEFT, -motor_maxpwm/2);
 				break;
 			case 'U':
-				motor_setpwm(MOTOR_LEFT, motor_maxpwm);
-				break;
-			case 'J':
-				motor_setpwm(MOTOR_LEFT, 0);
+				pwm(MOTOR_LEFT, motor_maxpwm);
 				break;
 			case 'N':
+				motorcontrol_setEnabled(false);
 				motor_setpwm(MOTOR_LEFT, -motor_maxpwm);
 				break;
 				
 			case 'i':
-				motor_setpwm(MOTOR_RIGHT, motor_maxpwm/2);
+				pwm(MOTOR_RIGHT, motor_maxpwm/2);
 				break;
 			case 'k':
-				motor_setpwm(MOTOR_RIGHT, 0);
+			case 'K':
+				pwm(MOTOR_RIGHT, 0);
 				break;
 			case 'm':
-				motor_setpwm(MOTOR_RIGHT, -motor_maxpwm/2);
+				pwm(MOTOR_RIGHT, -motor_maxpwm/2);
 				break;
 			case 'I':
-				motor_setpwm(MOTOR_RIGHT, motor_maxpwm);
-				break;
-			case 'K':
-				motor_setpwm(MOTOR_RIGHT, 0);
+				pwm(MOTOR_RIGHT, motor_maxpwm);
 				break;
 			case 'M':
-				motor_setpwm(MOTOR_RIGHT, -motor_maxpwm);
+				pwm(MOTOR_RIGHT, -motor_maxpwm);
 				break;
 				
 			case 'W':
@@ -131,12 +118,13 @@ void controlpanel_drive() {
 				break;
 				
 			case '+':
+			case '=':
 				speed += 2;
-				printf("Speed: %f\n", (double)speed);
+				printf("Speed: %f\n", speed);
 				break;
 			case '-':
 				speed -= 2;
-				printf("Speed: %f\n", (double)speed);
+				printf("Speed: %f\n", speed);
 				break;
 				
 			case 'e':
@@ -147,240 +135,197 @@ void controlpanel_drive() {
 				enc_reset(MOTOR_LEFT);
 				enc_reset(MOTOR_RIGHT);
 				break;
-			case 'q':
+				
+			case 'g': {
+				PIDGains newgains;
+				if (controlpanel_promptGains("motorcontrol", motorcontrol_getGains(), newgains)) {
+					motorcontrol_setGains(newgains);
+					printf("Gains set!\n");
+				} else {
+					printf("Canceled.\n");
+				}
+				break;
+			}
+			
+			case 'p':
+				motorcontrol_setDebug(false);
+				printf("Debug disabled\n");
+				break;
+				
+			case 'c':
+				motorcontrol_setEnabled(false);
+				printf("Motor control disabled\n");
+				break;
+				
+			case 'P':
+				motorcontrol_setDebug(true);
+				break;
+				
+			case 'q':	
+				motorcontrol_setEnabled(false);
+				motor_allOff();
 				return;
 
 			default:
-				printf("Unknown. Commands: WASD, Forward, Encoders, Back.\n");
+				motorcontrol_setEnabled(false);
+				motor_allOff();
+				printf("Unknown. Commands: WASD, ujn/ikm, +-, encoders, Encoder clear\n");
 				break;
 		}
 	}
-	
-	motorcontrol_setEnabled(false);
 }
 
-
-//void controlpanel_sensor() { }
-//void controlpanel_algorithm() { }
-
 void controlpanel_sensor() {
-	uint16_t linebuf[linesensor_count];
-	
 	while (true) {
-		printf("Sensor > ");
-		char ch = getchar();
-		printf("%c\n", ch);
-		switch (ch) {
-			case 'b':
-				printf("Bump: %d\n", sensors_readBump());
-				break;
-			
-			case 'c':
-				printf("CapADC: %u\n", sensors_readCapADC());
-				break;
-
-			case 'v':
-				printf("VoltageADC: %u\n", sensors_readVoltageADC());
-				break;
-
-			case 's':
-				printf("SignalADC: %u\n", sensors_readSignalADC());
-				break;
-				
-			case 'S': {
-				uint16_t data[8];
-				memset(data, 0, sizeof(data));
-				for (int i=0; i<1000; i++) {
-					uint16_t val = sensors_readVoltageADC();
-					val <<= 1;
-					
-					data[val >> 9]++;
-				}
-				
-				for (int i=0; i<8; i++) {
-					printf("%u ", data[i]);
-				}
-				printf("\n");
-				
-				int leftpos=0;
-				while (data[leftpos] < 5)
-					leftpos++;
-				
-				printf("Leftpos: %d\n", leftpos);
-					
-				int rightpos=7;
-				while (data[rightpos] < 5)
-					rightpos--;
-					
-				printf("Rightpos: %d\n", rightpos);
-					
-				int val = min(data[leftpos], data[rightpos]);
-				
-				printf("Val: %d\n", val);
-				
-				bool square=true;
-				for (int pos=leftpos+1; pos <= rightpos-1; pos++) {
-					printf("%d %d\n", pos, val - (int)data[pos]);
-					if (val - (int)data[pos] < 50) {
-						square = false;
-						break;
-					}
-				}
-				
-				printf("Square %d\n", square);
-				
-				break;
-			}
-				
-			case 'C': {
-				printf("Charging cap...\n");
-				
-				unsigned int ctr=0;
-				sensors_config(SENSOR_CHARGE);
-				while (sensors_readCapADC() < 1500) { ctr++; }
-				
-				printf("Time to get 1500: %u\n", ctr);
-				
-				_delay_ms(500);
-				printf("Final CapADC: %u\n", sensors_readCapADC());
-				sensors_config(SENSOR_MEASURE);
-				printf("Done\n");
-				break;
-			}
-				
-			case 'D':
-				printf("Discharing cap...\n");
-				sensors_config(SENSOR_DISCHARGE);
-				_delay_ms(1000);
-				sensors_config(SENSOR_MEASURE);
-				printf("Done\n");
-				break;				
-
+		switch (controlpanel_promptChar("Sensor")) {		
 			case 'a':
 				for (int i=0; i<8; i++)
 					printf("%d ", adc_sample(i));
 				printf("\n");
 				break;
 
-			case 'l':
+			case 'l': {
+				uint16_t linebuf[linesensor_count];
 				linesensor_read(linebuf);
 				for (int i=0; i<linesensor_count; i++)
-					printf("%u ", linebuf[i]);
+					printf("%-5u ", linebuf[i]);
 				printf("\n");
 				break;
-
+			}
+			
 			case 'L': {
-				LineFollowResults results;
-				
-				linesensor_read(linebuf);
 				debug_resetTimer();
-				linefollow_computeResults(linebuf, results);
-				uint16_t computeResults_time = debug_getTimer();
+				LineFollowResults results = linefollow_readSensor();
+				uint16_t time = debug_getTimer();
 				
-				printf("light: ");
+				printf("Light:\t");
 				for (int i=0; i<linesensor_count; i++)
-					printf("%f ", (double)results.light[i]);
-				printf("\n");
-				printf("max: %f\n", (double)results.light_max);
+					printf("%2.2f\t", results.light[i]);
+				printf("\n");						
 				
-				printf("squaresum: %e\n", (double)results.squaresum);
-				printf("squaretotal: %e\n", (double)results.squaretotal);
-				printf("steer: %f\n", (double)results.steer);
+				printf("Thresh:\t");
+				for (int i=0; i<linesensor_count; i++)
+					printf("%d\t", results.thresh[i]);
+				printf("\n");
+
+				printf("Center:\t%f\n", results.center);
+								
+				static const char *turnstrs[] = {
+					"NONE",
+					"LEFT",
+					"RIGHT"
+				};
+				
+				printf("Turn:\t%s\n", turnstrs[results.turn]);
 				
 				static const char *featurestrs[] = {
 					"NONE",
 					"INTERSECTION",
-					"LEFTTURN",
-					"RIGHTTURN",
 					"NOLINE"
 				};
-				printf("feature: %s\n", featurestrs[results.feature]);
-				printf("Compute Results Time: %u\n", computeResults_time);
+				printf("Feat:\t%s\n", featurestrs[results.feature]);
+				printf("Time:\t%u uS\n", time);
 				break;
 			}
 			
-			case 't': {
-				uint16_t reg;
-				if (temp_get16(0x07, reg))
-					printf("temperature reg: %u\n", reg);
-				else
-					printf("failed to get register\n");
+			case 'b':
+				printf("Battery voltage: %.2f\n", adc_getBattery());
 				break;
-			}
 			
 			case 'q':
 				return;
+				
+			default:
+				printf("Unknown. Commands: linesensor-raw, Linesensor-full, analog dump, battery\n");
+				break;
 		}
 	}
 }
-
-void controlpanel_algorithm() {
-	while (true) {
-		printf("Algorithm > ");
-		char ch = getchar();
-		printf("%c\n", ch);
-		switch (ch) {
-			case 'i':
-				linefollow_intersection();
-				drive_stop();
-				break;
-				
-			case 's': {
-				char linebuf[10];
-				int steer;
-				printf("Steer (%%): ");
-				gets(linebuf);
-				sscanf(linebuf, "%d", &steer);
-				printf("%d\n", steer);
-				drive_steer(steer/100.0f, 20);
-				getchar();
-				drive_stop();
-				break;
-			}
-			
-			case 'q':
-				return;
-		}
-	}
-}	
 
 void controlpanel_tests() {
+	bool linedebug=false;
+	
 	while (true) {
-		printf("Tests > ");
-		char ch = getchar();
-		printf("%c\n", ch);
-		switch (ch) {
-			case 'P':
-				controlpanel_pwmtest();
+		switch (controlpanel_promptChar("Tests")) {
+			case 'f': {
+				float vel;
+				if (!controlpanel_prompt("Velocity", "%f", &vel))
+					printf("Canceled.\n");
+					
+				printf("Push any key to stop. ");
+				linefollow_start(vel, linedebug);
+				getchar();
+				linefollow_stop();
+				putchar('\n');
+				
+				static const char *featurestrs[] = {
+					"NONE",
+					"INTERSECTION",
+					"NOLINE"
+				};
+				
+				printf("Last feature: %s\n", featurestrs[linefollow_getLastFeature()]);
+				break;
+			}
+				
+			case 'g': {
+				PIDGains newgains;
+				if (controlpanel_promptGains("linefollow", linefollow_getGains(), newgains)) {
+					linefollow_setGains(newgains);
+					printf("Gains set!\n");
+				} else {
+					printf("Canceled.");
+				}
+				break;
+			}
+			
+			case 'p':
+				tests_pwm();
+				break;
+				
+			case 'd':
+				linedebug = !linedebug;
+				printf("Line follow debugging %s\n", linedebug ? "enabled" : "disabled");
 				break;
 				
 			case 'q':
 				return;
+
+			default:
+				printf("Unknown. Commands: follow line, gain set, pwm test\n");
+				break;
 		}
 	}
 }
 
-void controlpanel_pwmtest() {
-	for (int16_t pwm = 0; pwm < motor_maxpwm; pwm++)
-		controlpanel_pwmtest_single(pwm);
-		
-	motor_setpwm(MOTOR_LEFT, 0);
-	motor_setpwm(MOTOR_RIGHT, 0);
-	_delay_ms(2000);
+int controlpanel_prompt(const char *prompt, const char *fmt, ...) {
+	va_list argp;
+	va_start(argp, fmt);
 	
-	for (int16_t pwm = 0; pwm > -motor_maxpwm; pwm--)
-		controlpanel_pwmtest_single(pwm);
-		
-	motor_setpwm(MOTOR_LEFT, 0);
-	motor_setpwm(MOTOR_RIGHT, 0);
+	printf("%s> ", prompt);
+	
+	char buf[32];
+	fgets(buf, sizeof(buf), stdin);
+	return vsscanf(buf, fmt, argp);
 }
 
-void controlpanel_pwmtest_single(int16_t pwm) {
-	enc_reset(MOTOR_LEFT);
-	enc_reset(MOTOR_RIGHT);
-	motor_setpwm(MOTOR_LEFT, pwm);
-	motor_setpwm(MOTOR_RIGHT, pwm);
-	_delay_ms(10);
-	printf("%d %d %d\n", pwm, enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
+char controlpanel_promptChar(const char *prompt) {
+	printf("%s> ", prompt);
+	
+	char ch = getchar();
+	putchar('\n');
+	return ch;
 }
 
+bool controlpanel_promptGains(const char *name, const PIDGains &curgains, PIDGains &gains) {
+	printf("Setting gains for %s\n", name);
+	printf("Current gains: P %.4f I %.4f D %.4f\n", curgains.p, curgains.i, curgains.d);
+	
+	if (!controlpanel_prompt("P", "%f", &gains.p))
+		return false;
+	if (!controlpanel_prompt("I", "%f", &gains.i))
+		return false;
+	if (!controlpanel_prompt("D", "%f", &gains.d))
+		return false;
+	return true;
+}

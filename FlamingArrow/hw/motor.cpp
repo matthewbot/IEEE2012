@@ -1,8 +1,6 @@
-#include <avr/io.h>
-
-#include <stdio.h>
-
 #include "hw/motor.h"
+#include <avr/io.h>
+#include <stdio.h>
 
 static PORT_t &ctrlport = PORTK;
 static const int ctrlpins_mask = 0xFF;
@@ -36,6 +34,12 @@ void motor_setpwm(uint8_t mot, int16_t pwm) {
 		ctrlport.OUTCLR = in1pin_mask;
 		ctrlport.OUTSET = in2pin_mask;
 		ccreg = -pwm;
+	}
+}
+
+void motor_allOff() {
+	for (int i=0; i<motor_count; i++) {
+		(&pwmtim.CCABUF)[i] = 0;
 	}
 }
 

@@ -1,97 +1,80 @@
-#include <stdio.h>
-#include <string.h>
-
+#include "debug/debug.h"
+#include "hw/uart.h"
+#include "hw/adc.h"
+#include "hw/motor.h"
+#include "hw/tick.h"
+#include "util.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
-
-#include "util.h"
-
-#include "debug/debug.h"
+#include <util/delay.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
 
 // debug LED
 static PORT_t &ledport = PORTR;
 static const int ledpin = 1;
 
-// debug/USB uart
-static USART_t &uart_usb = USARTC0;
-#define RXVEC_USB USARTC0_RXC_vect
-static PORT_t &uartport_usb = PORTC;
-static const int txpin_usb = 3;
-static const int rxpin_usb = 2;
-static const int bsel_usb = 2158; // makes 115200 baud
-static const int bscale_usb = 0xA;
-
-// xbee uart
-static PORT_t &uartport_xbee = PORTE;
-#define RXVEC_XBEE USARTE1_RXC_vect
-static USART_t &uart_xbee = USARTE1;
-static const int bsel_xbee = 3333;
-static const int bscale_xbee = 0xC;
-static const int txpin_xbee = 7;
-static const int rxpin_xbee = 6;
-static bool xbee_enabled = false;
-
 // debug timer
 static TC1_t &tim = TCC1;
 
-static char recvbuf[8];
-static volatile uint8_t recvbuf_pos;
+// output flags
+static bool echo_enabled = true;
 
-static int myput(char ch, FILE* file) {
-	if(ch == '\n')
-		myput('\r', file);
-	while (!(uart_usb.STATUS & USART_DREIF_bm)) { }
-	uart_usb.DATA = ch;
-	
-	if (xbee_enabled) {
-		while (!(uart_xbee.STATUS & USART_DREIF_bm)) { }
-		uart_xbee.DATA = ch;
-	}
-	
-	return 0;
-}
+// battery monitor
+static uint8_t batterycnt;
 
-static int myget(FILE* file) {
-	while (recvbuf_pos == 0) { }
-	
-	util_cli_lo();
-	char ch = recvbuf[0];
-	memmove(recvbuf, recvbuf+1, recvbuf_pos - 1);
-	recvbuf_pos--;
-	util_sei_lo();
-	
-	if (ch == '\r')
-		ch = '\n';
-	
-	return ch;
-}
+// stdio stuff
+static int put(char ch, FILE* file);
+static int get(FILE* file);
+static FILE stdinout;
 
 void debug_init() {
 	ledport.DIRSET = _BV(ledpin);
 	debug_setLED(false);
 	
-	uartport_usb.OUTSET = _BV(txpin_usb); // make pin high to avoid transmitting a false start bit on startup
-	uartport_usb.DIRSET = _BV(txpin_usb);
+	tim.CTRLA = TC_CLKSEL_DIV64_gc; // 32Mhz / 64 = .5 Mhz timer
+	tim.PER = 0xFFFF; // 1Mhz / 65536 = 65ms
 	
-	uart_usb.CTRLA = USART_RXCINTLVL_LO_gc;
-	uart_usb.CTRLB = USART_RXEN_bm | USART_TXEN_bm | USART_CLK2X_bm;
-	uart_usb.CTRLC = USART_CHSIZE_8BIT_gc;
-	uart_usb.BAUDCTRLA = bsel_usb & 0xFF;
-	uart_usb.BAUDCTRLB = (bscale_usb << USART_BSCALE_gp) | (bsel_usb >> 8);
+	fdev_setup_stream(&stdinout, put, get, _FDEV_SETUP_RW);
+	stdin = &stdinout;
+	stdout = &stdinout;
+}
+
+void debug_tick() {
+	if (adc_getBattery() < 10) {
+		if (++batterycnt >= 100)
+			debug_halt("Low battery");
+	} else {
+		batterycnt = 0;
+	}	
+}
+
+static int put(char ch, FILE* file) {
+	if(ch == '\n')
+		put('\r', file);
+		
+	while (!uart_put(UART_USB, ch)) { }
+	while (!uart_put(UART_XBEE, ch)) { }
 	
-	uartport_xbee.OUTSET = _BV(txpin_xbee);
-	uartport_xbee.DIRSET = _BV(txpin_xbee);
+	return 1;
+}
+
+static int get(FILE* file) {
+	int ch;
+	do {
+		ch = uart_get(UART_USB);
+		if (ch == -1)
+			ch = uart_get(UART_XBEE);
+	} while (ch == -1);
 	
-	uart_xbee.CTRLA = USART_RXCINTLVL_LO_gc;
-	uart_xbee.CTRLB = USART_RXEN_bm | USART_TXEN_bm;
-	uart_xbee.CTRLC = USART_CHSIZE_8BIT_gc;
-	uart_xbee.BAUDCTRLA = bsel_xbee & 0xFF;
-	uart_xbee.BAUDCTRLB = (bscale_xbee << USART_BSCALE_gp) | (bsel_xbee >> 8);
+	if (ch == '\r')
+		ch = '\n';
 	
-	tim.CTRLA = TC_CLKSEL_DIV1024_gc; // 32Mhz / 32 = 1 Mhz timer
-	tim.PER = 0xFFFF; // 1Mhz / 65536
+	if (echo_enabled)
+		put(ch, NULL); // echo character
 	
-	fdevopen(myput, myget);
+	return ch;
 }
 
 void debug_setLED(bool on) {
@@ -106,25 +89,34 @@ void debug_resetTimer() {
 }
 
 uint16_t debug_getTimer() {
-	return tim.CNT;
+	return tim.CNT * 2;
 }
 
-void debug_setXBeeEnabled(bool enabled) {
-	xbee_enabled = enabled;
-}
+void debug_out(const char *fmt, ...) {
+	va_list ap;
+	va_start(ap, fmt);
 
-static void receive(uint8_t ch) {
-	if (recvbuf_pos >= sizeof(recvbuf))
-		return;
+	char buf[64];
+	vsprintf(buf, fmt, ap);
 	
-	recvbuf[recvbuf_pos++] = ch;
+	uart_puts(UART_USB, buf); // no resending logic, we drop bytes if buffer fills up
+	
+	va_end(ap);
 }
 
-ISR(RXVEC_USB) {
-	receive(uart_usb.DATA);
+void debug_setEchoEnabled(bool enabled) {
+	echo_enabled = enabled;
 }
 
-ISR(RXVEC_XBEE) {
-	debug_setXBeeEnabled(true);
-	receive(uart_xbee.DATA);
+void debug_halt(const char *reason) {
+	tick_halt();
+	motor_allOff();
+	
+	bool led=false;
+	while (true) {
+		printf("Halted. %s\n", reason);
+		debug_setLED(led);
+		led = !led;
+		_delay_ms(1000);
+	}
 }
