@@ -109,7 +109,7 @@ void debug_setEchoEnabled(bool enabled) {
 }
 
 void debug_halt(const char *reason) {
-	tick_halt();
+	tick_suspend();
 	motor_allOff();
 	
 	bool led=false;

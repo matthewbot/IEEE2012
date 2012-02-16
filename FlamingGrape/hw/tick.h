@@ -11,9 +11,9 @@
 #define TICK_TIMMAX (TICK_TIMHZ/TICK_HZ)
 
 void tick_init();
-
 void tick_wait();
-void tick_halt();
+void tick_suspend();
+void tick_resume();
 
 uint16_t tick_getTimer();
 uint32_t tick_getCount();

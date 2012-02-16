@@ -45,8 +45,8 @@ LineFollowFeature linefollow_getLastFeature() {
 	return lastfeature;
 }
 
-void linefollow_setDebug(bool newdebug) {
-	debug = newdebug;
+LineFollowTurn linefollow_getLastTurn() {
+	return lastturn;
 }
 
 static float pow4(float val) {
@@ -129,8 +129,7 @@ void linefollow_tick() {
 	lastturn = results.turn;
 	if (results.feature != FEATURE_NONE) {
 		lastfeature = results.feature;
-		enabled = false;
-		motorcontrol_setEnabled(false);
+		linefollow_stop();
 		return;
 	}
 	

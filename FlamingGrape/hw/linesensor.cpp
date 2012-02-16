@@ -41,9 +41,11 @@ void linesensor_setLEDs(bool enabled) {
 }
 
 void linesensor_read(uint16_t *buf) {
+	tick_suspend();
 	for (int i=0; i<8; i++) {
 		buf[i] = readingsbuf[7-i];
 	}
+	tick_resume();
 }
 
 #pragma GCC optimize("3") // jack up optimization for these ISRs, in particular the signal port ISR
