@@ -176,7 +176,7 @@ void controlpanel_drive() {
 
 			case 'z':
 				speed = 100;
-				for (int i = 0; i < 20; i++) {
+				for (int i = 0; i < 100; i++) {
 					if (i%4 == 0) {
 						drive_fd(speed);
 					} else if (i%4 == 1) {
@@ -186,9 +186,27 @@ void controlpanel_drive() {
 					} else {
 						drive_lturn(speed);
 					}
-					_delay_ms(250);
+					_delay_ms(50);
 				}
 				speed = 20;
+				break;
+
+			case 'Z':
+				//speed = 100;
+				for (int i = 0; i < 100; i++) {
+					if (i%4 == 0) {
+						drive_fd(speed);
+					} else if (i%4 == 1) {
+						drive_rturn(speed);
+					} else if (i%4 == 2) {
+						drive_bk(speed);
+					} else {
+						drive_lturn(speed);
+					}
+					_delay_ms(50);
+				}
+				speed = 20;
+				break;
 
 			default:
 				motorcontrol_setEnabled(false);
@@ -209,7 +227,27 @@ void controlpanel_sensor() {
 				break;
 
 			case 'r':
-				printf("Range Finder: %f\n", adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
+				while(true) {
+					switch(controlpanel_promptChar("Rangefinder")) {
+						case 'q':
+							printf("Front Left Range: %f\n", adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE));
+							break;
+						case 'e':
+							printf("Front Right Range: %f\n", adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
+							break;
+						case 'a':
+							printf("Side Left Range: %f\n", adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE));
+							break;
+						case 'd':
+							printf("Side Right Range: %f\n", adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
+							break;
+						case 'z':
+							return;
+						default:
+							printf("q - front left, e - front right, a - side left, d - side right, z - exit\n");
+							break;
+					}
+				}
 				break;
 
 			case 'l': {
