@@ -10,7 +10,7 @@
 #include <math.h>
 #include <stdint.h>
 
-static PIDGains pidgains = { 4, 5, .01, .1 };
+static PIDGains pidgains = { 4, 1, .005, .5 };
 
 volatile static bool enabled;
 volatile static bool debug;
@@ -61,7 +61,9 @@ void motorcontrol_setEnabled(bool new_enabled) {
 }
 
 void motorcontrol_setGains(const PIDGains &newpidgains) {
+	tick_suspend();
 	pidgains = newpidgains;
+	tick_resume();
 }
 
 PIDGains motorcontrol_getGains() {
