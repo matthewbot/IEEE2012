@@ -93,6 +93,12 @@ int uart_get(UARTNum num) {
 	return ch;
 }
 
+// GCC doesn't want to inline these, but its a huge win because num is eliminated and
+// all the memory addresses get calculated at compile time.
+#pragma GCC optimize("3")
+static void receive(UARTNum num) __attribute__((always_inline));
+static void transmit(UARTNum num) __attribute__((always_inline));
+
 static void receive(UARTNum num) {
 	UARTData &data = uartdata[num];
 	if (data.inbuf_pos >= sizeof(data.inbuf))
