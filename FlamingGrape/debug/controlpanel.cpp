@@ -175,8 +175,20 @@ void controlpanel_drive() {
 				return;
 
 			case 'z':
-				motorcontrol_setEnabled(true);
-				
+				speed = 100;
+				for (int i = 0; i < 20; i++) {
+					if (i%4 == 0) {
+						drive_fd(speed);
+					} else if (i%4 == 1) {
+						drive_rturn(speed);
+					} else if (i%4 == 2) {
+						drive_fd(speed);
+					} else {
+						drive_lturn(speed);
+					}
+					_delay_ms(250);
+				}
+				speed = 20;
 
 			default:
 				motorcontrol_setEnabled(false);
