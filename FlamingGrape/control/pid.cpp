@@ -30,5 +30,5 @@ float pid_update(PIDState &state, const PIDGains &gains, float error, float dt, 
 }
 
 void pid_printDebug(float out, float error, const PIDDebug &d) {
-	debug_out("E % .3f O % .3f P % .3f I % .3f D % .3f\n", error, out, d.p_out, d.i_out, d.d_out);
+	debug_println("E % .3f O % .3f P % .3f I % .3f D % .3f", error, out, d.p_out, d.i_out, d.d_out);
 }

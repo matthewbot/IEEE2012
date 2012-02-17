@@ -92,12 +92,17 @@ uint16_t debug_getTimer() {
 	return tim.CNT * 2;
 }
 
-void debug_out(const char *fmt, ...) {
+void debug_println(const char *fmt, ...) {
 	va_list ap;
 	va_start(ap, fmt);
 
 	char buf[64];
-	vsprintf(buf, fmt, ap);
+	unsigned int amt = vsnprintf(buf, sizeof(buf), fmt, ap);
+	if (amt > sizeof(buf)-4)
+		amt = sizeof(buf)-4;
+	buf[amt++] = '\r';
+	buf[amt++] = '\n';
+	buf[amt++] = 0;
 	
 	uart_puts(UART_USB, buf); // no resending logic, we drop bytes if buffer fills up
 	
