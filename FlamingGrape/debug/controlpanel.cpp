@@ -117,7 +117,6 @@ void controlpanel_drive() {
 				drive_rturn_deg(90, speed);
 				break;
 				
-			case '+':
 			case '=':
 				speed += 2;
 				printf("Speed: %f\n", speed);
@@ -126,6 +125,15 @@ void controlpanel_drive() {
 				speed -= 2;
 				printf("Speed: %f\n", speed);
 				break;
+			case '+':
+				speed += 10;
+				printf("Speed: %f\n", speed);
+				break;
+			case '_':
+				speed -= 10;
+				printf("Speed: %f\n", speed);
+				break;
+				
 				
 			case 'e':
 				printf("L %i R %i\n", enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
@@ -302,7 +310,7 @@ int controlpanel_prompt(const char *prompt, const char *fmt, ...) {
 	va_list argp;
 	va_start(argp, fmt);
 	
-	printf("%s> ", prompt);
+	printf("%s# ", prompt);
 	
 	char buf[32];
 	fgets(buf, sizeof(buf), stdin);
@@ -319,13 +327,17 @@ char controlpanel_promptChar(const char *prompt) {
 
 bool controlpanel_promptGains(const char *name, const PIDGains &curgains, PIDGains &gains) {
 	printf("Setting gains for %s\n", name);
-	printf("Current gains: P %.4f I %.4f D %.4f\n", curgains.p, curgains.i, curgains.d);
+	printf("Current gains: P %.4f I %.4f D %.4f MaxI %.4f\n", curgains.p, curgains.i, curgains.d, curgains.maxi);
 	
-	if (!controlpanel_prompt("P", "%f", &gains.p))
-		return false;
-	if (!controlpanel_prompt("I", "%f", &gains.i))
-		return false;
-	if (!controlpanel_prompt("D", "%f", &gains.d))
-		return false;
-	return true;
+	if (controlpanel_prompt("P", "%f", &gains.p) != 1)
+		gains.p = curgains.p;
+	if (controlpanel_prompt("I", "%f", &gains.i) != 1)
+		gains.i = curgains.i;
+	if (controlpanel_prompt("D", "%f", &gains.d) != 1)
+		gains.d = curgains.d;
+	if (controlpanel_prompt("MaxI", "%f", &gains.maxi) != 1)
+		gains.maxi = curgains.maxi;
+		
+	printf("New gains: P %.4f I %.4f D %.4f MaxI %.4f\n", gains.p, gains.i, gains.d, gains.maxi);
+	return controlpanel_promptChar("Ok? [y/n]") == 'y';
 }
