@@ -34,3 +34,7 @@ float adc_sampleFloat(uint8_t pin) {
 float adc_getBattery() {
 	return adc_sample(ADC_BATTERY) * 0.008f;
 }
+
+float adc_sampleRangeFinder(uint8_t pin) {
+	return 2.54/((1.8151e-4*(float)adc_sample(pin)) - 8.8343e-2);
+}

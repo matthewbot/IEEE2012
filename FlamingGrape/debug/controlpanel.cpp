@@ -174,6 +174,10 @@ void controlpanel_drive() {
 				motor_allOff();
 				return;
 
+			case 'z':
+				motorcontrol_setEnabled(true);
+				
+
 			default:
 				motorcontrol_setEnabled(false);
 				motor_allOff();
@@ -190,6 +194,10 @@ void controlpanel_sensor() {
 				for (int i=0; i<8; i++)
 					printf("%d ", adc_sample(i));
 				printf("\n");
+				break;
+
+			case 'r':
+				printf("Range Finder: %f\n", adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
 				break;
 
 			case 'l': {
