@@ -175,34 +175,31 @@ void controlpanel_drive() {
 				return;
 
 			case 'z':
-				speed = 100;
-				for (int i = 0; i < 100; i++) {
-					if (i%4 == 0) {
-						drive_fd(speed);
-					} else if (i%4 == 1) {
-						drive_rturn(speed);
-					} else if (i%4 == 2) {
-						drive_fd(speed);
-					} else {
-						drive_lturn(speed);
-					}
+				speed = 40;
+				for (int i = 0; i < 20; i++) {
+					drive_fd(speed);
+					_delay_ms(25);
+					drive_rturn(speed);
+					_delay_ms(50);
+					drive_fd(speed);
+					_delay_ms(25);
+					drive_lturn(speed);
 					_delay_ms(50);
 				}
+				drive_stop();
 				speed = 20;
 				break;
 
 			case 'Z':
-				//speed = 100;
-				for (int i = 0; i < 100; i++) {
-					if (i%4 == 0) {
-						drive_fd(speed);
-					} else if (i%4 == 1) {
-						drive_rturn(speed);
-					} else if (i%4 == 2) {
-						drive_bk(speed);
-					} else {
-						drive_lturn(speed);
-					}
+				speed = 100;
+				for (int i = 0; i < 20; i++) {
+					drive_bk(speed);
+					_delay_ms(25);
+					drive_rturn(speed);
+					_delay_ms(50);
+					drive_bk(speed);
+					_delay_ms(25);
+					drive_lturn(speed);
 					_delay_ms(50);
 				}
 				speed = 20;
