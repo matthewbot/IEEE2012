@@ -36,5 +36,9 @@ float adc_getBattery() {
 }
 
 float adc_sampleRangeFinder(uint8_t pin) {
-	return 2.54/((1.8151e-4*(float)adc_sample(pin)) - 8.8343e-2);
+	uint16_t val = adc_sample(pin);
+	if (val < 600)
+		return 999;
+	else
+		return 2.54/((1.8151e-4*val) - 8.8343e-2);
 }
