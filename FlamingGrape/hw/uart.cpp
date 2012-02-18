@@ -101,10 +101,12 @@ static void transmit(UARTNum num) __attribute__((always_inline));
 
 static void receive(UARTNum num) {
 	UARTData &data = uartdata[num];
+	uint8_t byte = uarts[num]->DATA;
+	
 	if (data.inbuf_pos >= sizeof(data.inbuf))
 		return;
-	
-	data.inbuf[data.inbuf_pos++] = uarts[num]->DATA;
+		
+	data.inbuf[data.inbuf_pos++] = byte;
 }
 
 static void transmit(UARTNum num) {
