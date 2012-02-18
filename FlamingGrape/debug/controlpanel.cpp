@@ -4,6 +4,7 @@
 #include "control/linefollow.h"
 #include "control/motorcontrol.h"
 #include "control/drive.h"
+#include "competition/nav.h"
 #include "hw/motor.h"
 #include "hw/enc.h"
 #include "hw/adc.h"
@@ -321,6 +322,14 @@ void controlpanel_tests() {
 				linefollow_stop();
 				putchar('\n');
 				
+				static const char *turnstrs[] = {
+					"NONE",
+					"LEFT",
+					"RIGHT"
+				};
+				
+				printf("Turn:\t%s\n", turnstrs[linefollow_getLastTurn()]);
+				
 				static const char *featurestrs[] = {
 					"NONE",
 					"INTERSECTION",
@@ -330,6 +339,35 @@ void controlpanel_tests() {
 				printf("Last feature: %s\n", featurestrs[linefollow_getLastFeature()]);
 				break;
 			}
+			
+			case 'i': {
+				while (true) {
+					linefollow_start(60);
+					linefollow_waitDone();
+					
+					if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
+						break;
+					else if (linefollow_getLastTurn() == TURN_LEFT)
+						drive_lturn_deg(80, 50);
+					else if (linefollow_getLastTurn() == TURN_RIGHT)
+						drive_rturn_deg(80, 50);
+					else
+						break;
+				}
+				drive_stop();
+				
+				if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
+					printf("Intersection!\n");
+				else
+					printf("Error\n");
+				break;
+			};
+			
+			case 'l': {
+				bool ok = nav_loopback();
+				printf("Ok: %d\n", ok);
+				break;
+			}
 				
 			case 'g': {
 				PIDGains newgains;
@@ -337,7 +375,7 @@ void controlpanel_tests() {
 					linefollow_setGains(newgains);
 					printf("Gains set!\n");
 				} else {
-					printf("Canceled.");
+					printf("Canceled.\n");
 				}
 				break;
 			}

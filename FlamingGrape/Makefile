@@ -60,7 +60,7 @@ TARGET = main
 
 # List C source files here. (C dependencies are automatically generated.)
 
-SRC = $(TARGET).cpp init.cpp util.cpp $(wildcard control/*.cpp) $(wildcard control/*.cpp) $(wildcard debug/*.cpp) $(wildcard hw/*.cpp)
+SRC = $(TARGET).cpp init.cpp util.cpp $(wildcard control/*.cpp) $(wildcard control/*.cpp) $(wildcard debug/*.cpp) $(wildcard hw/*.cpp) $(wildcard competition/*.cpp)
 
 # List Assembler source files here.
 #     Make them always end in a capital .S.  Files ending in a lowercase .s
