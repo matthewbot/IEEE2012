@@ -10,6 +10,7 @@
 #include "hw/adc.h"
 #include "util.h"
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <math.h>
 #include <string.h>
@@ -17,7 +18,7 @@
 #include <stdio.h>
 
 void controlpanel_init() {
-	printf("Starting up\n");
+	printf_P(PSTR("Starting up\n"));
 }
 
 void controlpanel() {
@@ -33,10 +34,10 @@ void controlpanel() {
 				controlpanel_tests();
 				break;
 			case 'q':
-				printf("Quitting...\n");
+				printf_P(PSTR("Quitting...\n"));
 				return;
 			default:
-				printf("Unknown. Commands: drive, sensors, tests\n");
+				printf_P(PSTR("Unknown. Commands: drive, sensors, tests\n"));
 				break;
 		}
 	}
@@ -120,27 +121,27 @@ void controlpanel_drive() {
 				
 			case '=':
 				speed += 2;
-				printf("Speed: %f\n", speed);
+				printf_P(PSTR("Speed: %f\n"), speed);
 				break;
 			case '-':
 				speed -= 2;
-				printf("Speed: %f\n", speed);
+				printf_P(PSTR("Speed: %f\n"), speed);
 				break;
 			case '+':
 				speed += 10;
-				printf("Speed: %f\n", speed);
+				printf_P(PSTR("Speed: %f\n"), speed);
 				break;
 			case '_':
 				speed -= 10;
-				printf("Speed: %f\n", speed);
+				printf_P(PSTR("Speed: %f\n"), speed);
 				break;
 				
 				
 			case 'e':
-				printf("L %i R %i\n", enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
+				printf_P(PSTR("L %i R %i\n"), enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
 				break;
 			case 'E':
-				printf("Encoders reset\n");
+				printf_P(PSTR("Encoders reset\n"));
 				enc_reset(MOTOR_LEFT);
 				enc_reset(MOTOR_RIGHT);
 				break;
@@ -149,21 +150,21 @@ void controlpanel_drive() {
 				PIDGains newgains;
 				if (controlpanel_promptGains("motorcontrol", motorcontrol_getGains(), newgains)) {
 					motorcontrol_setGains(newgains);
-					printf("Gains set!\n");
+					printf_P(PSTR("Gains set!\n"));
 				} else {
-					printf("Canceled.\n");
+					printf_P(PSTR("Canceled.\n"));
 				}
 				break;
 			}
 			
 			case 'p':
 				motorcontrol_setDebug(false);
-				printf("Debug disabled\n");
+				printf_P(PSTR("Debug disabled\n"));
 				break;
 				
 			case 'c':
 				motorcontrol_setEnabled(false);
-				printf("Motor control disabled\n");
+				printf_P(PSTR("Motor control disabled\n"));
 				break;
 				
 			case 'P':
@@ -209,7 +210,7 @@ void controlpanel_drive() {
 			default:
 				motorcontrol_setEnabled(false);
 				motor_allOff();
-				printf("Unknown. Commands: WASD, ujn/ikm, +-, encoders, Encoder clear\n");
+				printf_P(PSTR("Unknown. Commands: WASD, ujn/ikm, +-, encoders, Encoder clear\n"));
 				break;
 		}
 	}
@@ -220,29 +221,29 @@ void controlpanel_sensor() {
 		switch (controlpanel_promptChar("Sensor")) {		
 			case 'a':
 				for (int i=0; i<8; i++)
-					printf("%d ", adc_sample(i));
-				printf("\n");
+					printf_P(PSTR("%d "), adc_sample(i));
+				printf_P(PSTR("\n"));
 				break;
 
 			case 'r':
 				while(true) {
 					switch(controlpanel_promptChar("Rangefinder")) {
 						case 'q':
-							printf("Front Left Range: %f\n", adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE));
+							printf_P(PSTR("Front Left Range: %f\n"), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE));
 							break;
 						case 'e':
-							printf("Front Right Range: %f\n", adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
+							printf_P(PSTR("Front Right Range: %f\n"), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
 							break;
 						case 'a':
-							printf("Side Left Range: %f\n", adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE));
+							printf_P(PSTR("Side Left Range: %f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE));
 							break;
 						case 'd':
-							printf("Side Right Range: %f\n", adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
+							printf_P(PSTR("Side Right Range: %f\n"), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
 							break;
 						case 'z':
 							return;
 						default:
-							printf("q - front left, e - front right, a - side left, d - side right, z - exit\n");
+							printf_P(PSTR("q - front left, e - front right, a - side left, d - side right, z - exit\n"));
 							break;
 					}
 				}
@@ -252,8 +253,8 @@ void controlpanel_sensor() {
 				uint16_t linebuf[linesensor_count];
 				linesensor_read(linebuf);
 				for (int i=0; i<linesensor_count; i++)
-					printf("%-5u ", linebuf[i]);
-				printf("\n");
+					printf_P(PSTR("%-5u "), linebuf[i]);
+				printf_P(PSTR("\n"));
 				break;
 			}
 			
@@ -262,17 +263,17 @@ void controlpanel_sensor() {
 				LineFollowResults results = linefollow_readSensor();
 				uint16_t time = debug_getTimer();
 				
-				printf("Light:\t");
+				printf_P(PSTR("Light:\t"));
 				for (int i=0; i<linesensor_count; i++)
-					printf("%2.2f\t", results.light[i]);
-				printf("\n");						
+					printf_P(PSTR("%2.2f\t"), results.light[i]);
+				printf_P(PSTR("\n"));						
 				
-				printf("Thresh:\t");
+				printf_P(PSTR("Thresh:\t"));
 				for (int i=0; i<linesensor_count; i++)
-					printf("%d\t", results.thresh[i]);
-				printf("\n");
+					printf_P(PSTR("%d\t"), results.thresh[i]);
+				printf_P(PSTR("\n"));
 
-				printf("Center:\t%f\n", results.center);
+				printf_P(PSTR("Center:\t%f\n"), results.center);
 								
 				static const char *turnstrs[] = {
 					"NONE",
@@ -280,27 +281,27 @@ void controlpanel_sensor() {
 					"RIGHT"
 				};
 				
-				printf("Turn:\t%s\n", turnstrs[results.turn]);
+				printf_P(PSTR("Turn:\t%s\n"), turnstrs[results.turn]);
 				
 				static const char *featurestrs[] = {
 					"NONE",
 					"INTERSECTION",
 					"NOLINE"
 				};
-				printf("Feat:\t%s\n", featurestrs[results.feature]);
-				printf("Time:\t%u uS\n", time);
+				printf_P(PSTR("Feat:\t%s\n"), featurestrs[results.feature]);
+				printf_P(PSTR("Time:\t%u uS\n"), time);
 				break;
 			}
 			
 			case 'b':
-				printf("Battery voltage: %.2f\n", adc_getBattery());
+				printf_P(PSTR("Battery voltage: %.2f\n"), adc_getBattery());
 				break;
 			
 			case 'q':
 				return;
 				
 			default:
-				printf("Unknown. Commands: linesensor-raw, Linesensor-full, analog dump, battery\n");
+				printf_P(PSTR("Unknown. Commands: linesensor-raw, Linesensor-full, analog dump, battery\n"));
 				break;
 		}
 	}
@@ -314,9 +315,9 @@ void controlpanel_tests() {
 			case 'f': {
 				float vel;
 				if (!controlpanel_prompt("Velocity", "%f", &vel))
-					printf("Canceled.\n");
+					printf_P(PSTR("Canceled.\n"));
 					
-				printf("Push any key to stop. ");
+				printf_P(PSTR("Push any key to stop. "));
 				linefollow_start(vel, linedebug);
 				getchar();
 				linefollow_stop();
@@ -328,7 +329,7 @@ void controlpanel_tests() {
 					"RIGHT"
 				};
 				
-				printf("Turn:\t%s\n", turnstrs[linefollow_getLastTurn()]);
+				printf_P(PSTR("Turn:\t%s\n"), turnstrs[linefollow_getLastTurn()]);
 				
 				static const char *featurestrs[] = {
 					"NONE",
@@ -336,7 +337,7 @@ void controlpanel_tests() {
 					"NOLINE"
 				};
 				
-				printf("Last feature: %s\n", featurestrs[linefollow_getLastFeature()]);
+				printf_P(PSTR("Last feature: %s\n"), featurestrs[linefollow_getLastFeature()]);
 				break;
 			}
 			
@@ -357,15 +358,15 @@ void controlpanel_tests() {
 				drive_stop();
 				
 				if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
-					printf("Intersection!\n");
+					printf_P(PSTR("Intersection!\n"));
 				else
-					printf("Error\n");
+					printf_P(PSTR("Error\n"));
 				break;
 			};
 			
 			case 'l': {
 				bool ok = nav_loopback();
-				printf("Ok: %d\n", ok);
+				printf_P(PSTR("Ok: %d\n"), ok);
 				break;
 			}
 				
@@ -373,9 +374,9 @@ void controlpanel_tests() {
 				PIDGains newgains;
 				if (controlpanel_promptGains("linefollow", linefollow_getGains(), newgains)) {
 					linefollow_setGains(newgains);
-					printf("Gains set!\n");
+					printf_P(PSTR("Gains set!\n"));
 				} else {
-					printf("Canceled.\n");
+					printf_P(PSTR("Canceled.\n"));
 				}
 				break;
 			}
@@ -386,14 +387,14 @@ void controlpanel_tests() {
 				
 			case 'd':
 				linedebug = !linedebug;
-				printf("Line follow debugging %s\n", linedebug ? "enabled" : "disabled");
+				printf_P(PSTR("Line follow debugging %s\n"), linedebug ? "enabled" : "disabled");
 				break;
 				
 			case 'q':
 				return;
 
 			default:
-				printf("Unknown. Commands: follow line, gain set, pwm test\n");
+				printf_P(PSTR("Unknown. Commands: follow line, gain set, pwm test\n"));
 				break;
 		}
 	}
@@ -403,7 +404,7 @@ int controlpanel_prompt(const char *prompt, const char *fmt, ...) {
 	va_list argp;
 	va_start(argp, fmt);
 	
-	printf("%s# ", prompt);
+	printf_P(PSTR("%s# "), prompt);
 	
 	char buf[32];
 	fgets(buf, sizeof(buf), stdin);
@@ -411,7 +412,7 @@ int controlpanel_prompt(const char *prompt, const char *fmt, ...) {
 }
 
 char controlpanel_promptChar(const char *prompt) {
-	printf("%s> ", prompt);
+	printf_P(PSTR("%s> "), prompt);
 	
 	char ch = getchar();
 	putchar('\n');
@@ -419,8 +420,8 @@ char controlpanel_promptChar(const char *prompt) {
 }
 
 bool controlpanel_promptGains(const char *name, const PIDGains &curgains, PIDGains &gains) {
-	printf("Setting gains for %s\n", name);
-	printf("Current gains: P %.4f I %.4f D %.4f MaxI %.4f\n", curgains.p, curgains.i, curgains.d, curgains.maxi);
+	printf_P(PSTR("Setting gains for %s\n"), name);
+	printf_P(PSTR("Current gains: P %.4f I %.4f D %.4f MaxI %.4f\n"), curgains.p, curgains.i, curgains.d, curgains.maxi);
 	
 	if (controlpanel_prompt("P", "%f", &gains.p) != 1)
 		gains.p = curgains.p;
@@ -431,6 +432,6 @@ bool controlpanel_promptGains(const char *name, const PIDGains &curgains, PIDGai
 	if (controlpanel_prompt("MaxI", "%f", &gains.maxi) != 1)
 		gains.maxi = curgains.maxi;
 		
-	printf("New gains: P %.4f I %.4f D %.4f MaxI %.4f\n", gains.p, gains.i, gains.d, gains.maxi);
+	printf_P(PSTR("New gains: P %.4f I %.4f D %.4f MaxI %.4f\n"), gains.p, gains.i, gains.d, gains.maxi);
 	return controlpanel_promptChar("Ok? [y/n]") == 'y';
 }
