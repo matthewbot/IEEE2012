@@ -222,7 +222,7 @@ void controlpanel_sensor() {
 			case 'a':
 				for (int i=0; i<8; i++)
 					printf_P(PSTR("%d "), adc_sample(i));
-				printf_P(PSTR("\n"));
+				putchar('\n');
 				break;
 
 			case 'r':
@@ -254,7 +254,7 @@ void controlpanel_sensor() {
 				linesensor_read(linebuf);
 				for (int i=0; i<linesensor_count; i++)
 					printf_P(PSTR("%-5u "), linebuf[i]);
-				printf_P(PSTR("\n"));
+				putchar('\n');
 				break;
 			}
 			
@@ -266,30 +266,17 @@ void controlpanel_sensor() {
 				printf_P(PSTR("Light:\t"));
 				for (int i=0; i<linesensor_count; i++)
 					printf_P(PSTR("%2.2f\t"), results.light[i]);
-				printf_P(PSTR("\n"));						
+				putchar('\n');						
 				
 				printf_P(PSTR("Thresh:\t"));
 				for (int i=0; i<linesensor_count; i++)
 					printf_P(PSTR("%d\t"), results.thresh[i]);
-				printf_P(PSTR("\n"));
+				putchar('\n');
 
 				printf_P(PSTR("Center:\t%f\n"), results.center);
 								
-				static const char *turnstrs[] = {
-					"NONE",
-					"LEFT",
-					"RIGHT"
-				};
-				
-				printf_P(PSTR("Turn:\t%s\n"), turnstrs[results.turn]);
-				
-				static const char *featurestrs[] = {
-					"NONE",
-					"INTERSECTION",
-					"NOLINE"
-				};
-				printf_P(PSTR("Feat:\t%s\n"), featurestrs[results.feature]);
-				printf_P(PSTR("Time:\t%u uS\n"), time);
+				printf_P(PSTR("Turn:\t")); linefollow_printTurn(results.turn); putchar('\n');
+				printf_P(PSTR("Feat:\t")); linefollow_printFeature(results.feature); putchar('\n');
 				break;
 			}
 			
@@ -323,21 +310,8 @@ void controlpanel_tests() {
 				linefollow_stop();
 				putchar('\n');
 				
-				static const char *turnstrs[] = {
-					"NONE",
-					"LEFT",
-					"RIGHT"
-				};
-				
-				printf_P(PSTR("Turn:\t%s\n"), turnstrs[linefollow_getLastTurn()]);
-				
-				static const char *featurestrs[] = {
-					"NONE",
-					"INTERSECTION",
-					"NOLINE"
-				};
-				
-				printf_P(PSTR("Last feature: %s\n"), featurestrs[linefollow_getLastFeature()]);
+				printf_P(PSTR("Turn:\t")); linefollow_printTurn(linefollow_getLastTurn()); putchar('\n');
+				printf_P(PSTR("Feat:\t")); linefollow_printFeature(linefollow_getLastFeature()); putchar('\n');
 				break;
 			}
 			
@@ -387,7 +361,8 @@ void controlpanel_tests() {
 				
 			case 'd':
 				linedebug = !linedebug;
-				printf_P(PSTR("Line follow debugging %s\n"), linedebug ? "enabled" : "disabled");
+				printf_P(PSTR("Line follow debugging "));
+				printf_P(linedebug ? PSTR("enabled\n") : PSTR("disabled\n"));
 				break;
 				
 			case 'q':

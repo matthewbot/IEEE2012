@@ -4,8 +4,10 @@
 #include "control/drive.h"
 #include "debug/debug.h"
 #include "hw/tick.h"
+#include <avr/pgmspace.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdio.h>
 
 static PIDGains pidgains = {45, 0, 2};
 static float thresh = 3;
@@ -144,4 +146,28 @@ void linefollow_tick() {
 		pid_printDebug(out, error, piddebug);
 	
 	drive_steer(out, vel);
+}
+
+static char none_str[] PROGMEM = "NONE";
+static char intersection_str[] PROGMEM = "INTERSECTION";
+static char noline_str[] PROGMEM = "NOLINE";
+static char left_str[] PROGMEM = "LEFT";
+static char right_str[] PROGMEM = "RIGHT";
+
+void linefollow_printFeature(LineFollowFeature feature) {
+	static PGM_P table[] PROGMEM = {
+		none_str,
+		intersection_str,
+		noline_str
+	};
+	printf_P((PGM_P)pgm_read_word(table + feature));
+}
+
+void linefollow_printTurn(LineFollowTurn turn) {
+	static PGM_P table[] PROGMEM = {
+		none_str,
+		left_str,
+		right_str
+	};
+	printf_P((PGM_P)pgm_read_word(table + turn));
 }

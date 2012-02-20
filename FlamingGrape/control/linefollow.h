@@ -10,12 +10,14 @@ enum LineFollowFeature {
 	FEATURE_INTERSECTION,
 	FEATURE_NOLINE
 };
+void linefollow_printFeature(LineFollowFeature feature);
 
 enum LineFollowTurn {
 	TURN_NONE,
 	TURN_LEFT,
 	TURN_RIGHT
 };
+void linefollow_printTurn(LineFollowTurn turn);
 
 struct LineFollowResults {
 	float light[linesensor_count];
@@ -25,6 +27,7 @@ struct LineFollowResults {
 	LineFollowTurn turn;
 	LineFollowFeature feature;
 };
+void linefollow_printResults(const LineFollowResults &results);
 
 void linefollow_start(float vel, bool debug=false, float linepos=0);
 void linefollow_stop();
