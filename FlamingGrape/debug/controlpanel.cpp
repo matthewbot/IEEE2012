@@ -313,8 +313,10 @@ void controlpanel_tests() {
 		switch (controlpanel_promptChar("Tests")) {
 			case 'f': {
 				float vel;
-				if (!controlpanel_prompt("Velocity", "%f", &vel))
+				if (!controlpanel_prompt("Velocity", "%f", &vel)) {
 					printf_P(PSTR("Canceled.\n"));
+					break;
+				}
 					
 				printf_P(PSTR("Push any key to stop. "));
 				linefollow_start(vel, linedebug);
@@ -352,7 +354,13 @@ void controlpanel_tests() {
 			
 			case 'l': {
 				bool ok = nav_loopback();
-				printf_P(PSTR("Ok: %d\n"), ok);
+				printf_P(PSTR("Loopback ok: %d\n"), ok);
+				if (ok) {
+					static bool right=false;
+					ok = nav_leftright(right);
+					printf_P(PSTR("leftirght ok: %d\n"), ok);
+					right = !right;
+				}
 				break;
 			}
 				
