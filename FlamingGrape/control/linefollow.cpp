@@ -66,7 +66,7 @@ LineFollowResults linefollow_readSensor() {
 	float tot=0;
 	
 	for (int i=0; i<linesensor_count; i++) {
-		float light = 5E15 / pow4(readings[i]); // maps line to ~35, dark to <<0
+		float light = 5E15 / pow4(1.0f+readings[i]); // maps line to ~35, dark to <<0
 		results.light[i] = light;
 		results.thresh[i] = light > thresh;
 		
@@ -105,7 +105,7 @@ LineFollowResults linefollow_readSensor() {
 void linefollow_waitLine() {
 	while (true) {
 		LineFollowResults results = linefollow_readSensor();
-		if (results.feature != FEATURE_NONE)
+		if (results.feature != FEATURE_NOLINE)
 			break;
 		tick_wait();
 	}
