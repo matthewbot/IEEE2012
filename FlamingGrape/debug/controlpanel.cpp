@@ -119,6 +119,18 @@ void controlpanel_drive() {
 				drive_rturn_deg(90, speed);
 				break;
 				
+			case 'o':
+				pwm(MOTOR_DEPLOY, 800);
+				break;
+			
+			case 'O':
+				pwm(MOTOR_DEPLOY, -800);
+				break;
+			
+			case 'l':
+				pwm(MOTOR_DEPLOY, 0);
+				break;	
+				
 			case '=':
 				speed += 2;
 				printf_P(PSTR("Speed: %f\n"), speed);

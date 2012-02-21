@@ -6,6 +6,7 @@
 enum Motor {
 	MOTOR_LEFT,
 	MOTOR_RIGHT,
+	MOTOR_DEPLOY = 3
 };
 
 static const int motor_count = 2;
