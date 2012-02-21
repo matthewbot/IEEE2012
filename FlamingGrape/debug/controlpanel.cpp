@@ -120,13 +120,21 @@ void controlpanel_drive() {
 				break;
 				
 			case 'o':
-				pwm(MOTOR_DEPLOY, 800);
+				pwm(MOTOR_DEPLOY, 600);
 				break;
 			
 			case 'O':
+				pwm(MOTOR_DEPLOY, 800);
+				break;
+				
+			case '.':
+				pwm(MOTOR_DEPLOY, -600);
+				break;
+				
+			case '>':
 				pwm(MOTOR_DEPLOY, -800);
 				break;
-			
+				
 			case 'l':
 				pwm(MOTOR_DEPLOY, 0);
 				break;	
