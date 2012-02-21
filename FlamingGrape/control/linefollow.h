@@ -29,7 +29,7 @@ struct LineFollowResults {
 };
 void linefollow_printResults(const LineFollowResults &results);
 
-void linefollow_start(float vel, bool debug=false, float linepos=0);
+void linefollow_start(float vel, float linepos=0);
 void linefollow_stop();
 bool linefollow_isDone();
 void linefollow_waitDone();
@@ -39,6 +39,7 @@ LineFollowTurn linefollow_getLastTurn();
 
 void linefollow_setThresh(float thresh);
 void linefollow_setGains(const PIDGains &gains);
+void linefollow_setDebug(bool debug);
 PIDGains linefollow_getGains();
 
 LineFollowResults linefollow_readSensor();

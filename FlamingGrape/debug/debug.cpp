@@ -6,6 +6,7 @@
 #include "util.h"
 #include <avr/interrupt.h>
 #include <avr/io.h>
+#include <avr/pgmspace.h>
 #include <util/delay.h>
 #include <stdio.h>
 #include <string.h>
@@ -119,7 +120,7 @@ void debug_halt(const char *reason) {
 	
 	bool led=false;
 	while (true) {
-		printf("Halted. %s\n", reason);
+		printf_P(PSTR("Halted. %s\n"), reason);
 		debug_setLED(led);
 		led = !led;
 		_delay_ms(1000);

@@ -334,7 +334,7 @@ void controlpanel_tests() {
 				}
 					
 				printf_P(PSTR("Push any key to stop. "));
-				linefollow_start(vel, linedebug);
+				linefollow_start(vel);
 				getchar();
 				linefollow_stop();
 				putchar('\n');
@@ -390,14 +390,16 @@ void controlpanel_tests() {
 				break;
 			}
 			
-			case 'p':
+			case 'm':
 				tests_pwm();
 				break;
 				
-			case 'd':
-				linedebug = !linedebug;
-				printf_P(PSTR("Line follow debugging "));
-				printf_P(linedebug ? PSTR("enabled\n") : PSTR("disabled\n"));
+			case 'P':
+				linefollow_setDebug(true);
+				break;
+				
+			case 'p':
+				linefollow_setDebug(false);
 				break;
 				
 			case 'q':

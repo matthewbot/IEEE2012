@@ -20,10 +20,9 @@ static volatile LineFollowFeature lastfeature;
 static volatile LineFollowTurn lastturn;
 static PIDState pidstate;
 
-void linefollow_start(float newvel, bool newdebug, float newlinepos) {
+void linefollow_start(float newvel, float newlinepos) {
 	pid_initState(pidstate);
 	vel = newvel;
-	debug = newdebug;
 	linepos = newlinepos;
 	lastturn = TURN_NONE;
 	lastfeature = FEATURE_NONE;
@@ -117,6 +116,10 @@ void linefollow_setThresh(float newthresh) {
 
 void linefollow_setGains(const PIDGains &newpidgains) {
 	pidgains = newpidgains;
+}
+
+void linefollow_setDebug(bool newdebug) {
+	debug = newdebug;
 }
 
 PIDGains linefollow_getGains() {
