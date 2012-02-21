@@ -28,6 +28,9 @@ void controlpanel() {
 			case 'd':
 				controlpanel_drive();
 				break;
+			case 'm':
+				controlpanel_motor();
+				break;
 			case 's':
 				controlpanel_sensor();
 				break;
@@ -42,11 +45,6 @@ void controlpanel() {
 				break;
 		}
 	}
-}
-
-static void pwm(int mot, int16_t pwm) {
-	motorcontrol_setEnabled(false);
-	motor_setpwm(mot, pwm);
 }
 
 void controlpanel_drive() {
@@ -72,41 +70,6 @@ void controlpanel_drive() {
 				drive_rturn(speed);
 				break;
 				
-			case 'u':
-				pwm(MOTOR_LEFT, motor_maxpwm/2);
-				break;
-			case 'j':
-			case 'J':
-				pwm(MOTOR_LEFT, 0);
-				break;
-			case 'n':
-				pwm(MOTOR_LEFT, -motor_maxpwm/2);
-				break;
-			case 'U':
-				pwm(MOTOR_LEFT, motor_maxpwm);
-				break;
-			case 'N':
-				motorcontrol_setEnabled(false);
-				motor_setpwm(MOTOR_LEFT, -motor_maxpwm);
-				break;
-				
-			case 'i':
-				pwm(MOTOR_RIGHT, motor_maxpwm/2);
-				break;
-			case 'k':
-			case 'K':
-				pwm(MOTOR_RIGHT, 0);
-				break;
-			case 'm':
-				pwm(MOTOR_RIGHT, -motor_maxpwm/2);
-				break;
-			case 'I':
-				pwm(MOTOR_RIGHT, motor_maxpwm);
-				break;
-			case 'M':
-				pwm(MOTOR_RIGHT, -motor_maxpwm);
-				break;
-				
 			case 'W':
 				drive_fd_dist(16, speed);
 				break;
@@ -118,26 +81,6 @@ void controlpanel_drive() {
 				break;
 			case 'D':
 				drive_rturn_deg(90, speed);
-				break;
-				
-			case 'o':
-				pwm(MOTOR_DEPLOY, 600);
-				break;
-			
-			case 'O':
-				pwm(MOTOR_DEPLOY, 800);
-				break;
-				
-			case '.':
-				pwm(MOTOR_DEPLOY, -600);
-				break;
-				
-			case '>':
-				pwm(MOTOR_DEPLOY, -800);
-				break;
-				
-			case 'l':
-				pwm(MOTOR_DEPLOY, 0);
 				break;	
 				
 			case '=':
@@ -155,16 +98,6 @@ void controlpanel_drive() {
 			case '_':
 				speed -= 10;
 				printf_P(PSTR("Speed: %f\n"), speed);
-				break;
-				
-				
-			case 'e':
-				printf_P(PSTR("L %i R %i\n"), enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
-				break;
-			case 'E':
-				printf_P(PSTR("Encoders reset\n"));
-				enc_reset(MOTOR_LEFT);
-				enc_reset(MOTOR_RIGHT);
 				break;
 				
 			case 'g': {
@@ -194,7 +127,6 @@ void controlpanel_drive() {
 				
 			case 'q':	
 				motorcontrol_setEnabled(false);
-				motor_allOff();
 				return;
 
 			case 'z':
@@ -230,10 +162,78 @@ void controlpanel_drive() {
 
 			default:
 				motorcontrol_setEnabled(false);
-				motor_allOff();
-				printf_P(PSTR("Unknown. Commands: WASD, ujn/ikm, +-, encoders, Encoder clear\n"));
+				printf_P(PSTR("Unknown. Commands: WASD, +-\n"));
 				break;
 		}
+	}
+}
+
+void controlpanel_motor() {
+	bool motenables[4] = {0, 0, 0, 0};
+	int16_t pwm = 0;
+	
+	while (true) {	
+		char ch = controlpanel_promptChar("Motor");
+		if (ch >= '0' && ch <= '3') {
+			int num = ch-'0';
+			bool &enable = motenables[num];
+			enable = !enable;
+			printf_P(PSTR("Motor %d %s\n"), num, enable ? "enabled" : "disabled");
+		} else if (ch == 'e') {
+			printf_P(PSTR("L %i R %i\n"), enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
+		} else if (ch == 'E') {
+			printf_P(PSTR("Encoders reset\n"));
+			enc_reset(MOTOR_LEFT);
+			enc_reset(MOTOR_RIGHT);
+		} else {
+			switch (ch) {
+				case 'x':
+					pwm += 50;
+					break;
+					
+				case 'z':
+					pwm -= 50;
+					break;
+					
+				case 'X':
+					pwm += 200;
+					break;
+					
+				case 'Z':
+					pwm -= 200;
+					break;	
+					
+				case 'a':
+					pwm = -motor_maxpwm;
+					break;
+					
+				case 's':
+					pwm = motor_maxpwm;
+					break;
+					
+				case ' ':
+					pwm = 0;
+					break;
+					
+				case 'q':
+					motor_allOff();
+					return;
+					
+				default:
+					printf_P(PSTR("Unknown. Commands 0-3 enable motors, zx pwm, a min, s max\n")); 
+					break;
+			}
+			
+			if (pwm > motor_maxpwm)
+				pwm = motor_maxpwm;
+			else if (pwm < -motor_maxpwm)
+				pwm = -motor_maxpwm;
+				
+			printf_P(PSTR("PWM %d\n"), pwm);
+		}
+							
+		for (uint8_t i=0; i<4; i++)
+			motor_setpwm(i, motenables[i] ? pwm : 0);
 	}
 }
 
@@ -298,6 +298,7 @@ void controlpanel_sensor() {
 								
 				printf_P(PSTR("Turn:\t")); linefollow_printTurn(results.turn); putchar('\n');
 				printf_P(PSTR("Feat:\t")); linefollow_printFeature(results.feature); putchar('\n');
+				printf_P(PSTR("Time:\t%ud usec\n"), time);
 				break;
 			}
 			
