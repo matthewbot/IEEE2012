@@ -19,6 +19,7 @@ void init_interrupts() {
 #include "control/motorcontrol.h"
 #include "control/drive.h"
 #include "hw/motor.h"
+#include "hw/mag.h"
 #include "hw/enc.h"
 #include "hw/adc.h"
 #include "hw/linesensor.h"
@@ -33,6 +34,7 @@ void init_modules() {
 	adc_init();
 	tick_init();
 	linesensor_init();
+	mag_init();
 	motorcontrol_init();
 	controlpanel_init();
 }

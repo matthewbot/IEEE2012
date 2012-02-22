@@ -13,8 +13,8 @@ static PORT_t &sigport = PORTD;
 #define SIGINT0VEC PORTD_INT0_vect
 static const int sigpins_mask = 0xFF; // all 8 pins are signal pins
 
-static PORT_t &ctrlport = PORTC;
-static const int ctrlpin = 7;
+static PORT_t &ctrlport = PORTE;
+static const int ctrlpin = 0;
 
 // variables
 

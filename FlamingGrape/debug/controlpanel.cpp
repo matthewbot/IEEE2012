@@ -6,6 +6,7 @@
 #include "control/drive.h"
 #include "competition/nav.h"
 #include "hw/motor.h"
+#include "hw/mag.h"
 #include "hw/enc.h"
 #include "hw/adc.h"
 #include "util.h"
@@ -303,6 +304,12 @@ void controlpanel_sensor() {
 			case 'b':
 				printf_P(PSTR("Battery voltage: %.2f\n"), adc_getBattery());
 				break;
+
+			case 'm': {
+				MagReading reading = mag_getReading();
+				printf_P(PSTR("mag: %5d %5d %5d\n"), reading.x, reading.y, reading.z);
+				break;
+			}
 			
 			case 'q':
 				return;
