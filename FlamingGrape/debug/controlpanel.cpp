@@ -402,6 +402,23 @@ void controlpanel_tests() {
 			case 'p':
 				linefollow_setDebug(false);
 				break;
+
+			case 'h':
+				drive_fd_dist(50, 30);
+				motor_setpwm(MOTOR_DEPLOY, 800);
+				_delay_ms(5000);
+				motor_setpwm(MOTOR_DEPLOY, 0);
+				_delay_ms(1000);
+				
+				for (int i=0; i<3; i++) {
+					drive_fd(30);
+					_delay_ms(250);
+					drive_bk(30);
+					_delay_ms(100);
+				}
+				
+				drive_bk_dist(10, 5);
+				break;
 				
 			case 'q':
 				return;
