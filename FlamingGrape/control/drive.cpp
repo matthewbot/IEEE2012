@@ -24,7 +24,7 @@ void drive_dist(float leftvel, float rightvel, float dist, int mot) {
 	if (dist > 0) {
 		while (enc_diff(enc_get(mot), startenc) < distenc) { }
 	} else {
-		while (enc_diff(enc_get(mot), startenc) > -distenc) { }
+		while (enc_diff(enc_get(mot), startenc) > distenc) { }
 	}
 	
 	drive_stop();
