@@ -315,6 +315,24 @@ void controlpanel_sensor() {
 				printf_P(PSTR("mag: %5d %5d %5d\n"), reading.x, reading.y, reading.z);
 				break;
 			}
+
+			case 'M': {
+				MagReading first_reading = mag_getReading();
+				MagReading reading;
+				bool returning = false;
+				while (true) {
+					printf_P(PSTR("%5d %5d %5d\n"), reading.x, reading.y, reading.z);
+					drive_lturn(10);
+					reading = mag_getReading();
+					if (!returning && (abs(reading.x - first_reading.x) > 100)) {
+						returning = true;
+					} else if (returning && (abs(reading.x - first_reading.x) < 20)) {
+						break;
+					}
+				}
+				drive_stop();
+				break;
+			}
 			
 			case 'q':
 				return;

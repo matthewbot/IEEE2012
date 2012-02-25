@@ -1,5 +1,5 @@
-#ifndef MAG_H
-#define MAG_H
+#ifndef MAG_H_
+#define MAG_H_
 
 #include <stdint.h>
 
