@@ -4,6 +4,7 @@
 #include "control/linefollow.h"
 #include "control/motorcontrol.h"
 #include "control/drive.h"
+#include "control/deploy.h"
 #include "competition/nav.h"
 #include "hw/motor.h"
 #include "hw/mag.h"
@@ -36,6 +37,9 @@ void controlpanel() {
 				break;
 			case 't':
 				controlpanel_tests();
+				break;
+			case 'D':
+				controlpanel_deploy();
 				break;
 			case 'q':
 				printf_P(PSTR("Quitting...\n"));
@@ -245,7 +249,7 @@ void controlpanel_sensor() {
 		switch (controlpanel_promptChar("Sensor")) {		
 			case 'a':
 				for (int i=0; i<8; i++)
-					printf_P(PSTR("%d "), adc_sample_average(i, 10));
+					printf_P(PSTR("%d "), adc_sampleAverage(i, 10));
 				putchar('\n');
 				break;
 
@@ -425,24 +429,23 @@ void controlpanel_tests() {
 				break;
 
 			case 'h':
-				motor_setpwm(MOTOR_DEPLOY, 800);
-				while (adc_sample_average(ADC_BEAM_BREAK, 5) < 3500) { }
+				motor_setpwm(MOTOR_DEPLOY, 700);
+				while (adc_sampleAverage(ADC_BEAM_BREAK, 5) < 3500) { }
 				printf("Entered\n");
 				_delay_ms(100);
-				while (adc_sample_average(ADC_BEAM_BREAK, 5) > 3500) { }
+				while (adc_sampleAverage(ADC_BEAM_BREAK, 5) > 3500) { }
 				printf("Left\n");
-				_delay_ms(500);
 				motor_setpwm(MOTOR_DEPLOY, 0);
 				
 				_delay_ms(2000);
 				
 			
 				drive_fd_dist(50, 30);
-				motor_setpwm(MOTOR_DEPLOY, 800);
+				motor_setpwm(MOTOR_DEPLOY, 700);
 				_delay_ms(1500);
 				motor_setpwm(MOTOR_DEPLOY, motor_maxpwm);
 				_delay_ms(1500);
-				motor_setpwm(MOTOR_DEPLOY, 800);
+				motor_setpwm(MOTOR_DEPLOY, 700);
 				drive_bk_dist(4, 5);
 				motor_setpwm(MOTOR_DEPLOY, 0);
 				break;
@@ -471,6 +474,37 @@ void controlpanel_tests() {
 		}
 	}
 }
+
+void controlpanel_deploy() {
+	while (true) {
+		switch (controlpanel_promptChar("Deploy")) {
+			case 'o':
+				deploy_out();
+				break;
+			case 'O':
+				deploy_out(true);
+				break;
+			case 'i':
+				deploy_in();
+				break;
+			case 'I':
+				deploy_in(true);
+				break;
+			case 'b':
+				printf("Beambreak: %d\n", deploy_getBeamBreak());
+				break;
+			case 'd':
+				deploy_start();
+				break;
+			case ' ':
+				deploy_stop();
+				break;
+			case 'q':
+				deploy_stop();
+				return;
+		}
+	}
+}	
 
 int controlpanel_prompt(const char *prompt, const char *fmt, ...) {
 	va_list argp;

@@ -41,6 +41,7 @@ uint32_t tick_getCount() {
 #include "control/motorcontrol.h"
 #include "control/linefollow.h"
 #include "control/magfollow.h"
+#include "control/deploy.h"
 #include "debug/debug.h"
 #include "hw/linesensor.h"
 #include "debug/debug.h"
@@ -54,6 +55,7 @@ ISR(TIMOVFVEC) {
 	magfollow_tick();
 	motorcontrol_tick();
 	debug_tick();
+	deploy_tick();
 	debug_setLED(BOARD_LED, false);
 }
 

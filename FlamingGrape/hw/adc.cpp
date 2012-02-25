@@ -28,7 +28,7 @@ uint16_t adc_sample(uint8_t pin) {
 	return adc->CH0.RES;
 }
 
-uint16_t adc_sample_average(uint8_t pin, uint8_t samples) {
+uint16_t adc_sampleAverage(uint8_t pin, uint8_t samples) {
 	uint32_t tot=0;
 	for (int i=0; i<samples; i++) {
 		tot += adc_sample(pin);
