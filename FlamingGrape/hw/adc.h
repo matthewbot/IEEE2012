@@ -14,6 +14,7 @@ enum {
 void adc_init();
 
 uint16_t adc_sample(uint8_t pin);
+uint16_t adc_sample_average(uint8_t pin, uint8_t samples);
 float adc_sampleFloat(uint8_t pin);
 
 float adc_getBattery();

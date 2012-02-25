@@ -1,5 +1,6 @@
 #include "hw/adc.h"
 #include <avr/io.h>
+#include <util/delay.h>
 
 void adc_init() {
 	ADCA.CTRLA = ADC_ENABLE_bm;
@@ -25,6 +26,16 @@ uint16_t adc_sample(uint8_t pin) {
 	while (!(adc->CH0.INTFLAGS & ADC_CH_CHIF_bm)) { } // wait for it to complete
 	adc->CH0.INTFLAGS = ADC_CH_CHIF_bm; // clear completion flag
 	return adc->CH0.RES;
+}
+
+uint16_t adc_sample_average(uint8_t pin, uint8_t samples) {
+	uint32_t tot=0;
+	for (int i=0; i<samples; i++) {
+		tot += adc_sample(pin);
+		_delay_us(100);
+	}
+	
+	return (uint16_t)(tot / (uint32_t)samples);
 }
 
 float adc_sampleFloat(uint8_t pin) {

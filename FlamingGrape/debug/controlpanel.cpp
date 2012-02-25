@@ -245,7 +245,7 @@ void controlpanel_sensor() {
 		switch (controlpanel_promptChar("Sensor")) {		
 			case 'a':
 				for (int i=0; i<8; i++)
-					printf_P(PSTR("%d "), adc_sample(i));
+					printf_P(PSTR("%d "), adc_sample_average(i, 10));
 				putchar('\n');
 				break;
 
