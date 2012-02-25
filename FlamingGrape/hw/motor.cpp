@@ -9,6 +9,8 @@ static PORT_t &pwmport = PORTF;
 static const int pwmpins_mask = 0x0F;
 static TC0_t &pwmtim = TCF0;
 
+static const bool flip[4] = {false, false, false, true};
+
 void motor_init() {
 	ctrlport.DIRSET = ctrlpins_mask;
 	pwmport.DIRSET = pwmpins_mask;
@@ -22,6 +24,9 @@ void motor_setpwm(uint8_t mot, int16_t pwm) {
 	uint8_t in1pin_mask = _BV(2*mot);
 	uint8_t in2pin_mask = in1pin_mask << 1;
 	register16_t &ccreg = (&pwmtim.CCABUF)[mot]; // CCxBUF registers are adjacent in memory
+
+	if (flip[mot])
+		pwm = -pwm;
 
 	if (pwm == 0) {
 		ctrlport.OUTCLR = in1pin_mask | in2pin_mask;
@@ -48,6 +53,9 @@ int16_t motor_getpwm(uint8_t mot) {
 
 	uint8_t in1pin_mask = _BV(2*mot);
 	if (!(ctrlport.IN & in1pin_mask))
+		pwm = -pwm;
+
+	if (flip[mot])
 		pwm = -pwm;
 
 	return pwm;
