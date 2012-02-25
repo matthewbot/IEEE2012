@@ -211,6 +211,10 @@ void controlpanel_motor() {
 					pwm = motor_maxpwm;
 					break;
 					
+				case 'd':
+					pwm = -pwm;
+					break;
+					
 				case ' ':
 					pwm = 0;
 					break;
