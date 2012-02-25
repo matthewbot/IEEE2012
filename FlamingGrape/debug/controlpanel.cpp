@@ -425,20 +425,26 @@ void controlpanel_tests() {
 				break;
 
 			case 'h':
+				motor_setpwm(MOTOR_DEPLOY, 800);
+				while (adc_sample_average(ADC_BEAM_BREAK, 5) < 3500) { }
+				printf("Entered\n");
+				_delay_ms(100);
+				while (adc_sample_average(ADC_BEAM_BREAK, 5) > 3500) { }
+				printf("Left\n");
+				_delay_ms(500);
+				motor_setpwm(MOTOR_DEPLOY, 0);
+				
+				_delay_ms(2000);
+				
+			
 				drive_fd_dist(50, 30);
 				motor_setpwm(MOTOR_DEPLOY, 800);
-				_delay_ms(5000);
+				_delay_ms(1500);
+				motor_setpwm(MOTOR_DEPLOY, motor_maxpwm);
+				_delay_ms(1500);
+				motor_setpwm(MOTOR_DEPLOY, 800);
+				drive_bk_dist(4, 5);
 				motor_setpwm(MOTOR_DEPLOY, 0);
-				_delay_ms(1000);
-				
-				for (int i=0; i<3; i++) {
-					drive_fd(30);
-					_delay_ms(250);
-					drive_bk(30);
-					_delay_ms(100);
-				}
-				
-				drive_bk_dist(10, 5);
 				break;
 
 			case 'L':

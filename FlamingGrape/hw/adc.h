@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 enum {
+	ADC_BEAM_BREAK = 0,
 	ADC_FRONT_LEFT_RANGE=4,
 	ADC_FRONT_RIGHT_RANGE=6,
 	ADC_SIDE_LEFT_RANGE=3,		// Not on yet
