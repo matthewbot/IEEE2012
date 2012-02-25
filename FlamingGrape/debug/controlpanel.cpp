@@ -82,7 +82,6 @@ void controlpanel_drive() {
 			case 'D':
 				drive_rturn_deg(90, speed);
 				break;	
-				
 			case '=':
 				speed += 2;
 				printf_P(PSTR("Speed: %f\n"), speed);
@@ -440,6 +439,21 @@ void controlpanel_tests() {
 				}
 				
 				drive_bk_dist(10, 5);
+				break;
+
+			case 'L':
+				debug_setLED(ERROR_LED, true);
+				_delay_ms(1000);
+				debug_setLED(ERROR_LED, false);
+				debug_setLED(YELLOW_LED, true);
+				_delay_ms(1000);
+				debug_setLED(YELLOW_LED, false);
+				debug_setLED(GREEN_LED, true);
+				_delay_ms(1000);
+				debug_setLED(GREEN_LED, false);
+				debug_setLED(OTHERYELLOW_LED, true);
+				_delay_ms(1000);
+				debug_setLED(OTHERYELLOW_LED, false);
 				break;
 				
 			case 'q':

@@ -14,7 +14,11 @@
 
 // debug LED
 static PORT_t &ledport = PORTR;
-static const int ledpin = 1;
+static const int boardled_mask = _BV(1);
+
+// debug LED BoB
+static PORT_t &debugledport = PORTE;
+static const int debugled_mask = _BV(2) | _BV(3) | _BV(4) | _BV(5);
 
 // debug timer
 static TC1_t &tim = TCC1;
@@ -31,8 +35,9 @@ static int get(FILE* file);
 static FILE stdinout;
 
 void debug_init() {
-	ledport.DIRSET = _BV(ledpin);
-	debug_setLED(false);
+	ledport.DIRSET = boardled_mask;
+	debugledport.DIRSET = debugled_mask;
+	debug_setLED(BOARD_LED, false);
 	
 	tim.CTRLA = TC_CLKSEL_DIV64_gc; // 32Mhz / 64 = .5 Mhz timer
 	tim.PER = 0xFFFF; // 1Mhz / 65536 = 65ms
@@ -45,7 +50,7 @@ void debug_init() {
 void debug_tick() {
 	if (adc_getBattery() < 10) {
 		if (++batterycnt >= 100)
-			debug_halt("Low battery");
+			debug_halt("STOP USING THE ROBOT CHARGE ME BRO");
 	} else {
 		batterycnt = 0;
 	}	
@@ -78,11 +83,20 @@ static int get(FILE* file) {
 	return ch;
 }
 
-void debug_setLED(bool on) {
-	if (on)
-		ledport.OUTCLR = _BV(ledpin);
-	else
-		ledport.OUTSET = _BV(ledpin);
+void debug_setLED(DebugLED led, bool on) {
+	if (led == BOARD_LED) {
+		if (on) {
+			ledport.OUTCLR = boardled_mask;
+		} else {
+			ledport.OUTSET = boardled_mask;
+		}
+	} else {
+		if (on) {
+			debugledport.OUTSET = _BV(led + 1);
+		} else {
+			debugledport.OUTCLR = _BV(led + 1);
+		}
+	}
 }
 
 void debug_resetTimer() {
@@ -120,8 +134,8 @@ void debug_halt(const char *reason) {
 	
 	bool led=false;
 	while (true) {
-		printf_P(PSTR("Halted. %s\n"), reason);
-		debug_setLED(led);
+		printf_P(PSTR("Halted like a boss. %s\n"), reason);
+		debug_setLED(BOARD_LED, led);
 		led = !led;
 		_delay_ms(1000);
 	}
