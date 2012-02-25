@@ -4,6 +4,8 @@
 #include "hw/motor.h"
 #include "control/pid.h"
 
+static const int motorcontrol_count = 2;
+
 void motorcontrol_init();
 
 float motorcontrol_getrps(int mot);

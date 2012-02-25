@@ -24,7 +24,7 @@ struct MotorInfo {
 	volatile uint16_t prev_enc; // used to find motor velocity
 };
 
-static MotorInfo motinfo[motor_count];
+static MotorInfo motinfo[motorcontrol_count];
 
 void motorcontrol_init() {
 	motinfo[0].m = 51.307   / motor_maxpwm;
@@ -51,7 +51,7 @@ void motorcontrol_setEnabled(bool new_enabled) {
 		return;
 	
 	if (new_enabled) {
-		for (int i=0; i<motor_count; i++)
+		for (int i=0; i<motorcontrol_count; i++)
 			motinfo[i].prev_enc = enc_get(i);
 		enabled = true;
 	} else {
@@ -78,7 +78,7 @@ void motorcontrol_tick() {
 	if (!enabled)
 		return;
 
-	for (int motnum=0; motnum<motor_count; motnum++) { // for each motor
+	for (int motnum=0; motnum<motorcontrol_count; motnum++) { // for each motor
 		MotorInfo &mot = motinfo[motnum]; // get its motor information
 
 		uint16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update

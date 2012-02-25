@@ -9,7 +9,7 @@ enum Motor {
 	MOTOR_DEPLOY = 3
 };
 
-static const int motor_count = 2;
+static const int motor_count = 4;
 static const int16_t motor_maxpwm = 1024;
 
 void motor_init();
