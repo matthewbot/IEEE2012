@@ -1,5 +1,8 @@
 #include "hw/uart.h"
+#include "hw/motor.h"
+#include "debug/debug.h"
 #include "util.h"
+#include <util/delay.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
@@ -52,6 +55,7 @@ void uart_init() {
 	uart_xbee.CTRLC = USART_CHSIZE_8BIT_gc;
 	uart_xbee.BAUDCTRLA = bsel_xbee & 0xFF;
 	uart_xbee.BAUDCTRLB = (bscale_xbee << USART_BSCALE_gp) | (bsel_xbee >> 8);
+
 }
 
 bool uart_put(UARTNum num, char ch) {
@@ -103,6 +107,16 @@ static void receive(UARTNum num) {
 	UARTData &data = uartdata[num];
 	uint8_t byte = uarts[num]->DATA;
 	
+	if (byte == '!') {
+		cli();
+		motor_allOff();
+		_delay_ms(100);
+		CPU_CCP = CCP_IOREG_gc;
+		RST.CTRL = RST_SWRST_bm;
+		debug_setLED(ERROR_LED, true);
+	}
+		
+
 	if (data.inbuf_pos >= sizeof(data.inbuf))
 		return;
 		
