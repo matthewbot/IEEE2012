@@ -29,7 +29,7 @@ struct LineFollowResults {
 };
 void linefollow_printResults(const LineFollowResults &results);
 
-void linefollow_start(float vel, float linepos=0);
+bool linefollow_start(float vel, float linepos=0);
 void linefollow_stop();
 bool linefollow_isDone();
 void linefollow_waitDone();

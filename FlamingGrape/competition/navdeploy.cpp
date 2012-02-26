@@ -1,4 +1,5 @@
 #include "competition/navdeploy.h"
+#include "competition/nav.h"
 #include "control/drive.h"
 #include "control/deploy.h"
 #include "control/linefollow.h"
@@ -31,21 +32,10 @@ void navdeploy_aroundBox() {
 	linefollow_waitDone();
 }
 
-bool navdeploy_loopback() { // follow intersection?
+bool navdeploy_loopback() {
 	deploy_start();		
-	while (true) {
-		linefollow_start(60);
-		linefollow_waitDone();
-		
-		if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
-			break;
-		else if (linefollow_getLastTurn() == TURN_LEFT)
-			drive_lturn_deg(50, 80);
-		else if (linefollow_getLastTurn() == TURN_RIGHT)
-			drive_rturn_deg(50, 80);
-		else
-			break;
-	}
+	if (!nav_linefollowIntersection())
+		return false;
 	drive_stop();
 	return true;
 }

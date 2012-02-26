@@ -20,13 +20,17 @@ static volatile LineFollowFeature lastfeature;
 static volatile LineFollowTurn lastturn;
 static PIDState pidstate;
 
-void linefollow_start(float newvel, float newlinepos) {
+bool linefollow_start(float newvel, float newlinepos) {
+	if (linefollow_readSensor().feature == FEATURE_NOLINE)
+		return false;
+	
 	pid_initState(pidstate);
 	vel = newvel;
 	linepos = newlinepos;
 	lastturn = TURN_NONE;
 	lastfeature = FEATURE_NONE;
 	enabled = true;
+	return true;
 }
 
 void linefollow_stop() {
