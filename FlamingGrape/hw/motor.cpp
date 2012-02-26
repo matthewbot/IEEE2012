@@ -9,7 +9,7 @@ static PORT_t &pwmport = PORTF;
 static const int pwmpins_mask = 0x0F;
 static TC0_t &pwmtim = TCF0;
 
-static const bool flip[4] = {false, false, false, false};
+static const bool flip[4] = {true, false, false, false};
 
 void motor_init() {
 	ctrlport.DIRSET = ctrlpins_mask;

@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static PIDGains pidgains = {45, 0, 2};
+static PIDGains pidgains = {45, 0, 4};
 static float thresh = 3;
 
 static volatile bool enabled;
@@ -65,7 +65,11 @@ LineFollowResults linefollow_readSensor() {
 	float tot=0;
 	
 	for (int i=0; i<linesensor_count; i++) {
-		float light = 5E15 / pow4(1.0f+readings[i]); // maps line to ~35, dark to <<0
+		float light;
+		if (readings[i] > 500)
+			light = 5E15 / pow4(1.0f+readings[i]); // maps line to ~35, dark to <<0
+		else
+			light = 0;
 		results.light[i] = light;
 		results.thresh[i] = light > thresh;
 		
@@ -104,7 +108,7 @@ LineFollowResults linefollow_readSensor() {
 void linefollow_waitLine() {
 	while (true) {
 		LineFollowResults results = linefollow_readSensor();
-		if (results.feature != FEATURE_NOLINE)
+		if (results.thresh[3] || results.thresh[4])
 			break;
 		tick_wait();
 	}

@@ -27,10 +27,10 @@ struct MotorInfo {
 static MotorInfo motinfo[motorcontrol_count];
 
 void motorcontrol_init() {
-	motinfo[0].m = 51.307   / motor_maxpwm;
-	motinfo[0].b = 473.6371 / motor_maxpwm;
-	motinfo[1].m = 48.755   / motor_maxpwm;
-	motinfo[1].b = 476.1585 / motor_maxpwm;
+	motinfo[0].m = 43.838  / motor_maxpwm;
+	motinfo[0].b = 488.072 / motor_maxpwm;
+	motinfo[1].m = 43.683  / motor_maxpwm;
+	motinfo[1].b = 472.567 / motor_maxpwm;
 }
 
 float motorcontrol_getrps(int motnum) {
@@ -56,7 +56,8 @@ void motorcontrol_setEnabled(bool new_enabled) {
 		enabled = true;
 	} else {
 		enabled = false;
-		motor_allOff();
+		for (int i=0; i<motorcontrol_count; i++)
+			motor_setpwm(i, 0);
 	}
 }
 
