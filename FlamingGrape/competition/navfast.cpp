@@ -1,4 +1,4 @@
-#include "competition/nav.h"
+#include "competition/navfast.h"
 #include "control/drive.h"
 #include "control/linefollow.h"
 #include "hw/adc.h"
@@ -8,7 +8,7 @@
 
 #include <util/delay.h>
 
-bool nav_loopback() {
+bool navfast_loopback() {
 	uint8_t turncount = 0;
 	
 	while (true) {
@@ -48,7 +48,7 @@ bool nav_loopback() {
 	return false;
 }
 
-bool nav_leftright(bool right) {
+bool navfast_leftright(bool right) {
 	if (right) {
 		drive_rturn_deg(30, 50);
 	} else {

@@ -5,7 +5,7 @@
 #include "control/motorcontrol.h"
 #include "control/drive.h"
 #include "control/deploy.h"
-#include "competition/nav.h"
+#include "competition/navfast.h"
 #include "competition/navdeploy.h"
 #include "hw/motor.h"
 #include "hw/mag.h"
@@ -395,11 +395,11 @@ void controlpanel_tests() {
 			};
 			
 			case 'l': {
-				bool ok = nav_loopback();
+				bool ok = navfast_loopback();
 				printf_P(PSTR("Loopback ok: %d\n"), ok);
 				if (ok) {
 					static bool right=false;
-					ok = nav_leftright(right);
+					ok = navfast_leftright(right);
 					printf_P(PSTR("leftirght ok: %d\n"), ok);
 					right = !right;
 				}
