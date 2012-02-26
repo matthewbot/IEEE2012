@@ -75,16 +75,16 @@ void controlpanel_drive() {
 				break;
 				
 			case 'W':
-				drive_fd_dist(16, speed);
+				drive_fd_dist(speed, 16);
 				break;
 			case 'A':
-				drive_lturn_deg(90, speed);
+				drive_lturn_deg(speed, 90);
 				break;
 			case 'S':
-				drive_bk_dist(16, speed);
+				drive_bk_dist(speed, 16);
 				break;
 			case 'D':
-				drive_rturn_deg(90, speed);
+				drive_rturn_deg(speed, 90);
 				break;	
 			case '=':
 				speed += 2;
@@ -378,9 +378,9 @@ void controlpanel_tests() {
 					if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
 						break;
 					else if (linefollow_getLastTurn() == TURN_LEFT)
-						drive_lturn_deg(80, 50);
+						drive_lturn_deg(50, 80);
 					else if (linefollow_getLastTurn() == TURN_RIGHT)
-						drive_rturn_deg(80, 50);
+						drive_rturn_deg(50, 80);
 					else
 						break;
 				}

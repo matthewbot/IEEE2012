@@ -31,10 +31,10 @@ bool nav_loopback() {
 		
 		if (linefollow_getLastFeature() == FEATURE_NOLINE) {
 			if (linefollow_getLastTurn() == TURN_LEFT) {
-				drive_lturn_deg(80, 50);
+				drive_lturn_deg(50, 80);
 				turncount++;
 			} else if (linefollow_getLastTurn() == TURN_RIGHT) {
-				drive_rturn_deg(80, 50);
+				drive_rturn_deg(50, 80);
 				turncount++;
 			} else {
 				break;

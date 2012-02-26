@@ -58,7 +58,7 @@ void drive_lturn(float vel) {
 	drive(-vel, vel);
 }
 
-void drive_lturn_deg(float deg, float vel) {
+void drive_lturn_deg(float vel, float deg) {
 	drive_dist(-vel, vel, degtorad(deg) * wheelbase_radius, MOTOR_RIGHT);
 }
 
@@ -66,7 +66,7 @@ void drive_rturn(float vel) {
 	drive(vel, -vel);
 }
 
-void drive_rturn_deg(float deg, float vel) {
+void drive_rturn_deg(float vel, float deg) {
 	drive_dist(vel, -vel, degtorad(deg) * wheelbase_radius, MOTOR_LEFT);
 }
 
