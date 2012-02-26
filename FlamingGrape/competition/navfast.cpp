@@ -5,8 +5,23 @@
 #include "hw/adc.h"
 #include "hw/tick.h"
 #include "debug/debug.h"
-#include <stdio.h>
+#include <avr/pgmspace.h>
 #include <util/delay.h>
+#include <stdio.h>
+
+void navfast_lap() {
+	if (!navfast_loopback()) {
+		printf_P(PSTR("Failed loopback\n"));
+		return;
+	}
+	
+	static bool right;
+	right = !right;
+	if (!navfast_leftright(right)) {
+		printf_P(PSTR("Failed leftright\n"));
+		return;
+	}
+}
 
 bool navfast_loopback() {
 	if (!nav_linefollowTurns(2))

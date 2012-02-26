@@ -5,6 +5,7 @@
 #include "control/motorcontrol.h"
 #include "control/drive.h"
 #include "control/deploy.h"
+#include "competition/nav.h"
 #include "competition/navfast.h"
 #include "competition/navdeploy.h"
 #include "hw/motor.h"
@@ -320,24 +321,6 @@ void controlpanel_sensor() {
 				break;
 			}
 
-			case 'M': {
-				MagReading first_reading = mag_getReading();
-				MagReading reading;
-				bool returning = false;
-				while (true) {
-					printf_P(PSTR("%5d %5d %5d\n"), reading.x, reading.y, reading.z);
-					drive_lturn(10);
-					reading = mag_getReading();
-					if (!returning && (abs(reading.x - first_reading.x) > 100)) {
-						returning = true;
-					} else if (returning && (abs(reading.x - first_reading.x) < 20)) {
-						break;
-					}
-				}
-				drive_stop();
-				break;
-			}
-			
 			case 'q':
 				return;
 				
@@ -353,68 +336,24 @@ void controlpanel_tests() {
 	
 	while (true) {
 		switch (controlpanel_promptChar("Tests")) {
-			case 'f': {
-				float vel;
-				if (!controlpanel_prompt("Velocity", "%f", &vel)) {
-					printf_P(PSTR("Canceled.\n"));
-					break;
-				}
-					
-				printf_P(PSTR("Push any key to stop. "));
-				linefollow_start(vel);
-				getchar();
-				linefollow_stop();
-				putchar('\n');
-				
-				printf_P(PSTR("Turn:\t")); linefollow_printTurn(linefollow_getLastTurn()); putchar('\n');
-				printf_P(PSTR("Feat:\t")); linefollow_printFeature(linefollow_getLastFeature()); putchar('\n');
+			case 'f':
+				tests_linefollow();
 				break;
-			}
 			
-			case 'i': {
-				while (true) {
-					linefollow_start(60);
-					linefollow_waitDone();
-					
-					if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
-						break;
-					else if (linefollow_getLastTurn() == TURN_LEFT)
-						drive_lturn_deg(50, 80);
-					else if (linefollow_getLastTurn() == TURN_RIGHT)
-						drive_rturn_deg(50, 80);
-					else
-						break;
-				}
-				drive_stop();
-				
-				if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
+			case 'i':
+				if (nav_linefollowIntersection())
 					printf_P(PSTR("Intersection!\n"));
 				else
 					printf_P(PSTR("Error\n"));
 				break;
-			};
-			
-			case 'l': {
-				bool ok = navfast_loopback();
-				printf_P(PSTR("Loopback ok: %d\n"), ok);
-				if (ok) {
-					static bool right=false;
-					ok = navfast_leftright(right);
-					printf_P(PSTR("leftirght ok: %d\n"), ok);
-					right = !right;
-				}
+
+			case 'l':
+				navfast_lap();
 				break;
-			}
 			
-			case 'd': {
-				navdeploy_loopback();
-				navdeploy_deploy();
-				navdeploy_aroundBox();
-				navdeploy_middle();
-				navdeploy_deploy();
-				navdeploy_aroundBox();
+			case 'd':
+				navdeploy_lap();
 				break;
-			}
 				
 			case 'g': {
 				PIDGains newgains;
@@ -431,6 +370,10 @@ void controlpanel_tests() {
 				tests_pwm();
 				break;
 				
+			case 'M':
+				tests_mag();
+				break;
+				
 			case 'P':
 				linefollow_setDebug(true);
 				break;
@@ -439,41 +382,8 @@ void controlpanel_tests() {
 				linefollow_setDebug(false);
 				break;
 
-			case 'h':
-				motor_setpwm(MOTOR_DEPLOY, 700);
-				while (adc_sampleAverage(ADC_BEAM_BREAK, 5) < 3500) { }
-				printf("Entered\n");
-				_delay_ms(100);
-				while (adc_sampleAverage(ADC_BEAM_BREAK, 5) > 3500) { }
-				printf("Left\n");
-				motor_setpwm(MOTOR_DEPLOY, 0);
-				
-				_delay_ms(2000);
-				
-			
-				drive_fd_dist(50, 30);
-				motor_setpwm(MOTOR_DEPLOY, 700);
-				_delay_ms(1500);
-				motor_setpwm(MOTOR_DEPLOY, motor_maxpwm);
-				_delay_ms(1500);
-				motor_setpwm(MOTOR_DEPLOY, 700);
-				drive_bk_dist(4, 5);
-				motor_setpwm(MOTOR_DEPLOY, 0);
-				break;
-
 			case 'L':
-				debug_setLED(ERROR_LED, true);
-				_delay_ms(1000);
-				debug_setLED(ERROR_LED, false);
-				debug_setLED(YELLOW_LED, true);
-				_delay_ms(1000);
-				debug_setLED(YELLOW_LED, false);
-				debug_setLED(GREEN_LED, true);
-				_delay_ms(1000);
-				debug_setLED(GREEN_LED, false);
-				debug_setLED(OTHERYELLOW_LED, true);
-				_delay_ms(1000);
-				debug_setLED(OTHERYELLOW_LED, false);
+				tests_led();
 				break;
 				
 			case 'q':

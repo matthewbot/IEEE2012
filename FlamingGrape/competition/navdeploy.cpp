@@ -5,6 +5,29 @@
 #include "control/linefollow.h"
 #include "debug/debug.h"
 #include <util/delay.h>
+#include <avr/pgmspace.h>
+#include <stdio.h>
+
+void navdeploy_lap() {
+	if (!navdeploy_loopback()) {
+		printf_P(PSTR("Failed loopback\n"));
+		return;
+	}
+	navdeploy_deploy();
+	if (!navdeploy_aroundBox()) {
+		printf_P(PSTR("Failed aroundbox\n"));
+		return;
+	}
+	if (!navdeploy_middle()) {
+		printf_P(PSTR("Failed middle\n"));
+		return;
+	}
+	navdeploy_deploy();
+	if (!navdeploy_aroundBox()) {
+		printf("Failed aroundbox\n");
+		return;
+	}
+}
 
 void navdeploy_deploy() {
 	deploy_waitDone();
@@ -22,13 +45,14 @@ void navdeploy_deploy() {
 	deploy_start();
 }
 
-void navdeploy_aroundBox() {
+bool navdeploy_aroundBox() {
 	drive_bk_dist(30, 15);
 	drive_lturn_deg(60, 15);
 	drive_fd_dist(60, 26);
 	drive_rturn_deg(60, 60);
 	
-	linefollow_start(60, .4);
+	if (!linefollow_start(60, .4))
+		return false;
 	linefollow_waitDone();
 }
 
@@ -46,7 +70,8 @@ bool navdeploy_middle() {
 	drive_fd(60);
 	linefollow_waitLine();
 	drive_lturn_deg(50, 80);
-	linefollow_start(60);
+	if (!linefollow_start(60))
+		return false;
 	linefollow_waitDone();
 	drive_stop();
 	return true;
