@@ -6,6 +6,7 @@
 #include "control/drive.h"
 #include "control/deploy.h"
 #include "competition/nav.h"
+#include "competition/navdeploy.h"
 #include "hw/motor.h"
 #include "hw/mag.h"
 #include "hw/enc.h"
@@ -402,6 +403,16 @@ void controlpanel_tests() {
 					printf_P(PSTR("leftirght ok: %d\n"), ok);
 					right = !right;
 				}
+				break;
+			}
+			
+			case 'd': {
+				navdeploy_loopback();
+				navdeploy_deploy();
+				navdeploy_aroundBox();
+				navdeploy_middle();
+				navdeploy_deploy();
+				navdeploy_aroundBox();
 				break;
 			}
 				

@@ -10,6 +10,7 @@ bool deploy_getBeamBreak();
 void deploy_start();
 void deploy_stop();
 bool deploy_isDone();
+void deploy_waitDone();
 
 void deploy_tick();
 

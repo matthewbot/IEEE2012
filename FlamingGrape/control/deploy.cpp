@@ -39,6 +39,10 @@ bool deploy_isDone() {
 	return !enabled;
 }
 
+void deploy_waitDone() {
+	while (enabled) { }
+}
+
 void deploy_tick() {
 	beambreak_filtered = .9f*beambreak_filtered + .1f*adc_sample(ADC_BEAM_BREAK);
 	
