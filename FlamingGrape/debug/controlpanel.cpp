@@ -40,6 +40,9 @@ void controlpanel() {
 			case 't':
 				controlpanel_tests();
 				break;
+			case 'n':
+				controlpanel_nav();
+				break;
 			case 'D':
 				controlpanel_deploy();
 				break;
@@ -331,6 +334,61 @@ void controlpanel_sensor() {
 	}
 }
 
+void controlpanel_nav() {
+	while (true) {
+		switch (controlpanel_promptChar("Nav")) {
+			case 'i':
+				if (nav_linefollowIntersection())
+					printf_P(PSTR("Intersection!\n"));
+				else
+					printf_P(PSTR("Error\n"));
+				break;
+				
+			case 't': {
+				int turns;
+				if (!controlpanel_prompt("Turns", "%d", &turns)) {
+					printf_P(PSTR("Canceled.\n"));
+					break;
+				}
+				
+				if (nav_linefollowTurns(turns))
+					printf_P(PSTR("Ok.\n"));
+				else
+					printf_P(PSTR("Error\n"));
+				break;
+			}
+			
+			case 'g': {
+				float heading;
+				if (!controlpanel_prompt("Heading", "%f", &heading)) {
+					printf_P(PSTR("Canceled.\n"));
+					break;
+				}
+				
+				float dist;
+				if (!controlpanel_prompt("Dist", "%f", &dist)) {
+					printf_P(PSTR("Canceled.\n"));
+					break;
+				}
+				
+				nav_magGo(heading, dist);
+				break;
+			}
+			
+			case 'f':
+				navfast_lap();
+				break;
+			
+			case 'd':
+				navdeploy_lap();
+				break;
+
+			case 'q':
+				return;
+		}
+	}
+}
+
 void controlpanel_tests() {
 	bool linedebug=false;
 	
@@ -339,22 +397,7 @@ void controlpanel_tests() {
 			case 'f':
 				tests_linefollow();
 				break;
-			
-			case 'i':
-				if (nav_linefollowIntersection())
-					printf_P(PSTR("Intersection!\n"));
-				else
-					printf_P(PSTR("Error\n"));
-				break;
 
-			case 'l':
-				navfast_lap();
-				break;
-			
-			case 'd':
-				navdeploy_lap();
-				break;
-				
 			case 'g': {
 				PIDGains newgains;
 				if (controlpanel_promptGains("linefollow", linefollow_getGains(), newgains)) {

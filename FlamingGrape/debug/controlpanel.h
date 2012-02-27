@@ -10,6 +10,7 @@ void controlpanel();
 void controlpanel_sensor();
 void controlpanel_motor();
 void controlpanel_drive();
+void controlpanel_nav();
 void controlpanel_tests();
 void controlpanel_deploy();
 
