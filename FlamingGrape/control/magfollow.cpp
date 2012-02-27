@@ -30,7 +30,7 @@ void magfollow_setDebug(bool new_debug) {
 
 void magfollow_stop() {
 	enabled = false;
-	motorcontrol_setEnabled(false);
+	drive_stop();
 }
 
 float magfollow_getHeading() {

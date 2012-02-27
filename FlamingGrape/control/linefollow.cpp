@@ -35,7 +35,7 @@ bool linefollow_start(float newvel, float newlinepos) {
 
 void linefollow_stop() {
 	enabled = false;
-	motorcontrol_setEnabled(false);
+	drive_stop();
 }
 
 bool linefollow_isDone() {
