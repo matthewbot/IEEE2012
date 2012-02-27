@@ -73,3 +73,22 @@ void drive_rturn_deg(float vel, float deg) {
 void drive_steer(float steer, float vel) {
 	drive(vel + steer, vel - steer);
 }
+
+void drive_wait_dist(float dist) {
+	uint16_t leftenc = enc_get(MOTOR_LEFT);
+	uint16_t rightenc = enc_get(MOTOR_RIGHT);
+	
+	while (true) {
+		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
+		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
+		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2);
+		
+		if (dist > 0) {
+			if (curdist >= dist)
+				break;
+		} else {
+			if (curdist <= dist)
+				break;
+		}
+	}
+}

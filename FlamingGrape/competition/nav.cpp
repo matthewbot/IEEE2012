@@ -1,12 +1,19 @@
 #include "competition/nav.h"
 #include "control/drive.h"
 #include "control/linefollow.h"
+#include "control/magfollow.h"
 #include "hw/adc.h"
 #include "hw/tick.h"
 #include "debug/debug.h"
+#include "util.h"
 #include <stdio.h>
 #include <util/delay.h>
 
+void nav_magGo(float heading_deg, float dist) {
+	magfollow_start(60, degtorad(heading_deg));
+	drive_wait_dist(dist);
+	magfollow_stop();
+}
 
 bool nav_linefollowIntersection() {
 	while (true) {

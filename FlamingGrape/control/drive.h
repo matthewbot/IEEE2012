@@ -17,4 +17,6 @@ void drive_rturn_deg(float vel, float deg);
 
 void drive_steer(float steer, float vel);
 
+void drive_wait_dist(float dist);
+
 #endif
