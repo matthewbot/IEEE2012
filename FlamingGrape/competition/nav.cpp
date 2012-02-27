@@ -17,8 +17,8 @@ void nav_magGo(float heading_deg, float dist) {
 
 bool nav_linefollowIntersection() {
 	while (true) {
-		linefollow_start(60);
-		linefollow_waitDone();
+		if (!nav_linefollow())
+			return false;
 		
 		if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
 			return true;
@@ -33,8 +33,8 @@ bool nav_linefollowIntersection() {
 
 bool nav_linefollowTurns(int turncount) {
 	while (true) {
-		linefollow_start(60);
-		linefollow_waitDone();
+		if (!nav_linefollow())
+			return false;
 		
 		if (linefollow_getLastTurn() == TURN_LEFT) {
 			if (--turncount <= 0)
@@ -47,5 +47,28 @@ bool nav_linefollowTurns(int turncount) {
 		} else {
 			return false;
 		}
-	}	
+	}
+}
+
+bool nav_linefollowRange(float range) {
+	if (!linefollow_start(60))
+		return false;
+	_delay_ms(100);
+	
+	while (!linefollow_isDone()) {
+		float reading = adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE);
+		if (reading < range) {
+			linefollow_stop();
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+bool nav_linefollow() {
+	if (!linefollow_start(60))
+		return false;
+	linefollow_waitDone();
+	return true;
 }

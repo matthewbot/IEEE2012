@@ -27,20 +27,9 @@ bool navfast_loopback() {
 	if (!nav_linefollowTurns(2))
 		return false;
 	
-	if (!linefollow_start(60))
+	if (!nav_linefollowRange(35))
 		return false;
-	_delay_ms(100);
-	
-	while (!linefollow_isDone()) {
-		float reading = adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE);
-		if (reading < 35) {
-			linefollow_stop();
-			drive_stop();
-			return true;
-		}
-	}
 			
-	drive_stop();
 	return false;
 }
 
