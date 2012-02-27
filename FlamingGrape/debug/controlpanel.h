@@ -8,6 +8,7 @@ void controlpanel_init();
 
 void controlpanel();
 void controlpanel_sensor();
+void controlpanel_gains();
 void controlpanel_motor();
 void controlpanel_drive();
 void controlpanel_nav();

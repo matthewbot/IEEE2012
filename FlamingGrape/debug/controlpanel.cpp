@@ -2,6 +2,7 @@
 #include "debug/debug.h"
 #include "debug/tests.h"
 #include "control/linefollow.h"
+#include "control/magfollow.h"
 #include "control/motorcontrol.h"
 #include "control/drive.h"
 #include "control/deploy.h"
@@ -33,6 +34,9 @@ void controlpanel() {
 			case 'd':
 				controlpanel_drive();
 				break;
+			case 'g':
+				controlpanel_gains();
+				break;
 			case 'm':
 				controlpanel_motor();
 				break;
@@ -56,6 +60,7 @@ void controlpanel() {
 					"Control Panels:\n"
 					"  d - Drive\n"
 					"  D - Deploy\n"
+					"  g - Gains\n"
 					"  m - Motor\n"
 					"  s - Sensor\n"
 					"  n - Nav\n"
@@ -117,18 +122,7 @@ void controlpanel_drive() {
 				speed -= 10;
 				printf_P(PSTR("Speed: %f\n"), speed);
 				break;
-				
-			case 'g': {
-				PIDGains newgains;
-				if (controlpanel_promptGains("motorcontrol", motorcontrol_getGains(), newgains)) {
-					motorcontrol_setGains(newgains);
-					printf_P(PSTR("Gains set!\n"));
-				} else {
-					printf_P(PSTR("Canceled.\n"));
-				}
-				break;
-			}
-			
+
 			case 'p':
 				motorcontrol_setDebug(false);
 				printf_P(PSTR("Debug disabled\n"));
@@ -195,6 +189,52 @@ void controlpanel_drive() {
 					"  q	 - Back";
 				puts_P(msg);
 				break;
+		}
+	}
+}
+
+void controlpanel_gains() {
+	PIDGains newgains;
+	while (true) {
+		char ch = controlpanel_promptChar("Gains");
+		switch (ch) {
+			case 'm':
+				if (controlpanel_promptGains("motorcontrol", motorcontrol_getGains(), newgains)) {
+					motorcontrol_setGains(newgains);
+					printf_P(PSTR("Gains set!\n"));
+				} else {
+					printf_P(PSTR("Cancelled.\n"));
+				}
+				break;
+			case 'M':
+				if (controlpanel_promptGains("magfollow", magfollow_getGains(), newgains)) {
+					magfollow_setGains(newgains);
+					printf_P(PSTR("Gains set!\n"));
+				} else {
+					printf_P(PSTR("Cancelled.\n"));
+				}
+				break;
+			case 'l':
+				if (controlpanel_promptGains("linefollow", linefollow_getGains(), newgains)) {
+					linefollow_setGains(newgains);
+					printf_P(PSTR("Gains set!\n"));
+				} else {
+					printf_P(PSTR("Cancelled.\n"));
+				}
+				break;
+			case 'q':
+				return;
+			case '?':
+				static const char msg[] PROGMEM =
+					"Gain commands:\n"
+					"  m - Adjust Motor Gains\n"
+					"  M - Adjust Magfollow Gains\n"
+					"  l - Adjust Linefollow Gains\n"
+					"  q	 - Back\n";
+				puts_P(msg);
+				break;
+			default:
+				printf_P(PSTR("Unknown Command, type '?' for help.\n"));
 		}
 	}
 }
@@ -460,17 +500,6 @@ void controlpanel_tests() {
 			case 'f':
 				tests_linefollow();
 				break;
-
-			case 'g': {
-				PIDGains newgains;
-				if (controlpanel_promptGains("linefollow", linefollow_getGains(), newgains)) {
-					linefollow_setGains(newgains);
-					printf_P(PSTR("Gains set!\n"));
-				} else {
-					printf_P(PSTR("Canceled.\n"));
-				}
-				break;
-			}
 			
 			case 'm':
 				tests_pwm();
@@ -503,7 +532,6 @@ void controlpanel_tests() {
 				static const char msg[] PROGMEM = 
 					"Test commands\n"
 					"  f  - Linefollow test\n"
-					"  g  - Set linefollow gains\n"
 					"  m  - Test motor pwm range (floors motors)\n"
 					"  M  - Test magnetometer (spins in place)\n"
 					"  Pp - Enables/Disable line follow debugging\n"

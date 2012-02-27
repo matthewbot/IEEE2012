@@ -80,3 +80,11 @@ const MagCal &magfollow_getCal() {
 	return magcal;
 }
 
+PIDGains magfollow_getGains() {
+	return pidgains;
+}
+
+void magfollow_setGains(const PIDGains &newpidgains) {
+	pidgains = newpidgains;
+}
+

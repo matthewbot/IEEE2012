@@ -1,6 +1,7 @@
 #ifndef MAGFOLLOW_H_
 #define MAGFOLLOW_H_
 
+#include "control/pid.h"
 #include "hw/mag.h"
 
 float magfollow_getHeading();
@@ -20,5 +21,8 @@ struct MagCal {
 
 void magfollow_setCal(const MagCal &magcal);
 const MagCal &magfollow_getCal();
+
+PIDGains magfollow_getGains();
+void magfollow_setGains(const PIDGains &gains);
 
 #endif
