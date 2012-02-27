@@ -25,6 +25,8 @@ void controlpanel_init() {
 	printf_P(PSTR("Starting up\n"));
 }
 
+static const char unknown_str[] PROGMEM = "Unknown. ? for help.";
+
 void controlpanel() {
 	while (true) {
 		switch (controlpanel_promptChar("Main")) {
@@ -46,11 +48,19 @@ void controlpanel() {
 			case 'D':
 				controlpanel_deploy();
 				break;
-			case 'q':
-				printf_P(PSTR("Quitting...\n"));
-				return;
 			default:
-				printf_P(PSTR("Unknown. Commands: drive, sensors, tests\n"));
+				puts_P(unknown_str);
+				break;
+			case '?':
+				static const char msg[] PROGMEM =
+					"Control Panels:\n"
+					"  d - Drive\n"
+					"  D - Deploy\n"
+					"  m - Motor\n"
+					"  s - Sensor\n"
+					"  n - Nav\n"
+					"  t - Tests";
+				puts_P(msg);
 				break;
 		}
 	}
@@ -169,8 +179,21 @@ void controlpanel_drive() {
 				break;
 
 			default:
-				motorcontrol_setEnabled(false);
-				printf_P(PSTR("Unknown. Commands: WASD, +-\n"));
+				puts_P(unknown_str);
+				drive_stop();
+				break;
+			case '?':
+				static const char msg[] PROGMEM =
+					"Drive commands:\n"
+					"  wasd  - Control robot\n"
+					"  space - Stop\n"
+					"  -=_+  - Adjust speed\n"
+					"  WASD  - Execute distance moves\n"
+					"  c	 - Disable motor control\n"
+					"  Pp	- Enable/Disable motor control debug\n"
+					"  zZ	- Moonwalk (WIP)\n"
+					"  q	 - Back";
+				puts_P(msg);
 				break;
 		}
 	}
@@ -232,7 +255,20 @@ void controlpanel_motor() {
 					return;
 					
 				default:
-					printf_P(PSTR("Unknown. Commands 0-3 enable motors, zx pwm, a min, s max\n")); 
+					puts_P(unknown_str);
+					break;
+					
+				case '?':
+					static const char msg[] PROGMEM = 
+						"Motor commands:\n"
+						"  0123  - Toggle motors\n"
+						"  zxZX  - Adjust PWM\n"
+						"  d	 - Flip PWM direction\n"
+						"  space - Zero PWM\n"
+						"  as	 - Max PWM\n"
+						"  e     - Display encoders\n"
+						"  q	 - Back";
+					puts_P(msg);
 					break;
 			}
 			
@@ -328,7 +364,20 @@ void controlpanel_sensor() {
 				return;
 				
 			default:
-				printf_P(PSTR("Unknown. Commands: linesensor-raw, Linesensor-full, analog dump, battery\n"));
+				puts_P(unknown_str);
+				break;
+				
+			case '?':
+				static const char msg[] PROGMEM = 
+					"Sensor commands\n"
+					"  a - Dump analog port A\n"
+					"  r - Rangefinder control panel\n" // Will if you get a chance merge these into the main control panel, one command to show all four rangefinders
+					"  l - Raw line sensor readings\n"
+					"  L - Processed line sensor readings\n"
+					"  b - Battery voltage (approx)\n"
+					"  m - Magnetometer\n"
+					"  q - Back";
+				puts_P(msg);
 				break;
 		}
 	}
@@ -385,13 +434,27 @@ void controlpanel_nav() {
 
 			case 'q':
 				return;
+				
+			default:
+				puts_P(unknown_str);
+				break;
+				
+			case '?':
+				static const char msg[] PROGMEM = 
+					"Nav commands\n"
+					"  i - Intersection line follow\n"
+					"  t - Turn counting line follow\n"
+					"  g - magGo along heading for specific distance\n"
+					"  f - run a fast lap\n"
+					"  d - run a deploying lap\n"
+					"  q - back";
+				puts_P(msg);
+				break;
 		}
 	}
 }
 
 void controlpanel_tests() {
-	bool linedebug=false;
-	
 	while (true) {
 		switch (controlpanel_promptChar("Tests")) {
 			case 'f':
@@ -433,7 +496,20 @@ void controlpanel_tests() {
 				return;
 
 			default:
-				printf_P(PSTR("Unknown. Commands: follow line, gain set, pwm test\n"));
+				puts_P(unknown_str);
+				break;
+				
+			case '?':
+				static const char msg[] PROGMEM = 
+					"Test commands\n"
+					"  f  - Linefollow test\n"
+					"  g  - Set linefollow gains\n"
+					"  m  - Test motor pwm range (floors motors)\n"
+					"  M  - Test magnetometer (spins in place)\n"
+					"  Pp - Enables/Disable line follow debugging\n"
+					"  L  - Tests debug LEDs\n"
+					"  q  - Back";
+				puts_P(msg);
 				break;
 		}
 	}
@@ -466,6 +542,18 @@ void controlpanel_deploy() {
 			case 'q':
 				deploy_stop();
 				return;
+			default:
+				puts_P(unknown_str);
+				static const char msg[] PROGMEM = 
+					"Deploy commands\n"
+					"  io    - Deploy in/out\n"
+					"  IO    - Deploy in/out fast\n"
+					"  b     - Read break beam\n"
+					"  d     - Put module to deploy position\n"
+					"  space - Stop\n"
+					"  q     - Back";
+				puts_P(msg);
+				break;
 		}
 	}
 }	
