@@ -24,10 +24,6 @@ void magfollow_start(float new_vel, float new_heading) {
 	enabled = true;
 }
 
-void magfollow_setDebug(bool new_debug) {
-	debug = new_debug;
-}
-
 void magfollow_stop() {
 	enabled = false;
 	drive_stop();
@@ -70,5 +66,17 @@ void magfollow_tick() {
 		
 		drive_steer(out, vel);
 	}
+}
+
+void magfollow_setDebug(bool new_debug) {
+	debug = new_debug;
+}
+
+void magfollow_setCal(const MagCal &new_magcal) {
+	magcal = new_magcal;
+}
+
+const MagCal &magfollow_getCal() {
+	return magcal;
 }
 
