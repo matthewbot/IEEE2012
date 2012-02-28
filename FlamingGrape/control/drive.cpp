@@ -81,7 +81,7 @@ void drive_wait_dist(float dist) {
 	while (true) {
 		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
 		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
-		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2);
+		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2) / enc_per_rotation;
 		
 		if (dist > 0) {
 			if (curdist >= dist)

@@ -10,7 +10,11 @@
 #include <util/delay.h>
 
 void nav_magGo(float heading_deg, float dist) {
-	magfollow_start(60, degtorad(heading_deg));
+	if (dist > 0) {
+		magfollow_start(60, degtorad(heading_deg));
+	} else {
+		magfollow_start(-60, degtorad(heading_deg));
+	}
 	drive_wait_dist(dist);
 	magfollow_stop();
 }
