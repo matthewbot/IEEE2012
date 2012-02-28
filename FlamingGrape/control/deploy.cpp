@@ -25,7 +25,6 @@ bool deploy_getBeamBreak() {
 }
 
 void deploy_start() {
-	seen_beambreak = false;
 	deploy_out();
 	enabled = true;
 }
@@ -44,18 +43,12 @@ void deploy_waitDone() {
 }
 
 void deploy_tick() {
-	beambreak_filtered = .9f*beambreak_filtered + .1f*adc_sample(ADC_BEAM_BREAK);
+	beambreak_filtered = .90f*beambreak_filtered + .10f*adc_sample(ADC_BEAM_BREAK);
 	
 	if (!enabled)
 		return;
 		
-	bool beambreak = deploy_getBeamBreak();
-	if (!seen_beambreak) {
-		if (beambreak)
-			seen_beambreak = true;
-	} else {
-		if (!beambreak)
-			deploy_stop();
-	}
+	if (deploy_getBeamBreak())
+		deploy_stop();
 }
 	
