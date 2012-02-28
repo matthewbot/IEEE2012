@@ -49,3 +49,4 @@ bool nav_linefollowTurns(int turncount) {
 		}
 	}	
 }
+

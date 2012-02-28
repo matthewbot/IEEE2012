@@ -18,3 +18,13 @@ int vsscanf(const char *s, const char *fmt, va_list ap) {
 	f.buf = (char *)s;
 	return vfscanf(&f, fmt, ap);
 }
+
+float anglewrap(float rad) {
+	if (rad > M_PI) {
+		return rad - 2*M_PI;
+	} else if (rad < -M_PI) {
+		return rad + 2*M_PI;
+	} else {
+		return rad;
+	}
+}

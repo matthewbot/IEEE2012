@@ -2,10 +2,12 @@
 #include "debug/debug.h"
 #include "debug/controlpanel.h"
 #include "control/linefollow.h"
+#include "control/magfollow.h"
 #include "control/drive.h"
 #include "hw/motor.h"
 #include "hw/enc.h"
 #include "hw/mag.h"
+#include "util.h"
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
@@ -42,14 +44,35 @@ void tests_mag() {
 		printf_P(PSTR("%5d %5d %5d\n"), reading.x, reading.y, reading.z);
 		drive_lturn(10);
 		reading = mag_getReading();
-		if (!returning && (abs(reading.x - first_reading.x) > 100)) {
+
+		float diff = sqrtf(squaref(reading.x - first_reading.x) + squaref(reading.y - first_reading.y));
+
+		if (!returning && (diff > 100)) {
 			returning = true;
-		} else if (returning && (abs(reading.x - first_reading.x) < 20)) {
+		} else if (returning && (diff < 20)) {
 			break;
 		}
 	}
 	
 	drive_stop();
+}
+
+void tests_magfollow() {
+	float vel;
+	if (!controlpanel_prompt("Velocity", "%f", &vel)) {
+		printf_P(PSTR("Cancelled.\n"));
+		return;
+	}
+	float heading;
+	if (!controlpanel_prompt("Heading", "%f", &heading)) {
+		printf_P(PSTR("Cancelled.\n"));
+		return;
+	}
+		
+	printf_P(PSTR("Push any key to stop.\n"));
+	magfollow_start(vel, degtorad(heading));
+	getchar();
+	magfollow_stop();
 }
 
 void tests_led() {

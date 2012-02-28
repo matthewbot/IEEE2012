@@ -18,6 +18,8 @@ inline float sign(float in) {
 inline float degtorad(float deg) { return deg * M_PI / 180; }
 inline float radtodeg(float rad) { return rad * 180 / M_PI; }
 
+float anglewrap(float rad);
+
 void msleep(unsigned long ms);
 
 int vsscanf(const char *s, const char *fmt, va_list ap); // avr-libc is missing this for some reason

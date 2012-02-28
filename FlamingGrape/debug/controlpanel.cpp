@@ -400,6 +400,20 @@ void controlpanel_sensor() {
 				break;
 			}
 
+			case 'M': {
+				float heading = magfollow_getHeading();
+				heading = radtodeg(heading);
+				printf_P(PSTR("Mag Heading: %f\n"), heading);
+				break;
+			}
+
+			case 'H': {
+				float newheading;
+				controlpanel_prompt("Heading", "%f", &newheading);
+				magfollow_setHeading(degtorad(newheading));
+				break;
+			}
+
 			case 'q':
 				return;
 				
@@ -416,6 +430,8 @@ void controlpanel_sensor() {
 					"  L - Processed line sensor readings\n"
 					"  b - Battery voltage (approx)\n"
 					"  m - Magnetometer\n"
+					"  M - Magnetometer Heading\n"
+					"  H - Set Magnetometer Heading\n"
 					"  q - Back";
 				puts_P(msg);
 				break;
@@ -501,7 +517,7 @@ void controlpanel_tests() {
 				tests_linefollow();
 				break;
 			
-			case 'm':
+			case 'p':
 				tests_pwm();
 				break;
 				
@@ -509,11 +525,15 @@ void controlpanel_tests() {
 				tests_mag();
 				break;
 				
-			case 'P':
+			case 'm':
+				tests_magfollow();
+				break;
+
+			case 'D':
 				linefollow_setDebug(true);
 				break;
 				
-			case 'p':
+			case 'd':
 				linefollow_setDebug(false);
 				break;
 
@@ -532,9 +552,10 @@ void controlpanel_tests() {
 				static const char msg[] PROGMEM = 
 					"Test commands\n"
 					"  f  - Linefollow test\n"
-					"  m  - Test motor pwm range (floors motors)\n"
+					"  p  - Test motor pwm range (floors motors)\n"
 					"  M  - Test magnetometer (spins in place)\n"
-					"  Pp - Enables/Disable line follow debugging\n"
+					"  m  - Magfollow test\n"
+					"  Dd - Enables/Disable line follow debugging\n"
 					"  L  - Tests debug LEDs\n"
 					"  q  - Back";
 				puts_P(msg);
