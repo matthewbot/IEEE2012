@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static PIDGains pidgains = {45, 0, 4};
+static PIDGains pidgains = {100, 0, 6, 0};
 static float thresh = 3;
 
 static volatile bool enabled;
@@ -98,7 +98,7 @@ LineFollowResults linefollow_readSensor() {
 		results.turn = TURN_NONE;
 	}
 
-	if (results.thresh_count > 6) {
+	if (results.thresh_count > 7) {
 		results.feature = FEATURE_INTERSECTION;
 	} else if (results.thresh_count == 0) { 
 		results.feature = FEATURE_NOLINE;
