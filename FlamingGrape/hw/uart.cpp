@@ -107,7 +107,7 @@ static void receive(UARTNum num) {
 	UARTData &data = uartdata[num];
 	uint8_t byte = uarts[num]->DATA;
 	
-	if (byte == '!') {
+	if (byte == '`') {		// E-Stop is `
 		cli();
 		motor_allOff();
 		_delay_ms(100);
