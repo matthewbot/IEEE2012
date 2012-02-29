@@ -337,22 +337,22 @@ void controlpanel_sensor() {
 			case 'r':
 				while(true) {
 					switch(controlpanel_promptChar("Rangefinder")) {
-						case 'q':
+						case 'w':
 							printf_P(PSTR("Front Left Range: %f\n"), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE));
 							break;
 						case 'e':
 							printf_P(PSTR("Front Right Range: %f\n"), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
 							break;
-						case 'a':
+						case 's':
 							printf_P(PSTR("Side Left Range: %f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE));
 							break;
 						case 'd':
 							printf_P(PSTR("Side Right Range: %f\n"), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
 							break;
-						case 'z':
+						case 'q':
 							return;
 						default:
-							printf_P(PSTR("q - front left, e - front right, a - side left, d - side right, z - exit\n"));
+							printf_P(PSTR("w - front left, e - front right, s - side left, d - side right, q - exit\n"));
 							break;
 					}
 				}
