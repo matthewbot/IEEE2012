@@ -47,7 +47,7 @@ void mag_init() {
 	PORTCFG.MPCMASK = drdy_mask; // Set up data ready pin for rising edge interrupt
 	ctrlport.PIN0CTRL = PORT_ISC_RISING_gc;
 	ctrlport.INT0MASK = drdy_mask;	// Set data ready pin to trigger on interrupt 0
-	ctrlport.INTCTRL = PORT_INT0LVL_MED_gc;
+	ctrlport.INTCTRL = PORT_INT0LVL_LO_gc;
 	magspi.CTRL = SPI_PRESCALER_DIV64_gc | SPI_CLK2X_bm | SPI_MASTER_bm | SPI_ENABLE_bm;	// Sets board to master, enables SPI, SCLK to x/32 (1MHz)
 	current_axis = AXIS_X;
 	mag_command(current_axis, mag_period);
