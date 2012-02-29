@@ -63,11 +63,11 @@ void navdeploy_deploy() {
 
 bool navdeploy_aroundBox() {
 	drive_bk_dist(30, 10);
-	drive_lturn_deg(60, 15);
+	drive_lturn_deg(60, 12);
 	drive_fd(60);
-	_delay_ms(100);
+	_delay_ms(300);
 	linefollow_waitLine(7, 7);
-	_delay_ms(100);
+	_delay_ms(80);
 	linefollow_waitLine(7, 7);
 	drive_rturn_deg(60, 45);
 	
@@ -86,7 +86,7 @@ bool navdeploy_loopback() {
 }
 
 bool navdeploy_middle() {
-	drive_rturn_deg(50, 27.5);
+	drive_rturn_deg(50, 20);
 	drive_fd_dist(60, 25);
 	drive_fd(60);
 	linefollow_waitLine(3, 4);
@@ -99,7 +99,7 @@ bool navdeploy_middle() {
 }
 
 void navdeploy_end() {
-	drive_rturn_deg(50, 35);
+	drive_rturn_deg(50, 20);
 	drive_fd_dist(60, 20);
 	drive_fd(60);
 	linefollow_waitLine();
