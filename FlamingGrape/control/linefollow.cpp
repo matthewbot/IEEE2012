@@ -118,6 +118,16 @@ void linefollow_waitLine() {
 	}
 }
 
+void linefollow_waitLine(int left, int right) {
+	while (true) {
+		LineFollowResults results = linefollow_readSensor();
+		for (int i=left; i<=right; i++)
+			if (results.thresh[i])
+				return;
+		tick_wait();
+	}
+}
+
 void linefollow_setThresh(float newthresh) {
 	thresh = newthresh;
 }

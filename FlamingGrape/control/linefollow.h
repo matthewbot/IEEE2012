@@ -44,6 +44,7 @@ PIDGains linefollow_getGains();
 
 LineFollowResults linefollow_readSensor();
 void linefollow_waitLine();
+void linefollow_waitLine(int left, int right);
 
 void linefollow_tick();
 
