@@ -106,3 +106,36 @@ void tests_linefollow() {
 	printf_P(PSTR("Turn:\t")); linefollow_printTurn(linefollow_getLastTurn()); putchar('\n');
 	printf_P(PSTR("Feat:\t")); linefollow_printFeature(linefollow_getLastFeature()); putchar('\n');
 }
+
+void tests_movingLineRead() {		// Allows line sensor to be read while motors spin (to debug issues from encoder magnets)
+	drive_fd(60);
+	while (true) {
+		debug_resetTimer();
+		LineFollowResults results = linefollow_readSensor();
+		uint16_t time = debug_getTimer();
+
+		printf_P(PSTR("Light:\t"));
+		for (int i=0; i<linesensor_count; i++)
+			printf_P(PSTR("%2.2f\t"), results.light[i]);
+		putchar('\n');						
+
+		printf_P(PSTR("Thresh:\t"));
+		for (int i=0; i<linesensor_count; i++)
+			printf_P(PSTR("%d\t"), results.thresh[i]);
+		putchar('\n');
+
+		printf_P(PSTR("Center:\t%f\n"), results.center);
+
+		printf_P(PSTR("Turn:\t")); linefollow_printTurn(results.turn); putchar('\n');
+		printf_P(PSTR("Feat:\t")); linefollow_printFeature(results.feature); putchar('\n');
+		printf_P(PSTR("Time:\t%ud usec\n"), time);
+
+		printf_P(PSTR("Push any key to take readings, or space to stop. \n"));
+		char c = getchar();
+		if (c == ' ') {
+			drive_stop();
+			return;
+		}
+	}
+	drive_stop();
+}

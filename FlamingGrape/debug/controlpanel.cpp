@@ -540,6 +540,10 @@ void controlpanel_tests() {
 			case 'L':
 				tests_led();
 				break;
+
+			case 'l':
+				tests_movingLineRead();
+				break;
 				
 			case 'q':
 				return;
@@ -557,6 +561,7 @@ void controlpanel_tests() {
 					"  m  - Magfollow test\n"
 					"  Dd - Enables/Disable line follow debugging\n"
 					"  L  - Tests debug LEDs\n"
+					"  l  - Runs motors while printing linesensor data\n"
 					"  q  - Back";
 				puts_P(msg);
 				break;
