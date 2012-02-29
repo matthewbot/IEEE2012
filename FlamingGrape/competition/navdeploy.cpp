@@ -14,6 +14,12 @@ void navdeploy_lap() {
 			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
+		
+		if (i == 0) {
+			_delay_ms(1000);
+			drive_lturn_deg(30, 5);
+		}
+		
 		navdeploy_deploy();
 		if (!navdeploy_aroundBox()) {
 			printf_P(PSTR("Failed aroundbox\n"));
@@ -36,7 +42,6 @@ void navdeploy_deploy() {
 	deploy_waitDone();
 	_delay_ms(1000);
 	drive_fd_dist(20, 10);
-	drive_fd(20);
 	deploy_out(true);
 	_delay_ms(2000);
 	
