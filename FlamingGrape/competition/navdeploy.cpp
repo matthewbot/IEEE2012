@@ -63,7 +63,7 @@ void navdeploy_deploy() {
 
 bool navdeploy_aroundBox() {
 	drive_bk_dist(30, 10);
-	drive_lturn_deg(60, 12);
+	drive_lturn_deg(60, 15);
 	drive_fd(60);
 	_delay_ms(300);
 	linefollow_waitLine(7, 7);

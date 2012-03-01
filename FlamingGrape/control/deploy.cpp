@@ -12,7 +12,7 @@ enum State {
 
 static volatile State state;
 static volatile float beambreak_filtered = 0;
-static volatile uint8_t waitctr;
+static volatile uint16_t waitctr;
 static volatile bool enabled;
 
 void deploy_out(bool full) {
@@ -65,7 +65,7 @@ void deploy_tick() {
 			
 		case STATE_LEAVE_BEAM:
 			if (!beambreak) {
-				waitctr = 150;
+				waitctr = 400;
 				state = STATE_WAIT_CTR;
 			}
 			break;
