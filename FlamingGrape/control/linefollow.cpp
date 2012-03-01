@@ -109,15 +109,6 @@ LineFollowResults linefollow_readSensor() {
 	return results;
 }
 
-void linefollow_waitLine() {
-	while (true) {
-		LineFollowResults results = linefollow_readSensor();
-		if (results.thresh[3] || results.thresh[4])
-			break;
-		tick_wait();
-	}
-}
-
 void linefollow_waitLine(int left, int right) {
 	while (true) {
 		LineFollowResults results = linefollow_readSensor();
@@ -130,6 +121,10 @@ void linefollow_waitLine(int left, int right) {
 
 void linefollow_setThresh(float newthresh) {
 	thresh = newthresh;
+}
+
+float linefollow_getThresh() {
+	return thresh;
 }
 
 void linefollow_setGains(const PIDGains &newpidgains) {

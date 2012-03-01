@@ -8,7 +8,6 @@
 #include "util.h"
 #include <math.h>
 
-
 static volatile bool enabled = false;
 static volatile float heading;
 static volatile float vel;

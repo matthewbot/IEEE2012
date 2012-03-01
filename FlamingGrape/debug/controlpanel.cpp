@@ -391,6 +391,18 @@ void controlpanel_sensor() {
 				break;
 			}
 			
+			case 't': {
+				float thresh;
+				printf_P(PSTR("Current threshold: %f\n"), linefollow_getThresh()); 
+				if (controlpanel_prompt("Threshold", "%f", &thresh) == 1) {
+					printf_P(PSTR("Threshold changed to %f\n"), thresh);
+					linefollow_setThresh(thresh);
+				} else {
+					printf_P(PSTR("Cancelled.\n"));
+				}
+				break;
+			}
+			
 			case 'b':
 				printf_P(PSTR("Battery voltage: %.2f\n"), adc_getBattery());
 				break;

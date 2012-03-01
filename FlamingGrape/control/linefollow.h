@@ -38,13 +38,14 @@ LineFollowFeature linefollow_getLastFeature();
 LineFollowTurn linefollow_getLastTurn();
 
 void linefollow_setThresh(float thresh);
+float linefollow_getThresh();
 void linefollow_setGains(const PIDGains &gains);
 void linefollow_setDebug(bool debug);
 PIDGains linefollow_getGains();
 
 LineFollowResults linefollow_readSensor();
-void linefollow_waitLine();
 void linefollow_waitLine(int left, int right);
+inline void linefollow_waitLine() { linefollow_waitLine(3, 4); }
 
 void linefollow_tick();
 
