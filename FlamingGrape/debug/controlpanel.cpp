@@ -142,7 +142,7 @@ void controlpanel_drive() {
 				motorcontrol_setEnabled(false);
 				return;
 
-			case 'z':
+			case 'z':			// Does moonwalk forwards
 				speed = 40;
 				for (int i = 0; i < 20; i++) {
 					drive_fd(speed);
@@ -158,7 +158,7 @@ void controlpanel_drive() {
 				speed = 20;
 				break;
 
-			case 'Z':
+			case 'Z':			// Does moonwalk backwards
 				speed = 100;
 				for (int i = 0; i < 20; i++) {
 					drive_bk(speed);
@@ -329,19 +329,19 @@ void controlpanel_motor() {
 void controlpanel_sensor() {
 	while (true) {
 		switch (controlpanel_promptChar("Sensor")) {		
-			case 'a':
+			case 'a':			// Prints raw adc sensor values pins 0 - 7
 				for (int i=0; i<8; i++)
 					printf_P(PSTR("%4d "), adc_sampleAverage(i, 10));
 				putchar('\n');
 				break;
 
-			case 'r':			// Gives all rangefinder readings in centimeters
+			case 'r':			// Prints all rangefinder readings in centimeters
 				while(true) {
 					printf_P(PSTR("Side Left: %5f, Front Left: %5f, Front Right: %5f, Side Right: %5f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
 				}
 				break;
 
-			case 'l': {
+			case 'l': {			// Prints out raw linesensor data
 				uint16_t linebuf[linesensor_count];
 				linesensor_read(linebuf);
 				for (int i=0; i<linesensor_count; i++)
@@ -350,7 +350,7 @@ void controlpanel_sensor() {
 				break;
 			}
 			
-			case 'L': {
+			case 'L': {			// Prints out full crunched linesensor data
 				debug_resetTimer();
 				LineFollowResults results = linefollow_readSensor();
 				uint16_t time = debug_getTimer();
@@ -373,24 +373,24 @@ void controlpanel_sensor() {
 				break;
 			}
 			
-			case 'b':
+			case 'b':			// Prints out battery data
 				printf_P(PSTR("Battery voltage: %.2f\n"), adc_getBattery());
 				break;
 
-			case 'm': {
+			case 'm': {			// Prints out raw magnetometer data
 				MagReading reading = mag_getReading();
 				printf_P(PSTR("mag: %5d %5d %5d\n"), reading.x, reading.y, reading.z);
 				break;
 			}
 
-			case 'M': {
+			case 'M': {			// Prints out magnetometer calibrated heading
 				float heading = magfollow_getHeading();
 				heading = radtodeg(heading);
 				printf_P(PSTR("Mag Heading: %f\n"), heading);
 				break;
 			}
 
-			case 'H': {
+			case 'H': {			// Sets current heading of robot to prompted heading from user
 				float newheading;
 				controlpanel_prompt("Heading", "%f", &newheading);
 				magfollow_setHeading(degtorad(newheading));
@@ -408,7 +408,7 @@ void controlpanel_sensor() {
 				static const char msg[] PROGMEM = 
 					"Sensor commands\n"
 					"  a - Dump analog port A\n"
-					"  r - Rangefinder control panel\n" // Will if you get a chance merge these into the main control panel, one command to show all four rangefinders
+					"  r - Rangefinder control panel\n"
 					"  l - Raw line sensor readings\n"
 					"  L - Processed line sensor readings\n"
 					"  b - Battery voltage (approx)\n"
@@ -425,14 +425,14 @@ void controlpanel_sensor() {
 void controlpanel_nav() {
 	while (true) {
 		switch (controlpanel_promptChar("Nav")) {
-			case 'i':
+			case 'i':			// Linefollows until an intersection
 				if (nav_linefollowIntersection())
 					printf_P(PSTR("Intersection!\n"));
 				else
 					printf_P(PSTR("Error\n"));
 				break;
 				
-			case 't': {
+			case 't': {			// Linefollows for a user prompted number of turns
 				int turns;
 				if (!controlpanel_prompt("Turns", "%d", &turns)) {
 					printf_P(PSTR("Canceled.\n"));
@@ -446,7 +446,7 @@ void controlpanel_nav() {
 				break;
 			}
 			
-			case 'g': {
+			case 'g': {			// Does a NavGo at a user prompted magnetometer heading and for a user prompted distance
 				float heading;
 				if (!controlpanel_prompt("Heading", "%f", &heading)) {
 					printf_P(PSTR("Canceled.\n"));
@@ -496,35 +496,35 @@ void controlpanel_nav() {
 void controlpanel_tests() {
 	while (true) {
 		switch (controlpanel_promptChar("Tests")) {
-			case 'f':
+			case 'f':		// Linefollow at user prompted velocity until key press
 				tests_linefollow();
 				break;
 			
-			case 'p':
+			case 'p':		// Ramps motors forwards to full speed then backwards to full speed
 				tests_pwm();
 				break;
 				
-			case 'M':
+			case 'M':		// Spins in place while printing raw magnetometer data for 1 rev
 				tests_mag();
 				break;
 				
-			case 'm':
+			case 'm':		// Follows a user prompted heading at prompted speed of magnetometer
 				tests_magfollow();
 				break;
 
-			case 'D':
+			case 'D':		// Turns on debug printing when linefollowing
 				linefollow_setDebug(true);
 				break;
 				
-			case 'd':
+			case 'd':		// Turns off debug printing when linefollowing
 				linefollow_setDebug(false);
 				break;
 
-			case 'L':
+			case 'L':		// Blinks through debug LEDs
 				tests_led();
 				break;
 
-			case 'l':
+			case 'l':		// Prints out linesensor data while spinning wheels for encoder interference
 				tests_movingLineRead();
 				break;
 				
@@ -549,6 +549,7 @@ void controlpanel_tests() {
 					"  Dd - Enables/Disable line follow debugging\n"
 					"  L  - Tests debug LEDs\n"
 					"  l  - Runs motors while printing linesensor data\n"
+					"  t  - Prints encoder ticks\n"
 					"  q  - Back";
 				puts_P(msg);
 				break;
