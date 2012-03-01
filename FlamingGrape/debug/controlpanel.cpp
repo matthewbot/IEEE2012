@@ -13,6 +13,7 @@
 #include "hw/mag.h"
 #include "hw/enc.h"
 #include "hw/adc.h"
+#include "hw/tick.h"
 #include "util.h"
 #include <avr/io.h>
 #include <avr/pgmspace.h>
@@ -184,8 +185,8 @@ void controlpanel_drive() {
 					"  -=_+  - Adjust speed\n"
 					"  WASD  - Execute distance moves\n"
 					"  c	 - Disable motor control\n"
-					"  Pp	- Enable/Disable motor control debug\n"
-					"  zZ	- Moonwalk (WIP)\n"
+					"  Pp	 - Enable/Disable motor control debug\n"
+					"  zZ	 - Moonwalk (WIP)\n"
 					"  q	 - Back";
 				puts_P(msg);
 				break;
@@ -386,7 +387,7 @@ void controlpanel_sensor() {
 								
 				printf_P(PSTR("Turn:\t")); linefollow_printTurn(results.turn); putchar('\n');
 				printf_P(PSTR("Feat:\t")); linefollow_printFeature(results.feature); putchar('\n');
-				printf_P(PSTR("Time:\t%ud usec\n"), time);
+				printf_P(PSTR("Time:\t%uus\n"), time);
 				break;
 			}
 			
@@ -547,6 +548,10 @@ void controlpanel_tests() {
 				
 			case 'q':
 				return;
+
+			case 't':
+				printf_P(PSTR("Tick Length %u us\n"), tick_getLength());
+				break;
 
 			default:
 				puts_P(unknown_str);

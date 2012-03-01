@@ -7,6 +7,7 @@ static TC1_t &tim = TCF1;
 #define TIMCCAVEC TCF1_CCA_vect
 
 static volatile uint32_t tickcount;
+static volatile uint16_t ticklength;
 
 void tick_init() {
 	tim.CTRLA = TC_CLKSEL_DIV8_gc; // 32Mhz / 8 = 4 Mhz timer (TICK_TIMHZ == 4E6)
@@ -38,6 +39,10 @@ uint32_t tick_getCount() {
 	return tickcount;
 }
 
+uint16_t tick_getLength() { // in uS
+	return (uint16_t)((uint32_t)ticklength * TICK_US / TICK_TIMMAX);
+}
+
 #include "control/motorcontrol.h"
 #include "control/linefollow.h"
 #include "control/magfollow.h"
@@ -45,10 +50,12 @@ uint32_t tick_getCount() {
 #include "debug/debug.h"
 #include "hw/linesensor.h"
 #include "debug/debug.h"
+#include <util/delay.h>
 
 ISR(TIMOVFVEC) {
-	debug_setLED(BOARD_LED, true);
+	uint16_t start = tim.CNT;
 	tickcount++;
+	debug_setLED(BOARD_LED, true);
 	
 	linesensor_tick();
 	linefollow_tick();
@@ -56,7 +63,9 @@ ISR(TIMOVFVEC) {
 	motorcontrol_tick();
 	debug_tick();
 	deploy_tick();
+	
 	debug_setLED(BOARD_LED, false);
+	ticklength = tim.CNT - start;
 }
 
 ISR(TIMCCAVEC) {
