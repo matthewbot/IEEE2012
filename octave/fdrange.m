@@ -1,14 +1,18 @@
 load -ascii fdrange_data.txt
+close all;
 
-y = fdrange_data(:, 1);
-x = fdrange_data(:, 3);
-invy = power(y, -1);
+for i=2:columns(fdrange_data)
+	x = fdrange_data(fdrange_data(:, i) > 0, i);
+	y = fdrange_data(1:rows(x), 1);
+	invy = power(y, -1);
 
-p = polyfit(x, invy, 1);
+	p = polyfit(x, invy, 1);
 
-x_pred = linspace(800, 4096);
-y_pred = power(polyval(p, x_pred), -1);
+	x_pred = linspace(min(x)-200, max(x)+200);
+	y_pred = power(polyval(p, x_pred), -1);
 
-plot(x_pred, y_pred, 'g', x, y, 'b');
+	figure();
+	plot(x_pred, y_pred, 'g', x, y, 'b');
 
-p
+	p
+end
