@@ -335,27 +335,9 @@ void controlpanel_sensor() {
 				putchar('\n');
 				break;
 
-			case 'r':
+			case 'r':			// Gives all rangefinder readings in centimeters
 				while(true) {
-					switch(controlpanel_promptChar("Rangefinder")) {
-						case 'w':
-							printf_P(PSTR("Front Left Range: %f\n"), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE));
-							break;
-						case 'e':
-							printf_P(PSTR("Front Right Range: %f\n"), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE));
-							break;
-						case 's':
-							printf_P(PSTR("Side Left Range: %f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE));
-							break;
-						case 'd':
-							printf_P(PSTR("Side Right Range: %f\n"), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
-							break;
-						case 'q':
-							return;
-						default:
-							printf_P(PSTR("w - front left, e - front right, s - side left, d - side right, q - exit\n"));
-							break;
-					}
+					printf_P(PSTR("Side Left: %5f, Front Left: %5f, Front Right: %5f, Side Right: %5f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
 				}
 				break;
 
