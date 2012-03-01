@@ -46,10 +46,23 @@ float adc_getBattery() {
 	return adc_sample(ADC_BATTERY) * 0.008f;
 }
 
+struct RangeFinderCal {
+	float a;
+	float b;
+	uint16_t min;
+};
+
+static const RangeFinderCal cals[] = {
+	{1, 1, 600},		// LEFT_SIDE
+	{3.3798e-4, -1.1623e-1, 600},		// LEFT_FRONT
+	{1, 1, 600},		// RIGHT_SIDE
+	{2.0913e-4, -1.0976e-1, 600}		// RIGHT_FRONT
+};
+
 float adc_sampleRangeFinder(uint8_t pin) {
 	uint16_t val = adc_sample(pin);
-	if (val < 600)
+	if (val < cals[pin - 3].min && pin == ADC_FRONT_LEFT_RANGE)
 		return 999;
-	else
-		return 2.54/((1.8151e-4*val) - 8.8343e-2);
+	else if (pin == ADC_FRONT_LEFT_RANGE)
+		return 2.54/((cals[pin - 3].a*val) - cals[pin - 3].b);
 }
