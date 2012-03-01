@@ -107,7 +107,7 @@ static void receive(UARTNum num) {
 	UARTData &data = uartdata[num];
 	uint8_t byte = uarts[num]->DATA;
 	
-	if (byte == 27) {		// E-Stop is ESC key
+	if (byte == 27 || byte == '!' || byte == '`') {		// E-Stop is ESC key, !, or `
 		cli();
 		motor_allOff();
 		_delay_ms(100);
