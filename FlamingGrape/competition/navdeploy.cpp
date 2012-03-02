@@ -81,7 +81,6 @@ bool navdeploy_loopback() {
 	deploy_start();		
 	if (!nav_linefollowIntersection())
 		return false;
-	drive_stop();
 	return true;
 }
 

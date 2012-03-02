@@ -34,8 +34,10 @@ bool linefollow_start(float newvel, float newlinepos) {
 }
 
 void linefollow_stop() {
-	enabled = false;
-	drive_stop();
+	if (enabled) {
+		enabled = false;
+		drive_stop();
+	}
 }
 
 bool linefollow_isDone() {

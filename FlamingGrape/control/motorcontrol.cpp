@@ -39,8 +39,8 @@ float motorcontrol_getrps(int motnum) {
 
 void motorcontrol_setrps(int motnum, float rps) {
 	MotorInfo &mot = motinfo[motnum];
-
-	if (sign(mot.rps_desired) != sign(rps) || fabsf(rps) < 0.1 || fabsf(mot.rps_desired) < 0.1)
+	
+	if (sign(mot.rps_desired) != sign(rps))
 		mot.pid.sum = 0;
 	
 	mot.rps_desired = rps;
