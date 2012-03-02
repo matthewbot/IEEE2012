@@ -63,7 +63,7 @@ ISR(TIMOVFVEC) {
 	motorcontrol_tick();
 	debug_tick();
 	deploy_tick();
-	
+
 	debug_setLED(BOARD_LED, false);
 	ticklength = tim.CNT - start;
 }
