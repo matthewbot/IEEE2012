@@ -15,7 +15,7 @@ static volatile float error_filter;
 static volatile bool debug;
 static PIDState pidstate;
 static PIDGains pidgains = {200, 0, 12, 0};
-static float heading_offset;			// heading offset value
+static float heading_offset;						// heading offset value
 static MagCal magcal = {-97.5, -81, 0.89606};		// x_offset, y_offset, y_scale
 
 void magfollow_start(float new_vel, float new_heading) {
