@@ -9,7 +9,8 @@ static PORT_t &pwmport = PORTF;
 static const int pwmpins_mask = 0x0F;
 static TC0_t &pwmtim = TCF0;
 
-static const bool flip[4] = {true, false, false, false};
+static const bool flip[4] = {true, false, false, false}; // LRDF
+static const uint8_t port[4] = {2, 1, 3, 0}; // LRDF
 
 void motor_init() {
 	ctrlport.DIRSET = ctrlpins_mask;
@@ -18,12 +19,14 @@ void motor_init() {
 	pwmtim.CTRLA = TC_CLKSEL_DIV1_gc; // no divider means timer runs at 32Mhz
 	pwmtim.CTRLB = TC0_CCAEN_bm | TC0_CCBEN_bm | TC0_CCCEN_bm | TC0_CCDEN_bm | TC_WGMODE_SS_gc; // enable all capture compares, single slope PWM
 	pwmtim.PER = 1023; // 32Mhz / ~1024 = 31.25 khz pwm freq
+	
+	motor_setpwm(MOTOR_FAN, motor_maxpwm);
 }
 
 void motor_setpwm(uint8_t mot, int16_t pwm) {
-	uint8_t in1pin_mask = _BV(2*mot);
+	uint8_t in1pin_mask = _BV(2*port[mot]);
 	uint8_t in2pin_mask = in1pin_mask << 1;
-	register16_t &ccreg = (&pwmtim.CCABUF)[mot]; // CCxBUF registers are adjacent in memory
+	register16_t &ccreg = (&pwmtim.CCABUF)[port[mot]]; // CCxBUF registers are adjacent in memory
 
 	if (flip[mot])
 		pwm = -pwm;
@@ -49,9 +52,9 @@ void motor_allOff() {
 }
 
 int16_t motor_getpwm(uint8_t mot) {
-	int16_t pwm = (&pwmtim.CCA)[mot]; // CCx registers are also adjacent
+	int16_t pwm = (&pwmtim.CCA)[port[mot]]; // CCx registers are also adjacent
 
-	uint8_t in1pin_mask = _BV(2*mot);
+	uint8_t in1pin_mask = _BV(2*port[mot]);
 	if (!(ctrlport.IN & in1pin_mask))
 		pwm = -pwm;
 
