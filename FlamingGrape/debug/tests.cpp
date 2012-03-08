@@ -139,3 +139,17 @@ void tests_movingLineRead() {		// Allows line sensor to be read while motors spi
 	}
 	drive_stop();
 }
+
+void tests_linesensorMin(uint16_t *min) {	
+	linesensor_read(min);
+	for (int i = 0; i < 200; i++) {
+		uint16_t buf[8];
+		linesensor_read(buf);
+		for (int j = 0; j < 8; j++) {
+			if (buf[j] < min[j]) {
+				min[j] = buf[j];
+			}
+		}
+		_delay_ms(20);
+	}
+}

@@ -10,5 +10,6 @@ void tests_magfollow();
 void tests_led();
 void tests_linefollow();
 void tests_movingLineRead();
+void tests_linesensorMin(uint16_t *min);
 
 #endif

@@ -532,8 +532,17 @@ void controlpanel_tests() {
 				linefollow_setDebug(false);
 				break;
 
-			case 'L':		// Blinks through debug LEDs
+			case 'e':		// Blinks through debug LEDs
 				tests_led();
+				break;
+
+			case 'L':		// Prints minimum of each sensor on linesensor array over 4 seconds of readings
+				uint16_t min[8];
+				tests_linesensorMin(min);
+				for (int i = 0; i < 8; i++) {
+					printf_P(PSTR("%5u "), min[i]);
+				}
+				printf_P(PSTR("\n"));
 				break;
 
 			case 'l':		// Prints out linesensor data while spinning wheels for encoder interference
@@ -559,7 +568,8 @@ void controlpanel_tests() {
 					"  M  - Test magnetometer (spins in place)\n"
 					"  m  - Magfollow test\n"
 					"  Dd - Enables/Disable line follow debugging\n"
-					"  L  - Tests debug LEDs\n"
+					"  e  - Tests debug LEDs\n"
+					"  L  - Prints min val of each linesensor over 4 secs\n"
 					"  l  - Runs motors while printing linesensor data\n"
 					"  t  - Prints encoder ticks\n"
 					"  q  - Back";
