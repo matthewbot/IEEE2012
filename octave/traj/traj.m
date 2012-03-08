@@ -1,6 +1,10 @@
 function [ts, vs, T]=traj(h, v0, v1, vmax, amax, N)
   vlim = sqrt(h*amax + (v0^2 + v1^2)/2);
-  if vlim >= vmax
+  if vmax < 0
+	vlim = -vlim;
+  end
+  
+  if abs(vlim) >= abs(vmax)
 	disp('case 1');
     Ta = (vmax - v0)/amax;
     Td = (vmax - v1)/amax;

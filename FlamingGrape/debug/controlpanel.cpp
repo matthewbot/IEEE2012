@@ -6,6 +6,7 @@
 #include "control/motorcontrol.h"
 #include "control/drive.h"
 #include "control/deploy.h"
+#include "control/traj.h"
 #include "competition/nav.h"
 #include "competition/navfast.h"
 #include "competition/navdeploy.h"
@@ -96,13 +97,13 @@ void controlpanel_drive() {
 				break;
 				
 			case 'W':
-				drive_fd_dist(speed, 16);
+				drive_fd_dist(speed, 50);
 				break;
 			case 'A':
 				drive_lturn_deg(speed, 90);
 				break;
 			case 'S':
-				drive_bk_dist(speed, 16);
+				drive_bk_dist(speed, 50);
 				break;
 			case 'D':
 				drive_rturn_deg(speed, 90);
@@ -172,6 +173,19 @@ void controlpanel_drive() {
 				}
 				speed = 20;
 				break;
+				
+			case 'm': {
+				float amax = drive_getTrajAmax();
+				printf_P(PSTR("Current amax: %.2f\n"), amax);
+				if (controlpanel_prompt("amax", "%f", &amax) != 1) {
+					printf_P(PSTR("Cancelled.\n"));
+					continue;
+				}
+				
+				drive_setTrajAmax(amax);
+				printf_P(PSTR("Amax set to: %.2f\n"), amax);
+				break;
+			}
 
 			default:
 				puts_P(unknown_str);

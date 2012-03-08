@@ -1,4 +1,5 @@
 #include "control/motorcontrol.h"
+#include "control/traj.h"
 #include "control/drive.h"
 #include "hw/enc.h"
 #include "hw/motor.h"
@@ -10,24 +11,42 @@
 static const float wheel_circumference = 16.3;
 static const float wheelbase_radius = 9; // distance between wheels (needs cal)
 
+static float traj_amax_rps=100 / wheel_circumference; // 100 cm/s^2
+
 void drive(float left, float right) {
 	motorcontrol_setrps(MOTOR_LEFT, left / wheel_circumference);
 	motorcontrol_setrps(MOTOR_RIGHT, right / wheel_circumference);
 	motorcontrol_setEnabled(true);
 }
 
-void drive_dist(float leftvel, float rightvel, float dist, int mot) {
-	int16_t distenc = (int16_t)(dist / wheel_circumference * enc_per_rotation);
-	uint16_t startenc = enc_get(mot);
-	drive(leftvel, rightvel);
-	
-	if (dist > 0) {
-		while (enc_diff(enc_get(mot), startenc) < distenc) { }
+void drive_dist(float leftvel, float rightvel, float ldist, float rdist, bool traj) {
+	if (traj) {
+		traj_setup(MOTOR_LEFT, ldist / wheel_circumference, 0, leftvel / wheel_circumference, ldist > 0 ? traj_amax_rps : -traj_amax_rps);
+		traj_setup(MOTOR_RIGHT, rdist / wheel_circumference, 0, rightvel / wheel_circumference, rdist > 0 ? traj_amax_rps : -traj_amax_rps);
+		traj_setEnabled(true);
+		traj_wait();
 	} else {
-		while (enc_diff(enc_get(mot), startenc) > distenc) { }
+		float dist;
+		Motor mot;
+		if (fabs(ldist) > 0.1) {
+			dist = ldist;
+			mot = MOTOR_LEFT;
+		} else {
+			dist = rdist;
+			mot = MOTOR_RIGHT;
+		}
+		
+		int16_t distenc = (int16_t)(dist / wheel_circumference * enc_per_rotation);
+		uint16_t startenc = enc_get(mot);
+		
+		drive(leftvel, rightvel);
+		if (dist > 0) {
+			while (enc_diff(enc_get(mot), startenc) < distenc) { }
+		} else {
+			while (enc_diff(enc_get(mot), startenc) > distenc) { }
+		}
+		drive_stop();
 	}
-	
-	drive_stop();
 }
 
 void drive_stop() {
@@ -42,32 +61,34 @@ void drive_fd(float vel) {
 	drive(vel, vel);
 }
 
-void drive_fd_dist(float vel, float dist) {
-	drive_dist(vel, vel, dist, MOTOR_LEFT);
+void drive_fd_dist(float vel, float dist, bool traj) {
+	drive_dist(vel, vel, dist, dist, traj);
 }
 
 void drive_bk(float vel) {
 	drive(-vel, -vel);
 }
 
-void drive_bk_dist(float vel, float dist) {
-	drive_dist(-vel, -vel, -dist, MOTOR_LEFT);
+void drive_bk_dist(float vel, float dist, bool traj) {
+	drive_dist(-vel, -vel, -dist, -dist, traj);
 }
 
 void drive_lturn(float vel) {
 	drive(-vel, vel);
 }
 
-void drive_lturn_deg(float vel, float deg) {
-	drive_dist(-vel, vel, degtorad(deg) * wheelbase_radius, MOTOR_RIGHT);
+void drive_lturn_deg(float vel, float deg, bool traj) {
+	float dist = degtorad(deg) * wheelbase_radius;
+	drive_dist(-vel, vel, -dist, dist, traj);
 }
 
 void drive_rturn(float vel) {
 	drive(vel, -vel);
 }
 
-void drive_rturn_deg(float vel, float deg) {
-	drive_dist(vel, -vel, degtorad(deg) * wheelbase_radius, MOTOR_LEFT);
+void drive_rturn_deg(float vel, float deg, bool traj) {
+	float dist = degtorad(deg) * wheelbase_radius;
+	drive_dist(vel, -vel, dist, -dist, traj);
 }
 
 void drive_steer(float steer, float vel) {
@@ -91,4 +112,12 @@ void drive_wait_dist(float dist) {
 				break;
 		}
 	}
+}
+
+void drive_setTrajAmax(float amax) {
+	traj_amax_rps = amax / wheel_circumference;
+}
+
+float drive_getTrajAmax() {
+	return traj_amax_rps * wheel_circumference;
 }

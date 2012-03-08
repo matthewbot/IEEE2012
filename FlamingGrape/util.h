@@ -15,6 +15,8 @@ inline float sign(float in) {
 	}
 }
 
+inline float sqrf(float f) { return f*f; }
+
 inline float degtorad(float deg) { return deg * M_PI / 180; }
 inline float radtodeg(float rad) { return rad * 180 / M_PI; }
 

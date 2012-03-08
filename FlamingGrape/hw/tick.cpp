@@ -46,6 +46,7 @@ uint16_t tick_getLength() { // in uS
 #include "control/motorcontrol.h"
 #include "control/linefollow.h"
 #include "control/magfollow.h"
+#include "control/traj.h"
 #include "control/deploy.h"
 #include "debug/debug.h"
 #include "hw/linesensor.h"
@@ -60,6 +61,7 @@ ISR(TIMOVFVEC) {
 	linesensor_tick();
 	linefollow_tick();
 	magfollow_tick();
+	traj_tick();
 	motorcontrol_tick();
 	debug_tick();
 	deploy_tick();
