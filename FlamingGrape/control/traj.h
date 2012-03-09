@@ -5,8 +5,11 @@
 
 void traj_tick();
 
-void traj_setup(Motor mot, float dist, float final_rps, float vmax, float amax);
-void traj_setEnabled(bool enabled);
+void traj_goDist(float ldist, float lfinalrps, float lvmax, float lamax, 
+                 float rdist, float rfinalrps, float rvmax, float ramax);
+void traj_goVel(float lfinalrps, float lamax,
+                float rfinalrps, float ramax);
+void traj_stop();
 void traj_wait();
 
 #endif
