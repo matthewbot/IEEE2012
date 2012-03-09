@@ -15,10 +15,10 @@ void navdeploy_lap() {
 			return;
 		}
 		
-		if (i == 0) {
+/*		if (i == 0) {		// Twitch for temperature box
 			_delay_ms(1000);
 			drive_lturn_deg(30, 5);
-		}
+		}*/
 		
 		navdeploy_deploy();
 		if (!navdeploy_aroundBox()) {
@@ -40,35 +40,32 @@ void navdeploy_lap() {
 
 void navdeploy_deploy() {
 	deploy_waitDone();
-	_delay_ms(1000);
-	drive_fd_dist(20, 10);
+	_delay_ms(500);
+	drive_fd_dist(20, 15);
 	deploy_out(true);
 	_delay_ms(2000);
 	
-	drive_bk(20); // TODO drive time functions
-	_delay_ms(250);
-	deploy_off();
-	drive_fd(20);
-	_delay_ms(500);
+	for (int i = 0; i < 2; i++) {
+		drive_bk_dist(20, 5);
+		deploy_off();
+		drive_fd_dist(20, 7);
+	}
 	
 	drive_bk(4);
-	_delay_ms(500);
-	drive_fd(20);
-	_delay_ms(500);
-	drive_bk(4);
-	linefollow_waitLine();	
+	linefollow_waitLine();
 	
 	deploy_start();
 }
 
 bool navdeploy_aroundBox() {
 	drive_bk_dist(30, 10);
-	drive_lturn_deg(60, 15);
+	drive_lturn_deg(60, 55);
 	drive_fd(60);
 	_delay_ms(300);
 	linefollow_waitLine(7, 7);
 	_delay_ms(80);
 	linefollow_waitLine(7, 7);
+	drive_stop();
 	drive_rturn_deg(60, 45);
 	
 	if (!linefollow_start(60, .4))
@@ -85,11 +82,18 @@ bool navdeploy_loopback() {
 }
 
 bool navdeploy_middle() {
-	drive_rturn_deg(50, 20);
-	drive_fd_dist(60, 25);
+	drive_rturn_deg(50, 40);
 	drive_fd(60);
+	drive_wait_dist(12);
 	linefollow_waitLine(3, 4);
-	drive_lturn_deg(50, 80);
+	drive_wait_dist(2);
+	drive_stop();
+	drive_lturn_deg(50, 60);
+	if (!linefollow_start(60))
+		return false;
+	linefollow_waitDone();
+	drive_stop();
+	drive_bk_dist(40, 14);
 	if (!linefollow_start(60))
 		return false;
 	linefollow_waitDone();
@@ -98,9 +102,10 @@ bool navdeploy_middle() {
 }
 
 void navdeploy_end() {
-	drive_rturn_deg(50, 20);
-	drive_fd_dist(60, 20);
+	drive_rturn_deg(50, 40);
 	drive_fd(60);
-	linefollow_waitLine();
-	drive_lturn_deg(50, 80);
+	drive_wait_dist(10);
+	linefollow_waitLine(0, 3);
+	drive_stop();
+	drive_lturn_deg(50, 70);
 }

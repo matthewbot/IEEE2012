@@ -2,6 +2,8 @@
 #include "hw/motor.h"
 #include "hw/adc.h"
 
+#include <util/delay.h>
+
 static const int16_t deploy_pwm = 700;
 
 enum State {
@@ -47,7 +49,9 @@ bool deploy_isDone() {
 }
 
 void deploy_waitDone() {
-	while (enabled) { }
+	//while (enabled) { }
+	_delay_ms(1000);
+	deploy_stop();
 }
 
 void deploy_tick() {
