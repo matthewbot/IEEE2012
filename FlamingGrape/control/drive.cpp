@@ -19,8 +19,8 @@ void drive(float lvel, float rvel, bool traj) {
 		           rvel / wheel_circumference, traj_amax_rps);
 	} else {
 		traj_stop();
-		motorcontrol_setrps(MOTOR_LEFT,  lvel / wheel_circumference); // floor it!
-		motorcontrol_setrps(MOTOR_RIGHT, rvel / wheel_circumference);
+		motorcontrol_setRPS(MOTOR_LEFT,  lvel / wheel_circumference); // floor it!
+		motorcontrol_setRPS(MOTOR_RIGHT, rvel / wheel_circumference);
 		motorcontrol_setEnabled(true);
 	}
 }
@@ -69,7 +69,7 @@ void drive_fd(float vel, bool traj) {
 	drive(vel, vel, traj);
 }
 
-void drive_fd_dist(float vel, float dist, bool traj) {
+void drive_fdDist(float vel, float dist, bool traj) {
 	drive_dist(vel, vel, dist, dist, traj);
 }
 
@@ -77,7 +77,7 @@ void drive_bk(float vel, bool traj) {
 	drive(-vel, -vel, traj);
 }
 
-void drive_bk_dist(float vel, float dist, bool traj) {
+void drive_bkDist(float vel, float dist, bool traj) {
 	drive_dist(-vel, -vel, -dist, -dist, traj);
 }
 
@@ -85,7 +85,7 @@ void drive_lturn(float vel, bool traj) {
 	drive(-vel, vel, traj);
 }
 
-void drive_lturn_deg(float vel, float deg, bool traj) {
+void drive_lturnDeg(float vel, float deg, bool traj) {
 	float dist = degtorad(deg) * wheelbase_radius;
 	drive_dist(-vel, vel, -dist, dist, traj);
 }
@@ -94,7 +94,7 @@ void drive_rturn(float vel, bool traj) {
 	drive(vel, -vel, traj);
 }
 
-void drive_rturn_deg(float vel, float deg, bool traj) {
+void drive_rturnDeg(float vel, float deg, bool traj) {
 	float dist = degtorad(deg) * wheelbase_radius;
 	drive_dist(vel, -vel, dist, -dist, traj);
 }
@@ -103,7 +103,7 @@ void drive_steer(float steer, float vel) {
 	drive(vel + steer, vel - steer, false);
 }
 
-void drive_wait_dist(float dist) {
+void drive_waitDist(float dist) {
 	uint16_t leftenc = enc_get(MOTOR_LEFT);
 	uint16_t rightenc = enc_get(MOTOR_RIGHT);
 	

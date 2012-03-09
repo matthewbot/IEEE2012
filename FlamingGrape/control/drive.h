@@ -7,17 +7,17 @@ void drive_stop(bool traj=true);
 void drive_off();
 
 void drive_fd(float vel, bool traj=true);
-void drive_fd_dist(float vel, float dist, bool traj=true);
+void drive_fdDist(float vel, float dist, bool traj=true);
 void drive_bk(float vel, bool traj=true);
-void drive_bk_dist(float vel, float dist, bool traj=true);
+void drive_bkDist(float vel, float dist, bool traj=true);
 void drive_lturn(float vel, bool traj=true);
-void drive_lturn_deg(float vel, float deg, bool traj=true);
+void drive_lturnDeg(float vel, float deg, bool traj=true);
 void drive_rturn(float vel, bool traj=true);
-void drive_rturn_deg(float vel, float deg, bool traj=true);
+void drive_rturnDeg(float vel, float deg, bool traj=true);
 
 void drive_steer(float steer, float vel);
 
-void drive_wait_dist(float dist);
+void drive_waitDist(float dist);
 
 void drive_setTrajAmax(float amax);
 float drive_getTrajAmax();

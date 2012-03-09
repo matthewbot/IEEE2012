@@ -39,14 +39,14 @@ void traj_goDist(float ldist, float lfinalrps, float lvmax, float lamax, float r
 	traj[MOTOR_LEFT].vmax = lvmax;
 	traj[MOTOR_LEFT].amax = ldist > 0 ? lamax : -lamax;
 	traj[MOTOR_LEFT].h = ldist;
-	traj[MOTOR_LEFT].v0 = motorcontrol_getrpsDesired(MOTOR_LEFT);
+	traj[MOTOR_LEFT].v0 = motorcontrol_getRPSDesired(MOTOR_LEFT);
 	traj[MOTOR_LEFT].v1 = lfinalrps;
 	prepareTrajectoryData(traj[MOTOR_LEFT]);
 	
 	traj[MOTOR_RIGHT].vmax = rvmax;
 	traj[MOTOR_RIGHT].amax = rdist > 0 ? ramax : -ramax;
 	traj[MOTOR_RIGHT].h = rdist;
-	traj[MOTOR_RIGHT].v0 = motorcontrol_getrpsDesired(MOTOR_RIGHT);
+	traj[MOTOR_RIGHT].v0 = motorcontrol_getRPSDesired(MOTOR_RIGHT);
 	traj[MOTOR_RIGHT].v1 = rfinalrps;
 	prepareTrajectoryData(traj[MOTOR_RIGHT]);
 	
@@ -57,10 +57,10 @@ void traj_goDist(float ldist, float lfinalrps, float lvmax, float lamax, float r
 void traj_goVel(float lfinalrps, float lamax, float rfinalrps, float ramax) {
 	mode = MODE_DISABLED;
 	
-	traj[MOTOR_LEFT].v0 = motorcontrol_getrpsDesired(MOTOR_LEFT);
+	traj[MOTOR_LEFT].v0 = motorcontrol_getRPSDesired(MOTOR_LEFT);
 	traj[MOTOR_LEFT].v1 = lfinalrps;
 	traj[MOTOR_LEFT].amax = traj[MOTOR_LEFT].v1 > traj[MOTOR_LEFT].v0 ? lamax : -lamax;
-	traj[MOTOR_RIGHT].v0 = motorcontrol_getrpsDesired(MOTOR_RIGHT);
+	traj[MOTOR_RIGHT].v0 = motorcontrol_getRPSDesired(MOTOR_RIGHT);
 	traj[MOTOR_RIGHT].v1 = rfinalrps;
 	traj[MOTOR_RIGHT].amax = traj[MOTOR_RIGHT].v1 > traj[MOTOR_RIGHT].v0 ? ramax : -ramax;
 	
@@ -75,7 +75,7 @@ void traj_wait() {
 void traj_stop() {
 	mode = MODE_DISABLED;
 	for (int i=0; i<motorcontrol_count; i++)
-		motorcontrol_setrps(i, 0);
+		motorcontrol_setRPS(i, 0);
 }
 
 void traj_tick() {
@@ -102,7 +102,7 @@ void traj_tick() {
 		
 		if (i == 0)
 			debug_println("RPS %f T %f", rps, t);
-		motorcontrol_setrps(i, rps);
+		motorcontrol_setRPS(i, rps);
 	}
 	
 	motorcontrol_setEnabled(true);

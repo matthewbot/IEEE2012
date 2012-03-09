@@ -4,7 +4,7 @@
 
 #include <util/delay.h>
 
-static const int16_t deploy_pwm = 700;
+static const int16_t deploy_PWM = 700;
 
 enum State {
 	STATE_ENTER_BEAM,
@@ -18,15 +18,15 @@ static volatile uint16_t waitctr;
 static volatile bool enabled;
 
 void deploy_out(bool full) {
-	motor_setpwm(MOTOR_DEPLOY, full ? motor_maxpwm : deploy_pwm);
+	motor_setPWM(MOTOR_DEPLOY, full ? motor_maxPWM : deploy_PWM);
 }
 
 void deploy_in(bool full) {
-	motor_setpwm(MOTOR_DEPLOY, full ? -motor_maxpwm : -deploy_pwm);
+	motor_setPWM(MOTOR_DEPLOY, full ? -motor_maxPWM : -deploy_PWM);
 }
 
 void deploy_off() {
-	motor_setpwm(MOTOR_DEPLOY, 0);
+	motor_setPWM(MOTOR_DEPLOY, 0);
 }
 
 bool deploy_getBeamBreak() {

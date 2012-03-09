@@ -100,16 +100,16 @@ void controlpanel_drive() {
 				break;
 				
 			case 'W':
-				drive_fd_dist(speed, 50);
+				drive_fdDist(speed, 50);
 				break;
 			case 'A':
-				drive_lturn_deg(speed, 90);
+				drive_lturnDeg(speed, 90);
 				break;
 			case 'S':
-				drive_bk_dist(speed, 50);
+				drive_bkDist(speed, 50);
 				break;
 			case 'D':
-				drive_rturn_deg(speed, 90);
+				drive_rturnDeg(speed, 90);
 				break;	
 			case '=':
 				speed += 2;
@@ -259,7 +259,7 @@ void controlpanel_gains() {
 
 void controlpanel_motor() {
 	bool motenables[4] = {0, 0, 0, 0};
-	int16_t pwm = 0;
+	int16_t PWM = 0;
 	
 	while (true) {	
 		char ch = controlpanel_promptChar("Motor");
@@ -277,35 +277,35 @@ void controlpanel_motor() {
 		} else {
 			switch (ch) {
 				case 'x':
-					pwm += 50;
+					PWM += 50;
 					break;
 					
 				case 'z':
-					pwm -= 50;
+					PWM -= 50;
 					break;
 					
 				case 'X':
-					pwm += 200;
+					PWM += 200;
 					break;
 					
 				case 'Z':
-					pwm -= 200;
+					PWM -= 200;
 					break;	
 					
 				case 'a':
-					pwm = -motor_maxpwm;
+					PWM = -motor_maxPWM;
 					break;
 					
 				case 's':
-					pwm = motor_maxpwm;
+					PWM = motor_maxPWM;
 					break;
 					
 				case 'd':
-					pwm = -pwm;
+					PWM = -PWM;
 					break;
 					
 				case ' ':
-					pwm = 0;
+					PWM = 0;
 					break;
 					
 				case 'q':
@@ -330,16 +330,16 @@ void controlpanel_motor() {
 					break;
 			}
 			
-			if (pwm > motor_maxpwm)
-				pwm = motor_maxpwm;
-			else if (pwm < -motor_maxpwm)
-				pwm = -motor_maxpwm;
+			if (PWM > motor_maxPWM)
+				PWM = motor_maxPWM;
+			else if (PWM < -motor_maxPWM)
+				PWM = -motor_maxPWM;
 				
-			printf_P(PSTR("PWM %d\n"), pwm);
+			printf_P(PSTR("PWM %d\n"), PWM);
 		}
 							
 		for (uint8_t i=0; i<4; i++)
-			motor_setpwm(i, motenables[i] ? pwm : 0);
+			motor_setPWM(i, motenables[i] ? PWM : 0);
 	}
 }
 
@@ -530,7 +530,7 @@ void controlpanel_tests() {
 				break;
 			
 			case 'p':		// Ramps motors forwards to full speed then backwards to full speed
-				tests_pwm();
+				tests_PWM();
 				break;
 				
 			case 'M':		// Spins in place while printing raw magnetometer data for 1 rev
@@ -581,7 +581,7 @@ void controlpanel_tests() {
 				static const char msg[] PROGMEM = 
 					"Test commands\n"
 					"  f  - Linefollow test\n"
-					"  p  - Test motor pwm range (floors motors)\n"
+					"  p  - Test motor PWM range (floors motors)\n"
 					"  M  - Test magnetometer (spins in place)\n"
 					"  m  - Magfollow test\n"
 					"  Dd - Enables/Disable line follow debugging\n"
