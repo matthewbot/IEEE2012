@@ -13,8 +13,8 @@ static const float wheelbase_radius = 9; // distance between wheels (needs cal)
 
 static float traj_amax_rps=100 / wheel_circumference; // 100 cm/s^2
 
-void drive(float lvel, float rvel, bool traj) {
-	if (traj) {
+void drive(float lvel, float rvel, DriveMode dm) {
+	if (dm == DM_TRAJ) {
 		traj_goVel(lvel / wheel_circumference, traj_amax_rps,
 		           rvel / wheel_circumference, traj_amax_rps);
 	} else {
@@ -25,8 +25,8 @@ void drive(float lvel, float rvel, bool traj) {
 	}
 }
 
-void drive_dist(float lvel, float rvel, float ldist, float rdist, bool traj) {
-	if (traj) {
+void drive_dist(float lvel, float rvel, float ldist, float rdist, DriveMode dm) {
+	if (dm == DM_TRAJ) {
 		traj_goDist(ldist / wheel_circumference, 0, lvel / wheel_circumference, traj_amax_rps,
 		            rdist / wheel_circumference, 0, rvel / wheel_circumference, traj_amax_rps);
 		traj_wait();
@@ -46,18 +46,18 @@ void drive_dist(float lvel, float rvel, float ldist, float rdist, bool traj) {
 		int16_t distenc = (int16_t)(dist / wheel_circumference * enc_per_rotation);
 		uint16_t startenc = enc_get(mot);
 		
-		drive(lvel, rvel, false);
+		drive(lvel, rvel, DM_BANG);
 		if (dist > 0) {
 			while (enc_diff(enc_get(mot), startenc) < distenc) { }
 		} else {
 			while (enc_diff(enc_get(mot), startenc) > distenc) { }
 		}
-		drive_stop(false);
+		drive_stop();
 	}
 }
 
-void drive_stop(bool traj) {
-	drive(0, 0, traj);
+void drive_stop(DriveMode dm) {
+	drive(0, 0, dm);
 }
 
 void drive_off() {
@@ -65,42 +65,42 @@ void drive_off() {
 	motorcontrol_setEnabled(false);
 }
 
-void drive_fd(float vel, bool traj) {
-	drive(vel, vel, traj);
+void drive_fd(float vel, DriveMode dm) {
+	drive(vel, vel, dm);
 }
 
-void drive_fdDist(float vel, float dist, bool traj) {
-	drive_dist(vel, vel, dist, dist, traj);
+void drive_fdDist(float vel, float dist, DriveMode dm) {
+	drive_dist(vel, vel, dist, dist, dm);
 }
 
-void drive_bk(float vel, bool traj) {
-	drive(-vel, -vel, traj);
+void drive_bk(float vel, DriveMode dm) {
+	drive(-vel, -vel, dm);
 }
 
-void drive_bkDist(float vel, float dist, bool traj) {
-	drive_dist(-vel, -vel, -dist, -dist, traj);
+void drive_bkDist(float vel, float dist, DriveMode dm) {
+	drive_dist(-vel, -vel, -dist, -dist, dm);
 }
 
-void drive_lturn(float vel, bool traj) {
-	drive(-vel, vel, traj);
+void drive_lturn(float vel, DriveMode dm) {
+	drive(-vel, vel, dm);
 }
 
-void drive_lturnDeg(float vel, float deg, bool traj) {
+void drive_lturnDeg(float vel, float deg, DriveMode dm) {
 	float dist = degtorad(deg) * wheelbase_radius;
-	drive_dist(-vel, vel, -dist, dist, traj);
+	drive_dist(-vel, vel, -dist, dist, dm);
 }
 
-void drive_rturn(float vel, bool traj) {
-	drive(vel, -vel, traj);
+void drive_rturn(float vel, DriveMode dm) {
+	drive(vel, -vel, dm);
 }
 
-void drive_rturnDeg(float vel, float deg, bool traj) {
+void drive_rturnDeg(float vel, float deg, DriveMode dm) {
 	float dist = degtorad(deg) * wheelbase_radius;
-	drive_dist(vel, -vel, dist, -dist, traj);
+	drive_dist(vel, -vel, dist, -dist, dm);
 }
 
 void drive_steer(float steer, float vel) {
-	drive(vel + steer, vel - steer, false);
+	drive(vel + steer, vel - steer, DM_BANG);
 }
 
 void drive_waitDist(float dist) {

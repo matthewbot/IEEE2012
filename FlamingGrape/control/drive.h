@@ -1,19 +1,24 @@
 #ifndef DRIVE_H_
 #define DRIVE_H_
 
-void drive(float leftvel, float rightvel, bool traj=true);
-void drive_dist(float leftvel, float rightvel, float ldist, float rdist, bool traj=true);
-void drive_stop(bool traj=true);
+enum DriveMode {
+	DM_BANG,
+	DM_TRAJ
+};
+
+void drive(float leftvel, float rightvel, DriveMode dm = DM_TRAJ);
+void drive_dist(float leftvel, float rightvel, float ldist, float rdist, DriveMode dm = DM_TRAJ);
+void drive_stop(DriveMode dm = DM_BANG);
 void drive_off();
 
-void drive_fd(float vel, bool traj=true);
-void drive_fdDist(float vel, float dist, bool traj=true);
-void drive_bk(float vel, bool traj=true);
-void drive_bkDist(float vel, float dist, bool traj=true);
-void drive_lturn(float vel, bool traj=true);
-void drive_lturnDeg(float vel, float deg, bool traj=true);
-void drive_rturn(float vel, bool traj=true);
-void drive_rturnDeg(float vel, float deg, bool traj=true);
+void drive_fd(float vel, DriveMode dm = DM_TRAJ);
+void drive_fdDist(float vel, float dist, DriveMode dm = DM_TRAJ);
+void drive_bk(float vel, DriveMode dm = DM_TRAJ);
+void drive_bkDist(float vel, float dist, DriveMode dm = DM_TRAJ);
+void drive_lturn(float vel, DriveMode dm = DM_TRAJ);
+void drive_lturnDeg(float vel, float deg, DriveMode dm = DM_TRAJ);
+void drive_rturn(float vel, DriveMode dm = DM_TRAJ);
+void drive_rturnDeg(float vel, float deg, DriveMode dm = DM_TRAJ);
 
 void drive_steer(float steer, float vel);
 

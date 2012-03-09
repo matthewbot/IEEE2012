@@ -80,10 +80,10 @@ void controlpanel_drive() {
 		
 		switch (ch) {
 			case ' ':
-				drive_stop(false);
+				drive_stop();
 				break;
 			case 'x':
-				drive_stop();
+				drive_stop(DM_TRAJ);
 				break;
 			
 			case 'w':

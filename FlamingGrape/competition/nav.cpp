@@ -27,10 +27,10 @@ bool nav_linefollowIntersection() {
 		if (linefollow_getLastFeature() == FEATURE_INTERSECTION)
 			return true; 
 		else if (linefollow_getLastTurn() == TURN_LEFT) {
-			drive_lturn(50);
+			drive_lturn(50, DM_BANG);
 			linefollow_waitLine(2, 7);
 		} else if (linefollow_getLastTurn() == TURN_RIGHT) {
-			drive_rturn(50);
+			drive_rturn(50, DM_BANG);
 			linefollow_waitLine(0, 5);
 		} else
 			return false;
@@ -45,11 +45,11 @@ bool nav_linefollowTurns(int turncount) {
 		if (linefollow_getLastTurn() == TURN_LEFT) {
 			if (--turncount <= 0)
 				return true;
-			drive_lturnDeg(50, 70);
+			drive_lturnDeg(50, 70, DM_BANG);
 		} else if (linefollow_getLastTurn() == TURN_RIGHT) {
 			if (--turncount <= 0)
 				return true;
-			drive_rturnDeg(50, 70);
+			drive_rturnDeg(50, 70, DM_BANG);
 		} else {
 			return false;
 		}

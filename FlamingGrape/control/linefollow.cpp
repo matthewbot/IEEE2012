@@ -36,7 +36,7 @@ bool linefollow_start(float newvel, float newlinepos) {
 void linefollow_stop() {
 	if (enabled) {
 		enabled = false;
-		drive_stop(false);
+		drive_stop();
 	}
 }
 
