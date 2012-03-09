@@ -26,13 +26,13 @@ static volatile bool enabled;
 static void computeTrajStart(TrajData &d);
 static float computeTrajRPS(TrajData &d, float t);
 
-void traj_setup(Motor mot, float dist, float final_rps, float vmax, float amax) {
+void traj_setup(Motor mot, float dist, float final_RPS, float vmax, float amax) {
 	TrajData &d = traj[mot];
 	d.amax = amax;
 	d.vmax = vmax;
 	d.h = dist;
-	d.v0 = motorcontrol_getrpsDesired(mot);
-	d.v1 = final_rps;
+	d.v0 = motorcontrol_getRPSDesired(mot);
+	d.v1 = final_RPS;
 	
 	computeTrajStart(d);
 }
@@ -43,7 +43,7 @@ void traj_setEnabled(bool newenabled) {
 		tickstart = tick_getCount();
 	} else {
 		for (int i=0; i<motorcontrol_count; i++)
-			motorcontrol_setrps(i, 0);
+			motorcontrol_setRPS(i, 0);
 	}
 }
 
@@ -61,8 +61,8 @@ void traj_tick() {
 	for (int i=0; i<motorcontrol_count; i++) {
 		TrajData &d = traj[i];
 		
-		float rps = computeTrajRPS(d, t);
-		motorcontrol_setrps(i, rps);
+		float RPS = computeTrajRPS(d, t);
+		motorcontrol_setRPS(i, RPS);
 		
 		if (t < d.T)
 			done = false;

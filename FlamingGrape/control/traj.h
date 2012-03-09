@@ -5,7 +5,7 @@
 
 void traj_tick();
 
-void traj_setup(Motor mot, float dist, float final_rps, float vmax, float amax);
+void traj_setup(Motor mot, float dist, float final_RPS, float vmax, float amax);
 void traj_setEnabled(bool enabled);
 void traj_wait();
 

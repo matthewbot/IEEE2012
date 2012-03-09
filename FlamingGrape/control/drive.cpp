@@ -11,18 +11,18 @@
 static const float wheel_circumference = 16.3;
 static const float wheelbase_radius = 9; // distance between wheels (needs cal)
 
-static float traj_amax_rps=100 / wheel_circumference; // 100 cm/s^2
+static float traj_amax_RPS=100 / wheel_circumference; // 100 cm/s^2
 
 void drive(float left, float right) {
-	motorcontrol_setrps(MOTOR_LEFT, left / wheel_circumference);
-	motorcontrol_setrps(MOTOR_RIGHT, right / wheel_circumference);
+	motorcontrol_setRPS(MOTOR_LEFT, left / wheel_circumference);
+	motorcontrol_setRPS(MOTOR_RIGHT, right / wheel_circumference);
 	motorcontrol_setEnabled(true);
 }
 
 void drive_dist(float leftvel, float rightvel, float ldist, float rdist, bool traj) {
 	if (traj) {
-		traj_setup(MOTOR_LEFT, ldist / wheel_circumference, 0, leftvel / wheel_circumference, ldist > 0 ? traj_amax_rps : -traj_amax_rps);
-		traj_setup(MOTOR_RIGHT, rdist / wheel_circumference, 0, rightvel / wheel_circumference, rdist > 0 ? traj_amax_rps : -traj_amax_rps);
+		traj_setup(MOTOR_LEFT, ldist / wheel_circumference, 0, leftvel / wheel_circumference, ldist > 0 ? traj_amax_RPS : -traj_amax_RPS);
+		traj_setup(MOTOR_RIGHT, rdist / wheel_circumference, 0, rightvel / wheel_circumference, rdist > 0 ? traj_amax_RPS : -traj_amax_RPS);
 		traj_setEnabled(true);
 		traj_wait();
 	} else {
@@ -115,9 +115,9 @@ void drive_waitDist(float dist) {
 }
 
 void drive_setTrajAmax(float amax) {
-	traj_amax_rps = amax / wheel_circumference;
+	traj_amax_RPS = amax / wheel_circumference;
 }
 
 float drive_getTrajAmax() {
-	return traj_amax_rps * wheel_circumference;
+	return traj_amax_RPS * wheel_circumference;
 }

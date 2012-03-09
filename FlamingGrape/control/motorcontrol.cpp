@@ -19,8 +19,8 @@ struct MotorInfo {
 	PIDState pid; // state of PID loop
 	float m;	// slope for open-loop lookup
 	float b;	// intercept for open-loop lookup
-	volatile float rps_desired;
-	volatile float rps_measured;
+	volatile float RPS_desired;
+	volatile float RPS_measured;
 	volatile uint16_t prev_enc; // used to find motor velocity
 };
 
@@ -33,21 +33,21 @@ void motorcontrol_init() {
 	motinfo[1].b = 472.567 / motor_maxpwm;
 }
 
-float motorcontrol_getrps(int motnum) {
-	return motinfo[motnum].rps_measured;
+float motorcontrol_getRPS(int motnum) {
+	return motinfo[motnum].RPS_measured;
 }
 
-float motorcontrol_getrpsDesired(int motnum) {
-	return motinfo[motnum].rps_desired;
+float motorcontrol_getRPSDesired(int motnum) {
+	return motinfo[motnum].RPS_desired;
 }
 
-void motorcontrol_setrps(int motnum, float rps) {
+void motorcontrol_setRPS(int motnum, float RPS) {
 	MotorInfo &mot = motinfo[motnum];
 	
-	if (sign(mot.rps_desired) != sign(rps))
+	if (sign(mot.RPS_desired) != sign(RPS))
 		mot.pid.sum = 0;
 	
-	mot.rps_desired = rps;
+	mot.RPS_desired = RPS;
 }
 
 void motorcontrol_setEnabled(bool new_enabled) {
@@ -88,13 +88,13 @@ void motorcontrol_tick() {
 
 		uint16_t enc = enc_get(motnum); // read the amount the motor traveled since the last update
 		int16_t diff = enc_diff(enc, mot.prev_enc); // compute the difference
-		mot.rps_measured = diff/enc_per_rotation*TICK_HZ; // compute the rotations per second
+		mot.RPS_measured = diff/enc_per_rotation*TICK_HZ; // compute the rotations per second
 		mot.prev_enc = enc; // save the encoder position
 
 		PIDDebug piddebug;
-		float error = mot.rps_desired - mot.rps_measured; // compute error
+		float error = mot.RPS_desired - mot.RPS_measured; // compute error
 		float out = pid_update(mot.pid, pidgains, error, 1.0/TICK_HZ, &piddebug); // update pid
-		out += sign(mot.rps_desired)*(mot.m*fabs(mot.rps_desired) + mot.b); // compute feedforward
+		out += sign(mot.RPS_desired)*(mot.m*fabs(mot.RPS_desired) + mot.b); // compute feedforward
 		
 		if (debug && motnum == 0)
 			pid_printDebug(out, error, piddebug);
