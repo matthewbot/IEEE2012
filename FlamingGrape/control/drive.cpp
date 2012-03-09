@@ -11,7 +11,7 @@
 static const float wheel_circumference = 16.3;
 static const float wheelbase_radius = 9; // distance between wheels (needs cal)
 
-static float traj_amax_rps=100 / wheel_circumference; // 100 cm/s^2
+static float traj_amax_rps=150 / wheel_circumference; // 100 cm/s^2
 
 void drive(float lvel, float rvel, bool traj) {
 	if (traj) {
@@ -58,6 +58,8 @@ void drive_dist(float lvel, float rvel, float ldist, float rdist, bool traj) {
 
 void drive_stop(bool traj) {
 	drive(0, 0, traj);
+	if (traj)
+		traj_wait();
 }
 
 void drive_off() {
