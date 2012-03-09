@@ -8,8 +8,9 @@ static const int motorcontrol_count = 2;
 
 void motorcontrol_init();
 
-float motorcontrol_getrps(int mot);
-void motorcontrol_setrps(int mot, float rps);
+float motorcontrol_getrps(int motnum);
+float motorcontrol_getrpsDesired(int motnum);
+void motorcontrol_setrps(int motnum, float rps);
 inline void motorcontrol_stop(int mot) { motorcontrol_setrps(mot, 0); }
 
 void motorcontrol_setEnabled(bool enabled=true);

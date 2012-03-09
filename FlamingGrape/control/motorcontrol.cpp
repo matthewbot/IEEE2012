@@ -37,6 +37,10 @@ float motorcontrol_getrps(int motnum) {
 	return motinfo[motnum].rps_measured;
 }
 
+float motorcontrol_getrpsDesired(int motnum) {
+	return motinfo[motnum].rps_desired;
+}
+
 void motorcontrol_setrps(int motnum, float rps) {
 	MotorInfo &mot = motinfo[motnum];
 	

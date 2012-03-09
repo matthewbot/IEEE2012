@@ -31,7 +31,7 @@ void traj_setup(Motor mot, float dist, float final_rps, float vmax, float amax) 
 	d.amax = amax;
 	d.vmax = vmax;
 	d.h = dist;
-	d.v0 = motorcontrol_getrps(mot);
+	d.v0 = motorcontrol_getrpsDesired(mot);
 	d.v1 = final_rps;
 	
 	computeTrajStart(d);
