@@ -71,12 +71,13 @@ LineFollowResults linefollow_readSensor() {
 	float tot=0;
 	
 	for (int i=0; i<linesensor_count; i++) {
-		float light;
+		float &light = results.light[i];
 		if (readings[i] > 500)
 			light = 5E15 / pow4(1.0f+readings[i]); // maps line to ~35, dark to <<0
 		else
 			light = 0;
-		results.light[i] = light;
+		if (i == 0 || i == linesensor_count - 1)
+			light *= 2;
 		results.thresh[i] = light > thresh;
 		
 		if (results.thresh[i]) {
