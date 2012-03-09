@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-static PIDGains pidgains = {100, 0, 6, 0};
+static PIDGains pidgains = {100, 0, 8, 0};
 static float thresh = 3;
 
 static volatile bool enabled;
