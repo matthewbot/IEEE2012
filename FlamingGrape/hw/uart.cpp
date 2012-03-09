@@ -1,3 +1,4 @@
+#include "competition/sensorcomms.h"
 #include "hw/uart.h"
 #include "hw/motor.h"
 #include "debug/debug.h"
@@ -119,6 +120,11 @@ static void receive(UARTNum num) {
 
 	if (data.inbuf_pos >= sizeof(data.inbuf))
 		return;
+		
+	if (num == UART_XBEE) {
+		if (sensorcomms_gotByte(byte))
+			return;
+	}
 		
 	data.inbuf[data.inbuf_pos++] = byte;
 }

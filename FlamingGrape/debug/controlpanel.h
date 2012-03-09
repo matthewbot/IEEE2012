@@ -14,6 +14,7 @@ void controlpanel_drive();
 void controlpanel_nav();
 void controlpanel_tests();
 void controlpanel_deploy();
+void controlpanel_sensorcomms();
 
 bool controlpanel_promptGains(const char *name, const PIDGains &curgains, PIDGains &gains);
 int controlpanel_prompt(const char *prompt, const char *fmt, ...);
