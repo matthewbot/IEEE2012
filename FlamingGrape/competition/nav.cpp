@@ -15,7 +15,7 @@ void nav_magGo(float heading_deg, float dist) {
 	} else {
 		magfollow_start(-60, degtorad(heading_deg));
 	}
-	drive_wait_dist(dist);
+	drive_waitDist(dist);
 	magfollow_stop();
 }
 
@@ -45,11 +45,11 @@ bool nav_linefollowTurns(int turncount) {
 		if (linefollow_getLastTurn() == TURN_LEFT) {
 			if (--turncount <= 0)
 				return true;
-			drive_lturn_deg(50, 70);
+			drive_lturnDeg(50, 70);
 		} else if (linefollow_getLastTurn() == TURN_RIGHT) {
 			if (--turncount <= 0)
 				return true;
-			drive_rturn_deg(50, 70);
+			drive_rturnDeg(50, 70);
 		} else {
 			return false;
 		}

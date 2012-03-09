@@ -61,7 +61,7 @@ void drive_fd(float vel) {
 	drive(vel, vel);
 }
 
-void drive_fd_dist(float vel, float dist, bool traj) {
+void drive_fdDist(float vel, float dist, bool traj) {
 	drive_dist(vel, vel, dist, dist, traj);
 }
 
@@ -69,7 +69,7 @@ void drive_bk(float vel) {
 	drive(-vel, -vel);
 }
 
-void drive_bk_dist(float vel, float dist, bool traj) {
+void drive_bkDist(float vel, float dist, bool traj) {
 	drive_dist(-vel, -vel, -dist, -dist, traj);
 }
 
@@ -77,7 +77,7 @@ void drive_lturn(float vel) {
 	drive(-vel, vel);
 }
 
-void drive_lturn_deg(float vel, float deg, bool traj) {
+void drive_lturnDeg(float vel, float deg, bool traj) {
 	float dist = degtorad(deg) * wheelbase_radius;
 	drive_dist(-vel, vel, -dist, dist, traj);
 }
@@ -86,7 +86,7 @@ void drive_rturn(float vel) {
 	drive(vel, -vel);
 }
 
-void drive_rturn_deg(float vel, float deg, bool traj) {
+void drive_rturnDeg(float vel, float deg, bool traj) {
 	float dist = degtorad(deg) * wheelbase_radius;
 	drive_dist(vel, -vel, dist, -dist, traj);
 }
@@ -95,7 +95,7 @@ void drive_steer(float steer, float vel) {
 	drive(vel + steer, vel - steer);
 }
 
-void drive_wait_dist(float dist) {
+void drive_waitDist(float dist) {
 	uint16_t leftenc = enc_get(MOTOR_LEFT);
 	uint16_t rightenc = enc_get(MOTOR_RIGHT);
 	

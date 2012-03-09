@@ -35,17 +35,17 @@ bool navfast_loopback() {
 
 bool navfast_leftright(bool right) {
 	if (right) {
-		drive_rturn_deg(30, 50);
+		drive_rturnDeg(30, 50);
 	} else {
-		drive_lturn_deg(20, 50);
+		drive_lturnDeg(20, 50);
 	}
 	
-	drive_fd_dist(60, 30);
+	drive_fdDist(60, 30);
 	
 	if (right) {
-		drive_lturn_deg(30, 50);
+		drive_lturnDeg(30, 50);
 	} else {
-		drive_rturn_deg(30, 50);
+		drive_rturnDeg(30, 50);
 	}
 	
 	if (!linefollow_start(60))

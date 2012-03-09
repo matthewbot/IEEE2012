@@ -97,16 +97,16 @@ void controlpanel_drive() {
 				break;
 				
 			case 'W':
-				drive_fd_dist(speed, 50);
+				drive_fdDist(speed, 50);
 				break;
 			case 'A':
-				drive_lturn_deg(speed, 90);
+				drive_lturnDeg(speed, 90);
 				break;
 			case 'S':
-				drive_bk_dist(speed, 50);
+				drive_bkDist(speed, 50);
 				break;
 			case 'D':
-				drive_rturn_deg(speed, 90);
+				drive_rturnDeg(speed, 90);
 				break;	
 			case '=':
 				speed += 2;
