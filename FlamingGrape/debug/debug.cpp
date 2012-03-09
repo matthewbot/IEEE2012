@@ -48,12 +48,12 @@ void debug_init() {
 }
 
 void debug_tick() {
-	if (adc_getBattery() < 10.4) {
+	if (adc_getBattery() < 10.5) {
 		if (++batterycnt >= 100)
 			debug_halt("STOP USING THE ROBOT CHARGE ME BRO");
 	} else {
 		batterycnt = 0;
-	}	
+	}
 }
 
 static int put(char ch, FILE* file) {
