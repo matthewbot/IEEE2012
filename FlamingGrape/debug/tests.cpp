@@ -12,28 +12,28 @@
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
-void tests_pwm() {
-	for (int16_t pwm = 0; pwm < motor_maxpwm; pwm++)
-		tests_pwm_single(pwm);
+void tests_PWM() {
+	for (int16_t PWM = 0; PWM < motor_maxPWM; PWM++)
+		tests_PWM_single(PWM);
 		
-	motor_setpwm(MOTOR_LEFT, 0);
-	motor_setpwm(MOTOR_RIGHT, 0);
+	motor_setPWM(MOTOR_LEFT, 0);
+	motor_setPWM(MOTOR_RIGHT, 0);
 	_delay_ms(2000);
 	
-	for (int16_t pwm = 0; pwm > -motor_maxpwm; pwm--)
-		tests_pwm_single(pwm);
+	for (int16_t PWM = 0; PWM > -motor_maxPWM; PWM--)
+		tests_PWM_single(PWM);
 		
-	motor_setpwm(MOTOR_LEFT, 0);
-	motor_setpwm(MOTOR_RIGHT, 0);
+	motor_setPWM(MOTOR_LEFT, 0);
+	motor_setPWM(MOTOR_RIGHT, 0);
 }
 
-void tests_pwm_single(int16_t pwm) {
+void tests_PWM_single(int16_t PWM) {
 	enc_reset(MOTOR_LEFT);
 	enc_reset(MOTOR_RIGHT);
-	motor_setpwm(MOTOR_LEFT, pwm);
-	motor_setpwm(MOTOR_RIGHT, pwm);
+	motor_setPWM(MOTOR_LEFT, PWM);
+	motor_setPWM(MOTOR_RIGHT, PWM);
 	_delay_ms(10);
-	printf_P(PSTR("%d %d %d\n"), pwm, enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
+	printf_P(PSTR("%d %d %d\n"), PWM, enc_get(MOTOR_LEFT), enc_get(MOTOR_RIGHT));
 }
 
 void tests_mag() {

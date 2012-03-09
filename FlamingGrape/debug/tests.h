@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-void tests_pwm();
-void tests_pwm_single(int16_t pwm);
+void tests_PWM();
+void tests_PWM_single(int16_t PWM);
 void tests_mag();
 void tests_magfollow();
 void tests_led();
