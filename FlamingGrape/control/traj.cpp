@@ -100,8 +100,6 @@ void traj_tick() {
 		if (!partdone)
 			done = false;
 		
-		if (i == 0)
-			debug_println("RPS %f T %f", rps, t);
 		motorcontrol_setRPS(i, rps);
 	}
 	

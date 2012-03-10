@@ -704,6 +704,16 @@ void controlpanel_sensorcomms() {
 				break;
 			}
 			
+			case 'P':
+				sensorcomms_setDebug(true);
+				printf_P(PSTR("Comm prints enabled\n"));
+				break;
+				
+			case 'p':
+				sensorcomms_setDebug(false);
+				printf_P(PSTR("Comm prints disabled\n"));
+				break;				
+			
 			case 'q':
 				return;
 				

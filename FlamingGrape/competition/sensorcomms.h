@@ -6,6 +6,7 @@
 void sensorcomms_tick();
 bool sensorcomms_gotByte(uint8_t byte);
 void sensorcomms_reset();
+void sensorcomms_setDebug(bool debug);
 
 enum BoardStatus {
 	BOARDSTATUS_OFFLINE,

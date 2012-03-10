@@ -93,6 +93,10 @@ bool sensorcomms_getBoardReadingValid(BoardNum board) {
 	return data[board].reading_valid;
 }
 
+void sensorcomms_setDebug(bool newdebug) {
+	debug = newdebug;
+}
+
 // internals
 
 void sensorcomms_tick() {
@@ -121,8 +125,10 @@ static bool in(uint8_t byte) {
 	if (recvstate == STATE_COMMAND) {
 		switch (byte) {
 			case BYTE_WANTID:
-				if (nextnum >= BOARDNUM_MAX) 
-					break; // TODO error handling
+				if (nextnum >= BOARDNUM_MAX) {
+					debug_setLED(ERROR_LED, true); 
+					break;
+				}
 				
 				data[nextnum].status = BOARDSTATUS_ASSIGNING;
 				out(BYTE_ASSIGNID + nextnum);

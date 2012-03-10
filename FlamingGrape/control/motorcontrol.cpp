@@ -80,8 +80,12 @@ void motorcontrol_setDebug(bool newdebug) {
 }
 
 void motorcontrol_tick() {
-	if (!enabled)
+	if (!enabled) {
+		debug_setLED(YELLOW_LED, false);
 		return;
+	}
+
+	bool led=false;
 
 	for (int motnum=0; motnum<motorcontrol_count; motnum++) { // for each motor
 		MotorInfo &mot = motinfo[motnum]; // get its motor information
@@ -105,6 +109,11 @@ void motorcontrol_tick() {
 			out = -1;
 		
 		motor_setPWM(motnum, (int16_t)(out*motor_maxPWM)); // convert output to PWM, set it to the motor
+		
+		if (error > .5)
+			led = true;
 	}
+	
+	debug_setLED(YELLOW_LED, led);
 }
 

@@ -6,8 +6,8 @@
 
 enum DebugLED {
 	BOARD_LED,
-	ERROR_LED,
-	YELLOW_LED,
+	ERROR_LED, // red
+	YELLOW_LED, // motorcontrol not hitting desired rps
 	GREEN_LED,
 	OTHERYELLOW_LED
 };
