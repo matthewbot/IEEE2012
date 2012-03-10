@@ -8,6 +8,8 @@
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
+
+
 void navdeploy_lap() {
 	for (int i=0; i<2; i++) {
 		if (!navdeploy_loopback()) {
@@ -111,7 +113,4 @@ void navdeploy_end() {			// Run after second box has been navigated around on on
 	drive_stop();
 	_delay_ms(300);
 	drive_lturnDeg(50, 60);	// turn left to face the direction we want to go on the loopback line
-/***************************
-** ^ Make into function ^ **
-***************************/
 }
