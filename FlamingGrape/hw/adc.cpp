@@ -54,15 +54,15 @@ struct RangeFinderCal {
 
 static const RangeFinderCal cals[] = {
 	{1, 1, 600},		// LEFT_SIDE
-	{3.3798e-4, -1.1623e-1, 600},		// LEFT_FRONT
+	{2.4721e-4, -4.3370e-2, 600},		// LEFT_FRONT
 	{1, 1, 600},		// RIGHT_SIDE
-	{2.0913e-4, -1.0976e-1, 600}		// RIGHT_FRONT
+	{1.4665e-4, -5.1225e-2, 600}		// RIGHT_FRONT
 };
 
 float adc_sampleRangeFinder(uint8_t pin) {
 	uint16_t val = adc_sample(pin);
-	if (val < cals[pin - 3].min && pin == ADC_FRONT_LEFT_RANGE)
+	if (val < cals[pin - 3].min)
 		return 999;
-	else if (pin == ADC_FRONT_LEFT_RANGE)
-		return 2.54/((cals[pin - 3].a*val) - cals[pin - 3].b);
+	else
+		return 2.54/((cals[pin - 3].a*val) + cals[pin - 3].b);
 }

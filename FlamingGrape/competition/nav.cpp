@@ -43,13 +43,13 @@ bool nav_linefollowTurns(int turncount) {
 			return false;
 		
 		if (linefollow_getLastTurn() == TURN_LEFT) {
-			if (--turncount <= 0)
-				return true;
 			drive_lturnDeg(50, 70, DM_BANG);
-		} else if (linefollow_getLastTurn() == TURN_RIGHT) {
 			if (--turncount <= 0)
 				return true;
+		} else if (linefollow_getLastTurn() == TURN_RIGHT) {
 			drive_rturnDeg(50, 70, DM_BANG);
+			if (--turncount <= 0)
+				return true;
 		} else {
 			return false;
 		}
@@ -61,14 +61,20 @@ bool nav_linefollowRange(float range) {
 		return false;
 	_delay_ms(100);
 	
+	printf("C\n");
+	
+	float dist=0;
 	while (!linefollow_isDone()) {
-		float reading = adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE);
-		if (reading < range) {
+		float reading = adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE);
+		dist = .9f*dist + .1f*reading;
+		if (dist < range) {
+			printf("D %f\n", reading);
 			linefollow_stop();
 			return true;
 		}
 	}
 	
+	printf("E\n");
 	return false;
 }
 

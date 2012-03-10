@@ -357,9 +357,7 @@ void controlpanel_sensor() {
 				break;
 
 			case 'r':			// Prints all rangefinder readings in centimeters
-				while(true) {
-					printf_P(PSTR("Side Left: %5f, Front Left: %5f, Front Right: %5f, Side Right: %5f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
-				}
+				printf_P(PSTR("Side Left: %5f, Front Left: %5f, Front Right: %5f, Side Right: %5f\n"), adc_sampleRangeFinder(ADC_SIDE_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE), adc_sampleRangeFinder(ADC_FRONT_RIGHT_RANGE), adc_sampleRangeFinder(ADC_SIDE_RIGHT_RANGE));
 				break;
 
 			case 'l': {			// Prints out raw linesensor data

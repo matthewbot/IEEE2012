@@ -61,9 +61,9 @@ bool navdeploy_aroundBox() {	// Run immediately after dropping one sensor off, t
 	drive_bkDist(30, 10);		// backup to give room when cutting corner around box
 	drive_lturnDeg(60, 55);	// turn left to go around left front corner of box
 	drive_fd(60);				// drive forward to the left side of the box
-	_delay_ms(300);
+	drive_waitDist(10);
 	linefollow_waitLine(7, 7);	// notice when the first line is crossed as we cut the corner of the line surrounding the box
-	_delay_ms(80);
+	drive_waitDist(10);
 	linefollow_waitLine(7, 7);	// when the second line is seen of the corner of the line surrounding the box
 	drive_stop();				// stop
 	_delay_ms(300);				// wait for bouncing to stop
