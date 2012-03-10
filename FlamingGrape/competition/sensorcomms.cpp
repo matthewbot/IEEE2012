@@ -118,7 +118,10 @@ bool sensorcomms_gotByte(uint8_t byte) {
 	if (in(byte)) {
 		if (debug)
 			debug_println("<%02x>", byte);
+		return true;
 	}
+	
+	return false;
 }
 
 static bool in(uint8_t byte) {
@@ -127,7 +130,7 @@ static bool in(uint8_t byte) {
 			case BYTE_WANTID:
 				if (nextnum >= BOARDNUM_MAX) {
 					debug_setLED(ERROR_LED, true); 
-					break;
+					return true;
 				}
 				
 				data[nextnum].status = BOARDSTATUS_ASSIGNING;
