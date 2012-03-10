@@ -43,6 +43,7 @@ uint16_t tick_getLength() { // in uS
 	return (uint16_t)((uint32_t)ticklength * TICK_US / TICK_TIMMAX);
 }
 
+#include "competition/sensorcomms.h"
 #include "control/motorcontrol.h"
 #include "control/linefollow.h"
 #include "control/magfollow.h"
@@ -65,6 +66,7 @@ ISR(TIMOVFVEC) {
 	motorcontrol_tick();
 	debug_tick();
 	deploy_tick();
+	sensorcomms_tick();
 
 	debug_setLED(BOARD_LED, false);
 	ticklength = tim.CNT - start;

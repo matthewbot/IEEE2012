@@ -10,6 +10,7 @@
 #include "competition/nav.h"
 #include "competition/navfast.h"
 #include "competition/navdeploy.h"
+#include "competition/sensorcomms.h"
 #include "hw/motor.h"
 #include "hw/mag.h"
 #include "hw/enc.h"
@@ -50,6 +51,9 @@ void controlpanel() {
 				break;
 			case 'n':
 				controlpanel_nav();
+				break;
+			case 'c':
+				controlpanel_sensorcomms();
 				break;
 			case 'D':
 				controlpanel_deploy();
@@ -638,6 +642,86 @@ void controlpanel_deploy() {
 		}
 	}
 }	
+
+void controlpanel_sensorcomms() {
+	while (true) {
+		switch (controlpanel_promptChar("Comms")) {
+			case 'c':
+				printf_P(PSTR("Board count: %d\n"), sensorcomms_getOnlineBoardCount());
+				break;
+				
+			case 's': {
+				static const char symbols[] = {'V', 'C', 'T', 'S'};
+				for (int board=0; board < BOARDNUM_MAX; board++) {
+					printf_P(PSTR("%c "), symbols[board]);
+					sensorcomms_printBoardStatus(sensorcomms_getBoardStatus((BoardNum)board));
+					putchar('\n');
+				}
+				break;
+			}
+				
+			case 'u': {
+				int board;
+				if (controlpanel_prompt("Board", "%d", &board) != 1) {
+					printf_P(PSTR("Cancelled.\n"));
+					break;
+				}
+				
+				sensorcomms_updateBoard((BoardNum)board);
+				printf_P(PSTR("Updating board %d\n"), board);
+				break;
+			}
+			
+			case 'U': {
+				for (int board=0; board < sensorcomms_getOnlineBoardCount(); board++) {
+					sensorcomms_updateBoard((BoardNum)board);
+					printf_P(PSTR("Updating board %d\n"), board);
+					sensorcomms_waitBoard((BoardNum)board);
+				}
+				printf_P(PSTR("Done!\n"));
+				
+				break;
+			}
+			
+			case 'R':
+				if (controlpanel_promptChar("Really reset comms? [y/n]") == 'y') {
+					printf_P(PSTR("Comms reset\n"));
+					sensorcomms_reset();
+				}
+				break;
+				
+			case 'd': {
+				uint8_t buf[10];
+				for (int board=0; board < BOARDNUM_MAX; board++) {
+					sensorcomms_getBoardReading(buf, sizeof(buf), (BoardNum)board);
+					for (int i=0; i<sizeof(buf); i++)
+						printf_P(PSTR("%02x "), buf[i]);
+					if (sensorcomms_getBoardReadingValid((BoardNum)board))
+						printf_P(PSTR(" - valid\n"));
+					else
+						printf_P(PSTR(" - invalid\n"));
+				}
+				break;
+			}
+			
+			case 'P':
+				sensorcomms_setDebug(true);
+				printf_P(PSTR("Comm prints enabled\n"));
+				break;
+				
+			case 'p':
+				sensorcomms_setDebug(false);
+				printf_P(PSTR("Comm prints disabled\n"));
+				break;				
+			
+			case 'q':
+				return;
+				
+			// TODO help menu
+				
+		}
+	}
+}
 
 int controlpanel_prompt(const char *prompt, const char *fmt, ...) {
 	va_list argp;
