@@ -57,7 +57,7 @@ void navfast_lap() {
 }
 
 bool navfast_loopback() {
-	if (!nav_linefollowTurns(2, 0.5))
+	if (!nav_linefollowTurns(1, 0.5))
 		return false;
 	_delay_ms(50);
 	if (!nav_linefollowDist(35))
@@ -217,15 +217,23 @@ bool navfast_jump(bool right) {
 // waitLineDist
 // better turn detection
 
-void navfast_end(bool right) { // FIXME: skip last corner
-	turn(60, 40, !right);
-		
-	drive_fd(60);
-	drive_waitDist(15);
-	linefollow_waitLine();
-	drive_waitDist(5);
-	drive_stop();
-	_delay_ms(300);
-	
-	turn(60, 40, right);
+void navfast_end(bool right) {	// Run after a row of boxes to return to main line for loopback
+	if (right) {				// If we're on the back right corner
+		drive_fd(60);				// Start going straight forward to intersect loopback line
+		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
+		linefollow_waitLine();		// Drive until we intersect loopback line
+		drive_stop();
+		_delay_ms(300);
+		drive_rturnDeg(60, 80);		// Turn to face direction of loopback
+	} else {					// If we're on the back left corner
+		drive_rturnDeg(60, 30);		// Turn to intersect loopback line
+		drive_fd(60);				// Start going towards the loopback line
+		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
+		linefollow_waitLine(3, 4);	// Wait for the middle sensors to see a line, this is our first crossover
+		drive_waitDist(10);			// Keep going to get off that line
+		linefollow_waitLine(6, 7);	// Wait until the right side of the sensor is triggered (this will be loopback line to follow)
+		drive_stop();
+		_delay_ms(300);
+		drive_rturnDeg(60, 45);		// Turn to face direction on new loopback line
+	}
 }
