@@ -1,6 +1,8 @@
 #ifndef DRIVE_H_
 #define DRIVE_H_
 
+#include <stdint.h>
+
 enum DriveMode {
 	DM_BANG,
 	DM_TRAJ
@@ -26,5 +28,13 @@ void drive_waitDist(float dist);
 
 void drive_setTrajAmax(float amax);
 float drive_getTrajAmax();
+
+struct DriveDist {
+	uint16_t leftenc;
+	uint16_t rightenc;
+};
+
+void drive_initDist(DriveDist &dist);
+float drive_getDist(const DriveDist &dist);
 
 #endif

@@ -122,7 +122,6 @@ void motorcontrol_tick() {
 			led = true;
 	}
 	
-	debug_println("L %.2f R %.2f", motinfo[0].RPS_measured, motinfo[1].RPS_measured);
 	debug_setLED(YELLOW_LED, led);
 }
 

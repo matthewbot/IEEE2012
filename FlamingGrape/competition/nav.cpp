@@ -87,13 +87,11 @@ bool nav_linefollowDist(float dist) {
 		return false;
 	_delay_ms(100);
 	
-	uint16_t leftenc = enc_get(MOTOR_LEFT);
-	uint16_t rightenc = enc_get(MOTOR_RIGHT);
+	DriveDist dd;
+	drive_initDist(dd);
 	
 	while (!linefollow_isDone()) {
-		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
-		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
-		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2) / enc_per_rotation;
+		float curdist = drive_getDist(dd);
 		
 		if (curdist >= dist) {
 			linefollow_stop();
@@ -112,13 +110,11 @@ bool nav_linefollow(float offset) {
 }
 
 bool nav_waitLineDist(int left, int right, float dist) {
-	uint16_t leftenc = enc_get(MOTOR_LEFT);
-	uint16_t rightenc = enc_get(MOTOR_RIGHT);
+	DriveDist dd;
+	drive_initDist(dd);
 	
 	while (!linefollow_getLine(left, right)) {
-		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
-		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
-		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2) / enc_per_rotation;
+		float curdist = drive_getDist(dd);
 		
 		if (curdist >= dist) {
 			linefollow_stop();

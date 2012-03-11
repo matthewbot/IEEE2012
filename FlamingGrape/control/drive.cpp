@@ -106,13 +106,11 @@ void drive_steer(float steer, float vel) {
 }
 
 void drive_waitDist(float dist) {
-	uint16_t leftenc = enc_get(MOTOR_LEFT);
-	uint16_t rightenc = enc_get(MOTOR_RIGHT);
+	DriveDist dd;
+	drive_initDist(dd);
 	
 	while (true) {
-		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
-		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
-		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2) / enc_per_rotation;
+		float curdist = drive_getDist(dd);
 		
 		if (dist > 0) {
 			if (curdist >= dist)
@@ -130,4 +128,15 @@ void drive_setTrajAmax(float amax) {
 
 float drive_getTrajAmax() {
 	return traj_amax_rps * wheel_circumference;
+}
+
+void drive_initDist(DriveDist &dist) {
+	dist.leftenc = enc_get(MOTOR_LEFT);
+	dist.rightenc = enc_get(MOTOR_RIGHT);	
+}
+
+float drive_getDist(const DriveDist &dist) {
+	int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), dist.leftenc);
+	int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), dist.rightenc);
+	return (leftdiff + rightdiff) * ((wheel_circumference/2) / enc_per_rotation);
 }

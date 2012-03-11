@@ -26,7 +26,8 @@ void navfast_lap() {
 		
 		uint32_t val = tick_getCount();
 		bool right=((val&0x01) != 0);
-		bool cross=((val&0x02) != 0);
+		//bool cross=((val&0x02) != 0);
+		bool cross=false;
 		
 		printf_P(PSTR("Entering leftright\n"));
 		if (!navfast_leftright(right)) {
@@ -70,7 +71,7 @@ bool navfast_loopback() {
 
 bool navfast_leftright(bool right) {
 	if (right)
-		drive_rturnDeg(60, 3);
+		drive_rturnDeg(60, 38);
 	else
 		drive_lturnDeg(60, 45);
 	nav_pause();
@@ -84,13 +85,20 @@ bool navfast_leftright(bool right) {
 		return false;
 	}
 	
-	drive_waitDist(1);
-	linefollow_waitLine(sensor, sensor, true); // wait till off the line
+	drive_waitDist(4);
 	
-	if (!nav_waitLineDist(sensor, sensor, 25)) {
-		drive_stop();
-		printf_P(PSTR("TODO Missed second line!"));
-		return false;
+	if (linefollow_getLine(0, 7)) { // if we still see the line
+		if (!nav_waitLineDist(sensor, sensor, 25)) { // do a long timeout
+			if (!linefollow_getLine(2, 6)) {
+				drive_stop();
+				printf_P(PSTR("TODO Missed second line!"));
+				return false;
+			} else {
+				printf_P(PSTR("Missed second line, but still able to follow"));
+			}
+		}
+	} else {
+		printf_P(PSTR("Nicked corner!\n"));
 	}
 	
 	drive_stop();
@@ -171,49 +179,93 @@ bool navfast_cross(bool right) {
 // handle line visible always (hit box, veered)
 // handle nicked corner
 
+static bool jumpFix(bool right);
+
 bool navfast_jump(bool right) {
 	nav_pause();
 	turn(60, 15, right);
 	
+	bool jumpfix=false;
 	nav_pause();
 	drive_fd(60);
 	drive_waitDist(4);
 	if (!nav_waitLineDist(0, 7, 25)) {
-		drive_stop();
-		_delay_ms(300);
-		turn(60, 45, !right);
-		drive_fd(60);
-		if (!nav_waitLineDist(0, 7, 40)) {
-			drive_stop();
-			printf_P(PSTR("Wat do?? Double jump fail\n"));
+		printf_P(PSTR("A"));
+		jumpfix = true;
+		if (!jumpFix(right))
 			return false;
-		}
-		drive_waitDist(5);
-		drive_stop();
-		_delay_ms(300);
-		
-		turn(60, 20, right);
-		drive_stop();
 	} else {
 		drive_waitDist(3);
 	}
 	
+	DriveDist dd;
+	drive_initDist(dd);
+	
 	if (!nav_linefollow(right ? -.4 : .4)) {
-		printf_P(PSTR("Line gone???\n"));
-		drive_stop();
-		return false;
-	}
-	if (linefollow_getLastFeature() == FEATURE_INTERSECTION) { // TODO not really good enough, use future drive measurement stuff
-		printf("Intersection fix!\n");
-		turn(60, 15, right);
-		drive_fdDist(60, 5, DM_BANG);
-		if (!nav_linefollow(right ? -.4 : .4))
+		printf_P(PSTR("B"));
+		jumpfix = true;
+		if (!jumpFix(right))
 			return false;
+		if (!nav_linefollow(right ? -.4 : .4)) {
+			printf_P(PSTR("Line disappeared after nicked-corner jumpfix\n"));
+			return false;
+		}
+	}
+	if (linefollow_getLastFeature() == FEATURE_INTERSECTION || (!jumpfix && drive_getDist(dd) < 10)) { // TODO not really good enough, use future drive measurement stuff
+		printf("Intersection/shortline fix!\n");
+		turn(60, 45, right);
+		nav_pause();
+		
+		drive_stop();
+		_delay_ms(300);
+		
+		drive_fd(60);
+		uint8_t sensor = right ? 7 : 0;
+		if (!nav_waitLineDist(sensor, sensor, 20)) {
+			printf_P(PSTR("No line after intersection/shortline fix, turning back to find line"));
+			
+			turn(60, 65, !right);
+			drive_stop();
+			_delay_ms(300);
+			
+			drive_fd(60);
+			if (!nav_waitLineDist(0, 7, 20) || !nav_linefollow(right ? -.4 : .4)) {
+				drive_stop();
+				printf_P(PSTR("Giving up on intersection/shortline\n"));
+				return false;
+			}
+		} else {
+			if (!nav_linefollow(right ? -.4 : .4)) {
+				printf_P(PSTR("Line disappeared after intersection/shortline fix\n"));
+				return false;
+			}
+		}
 	}
 		
 	linefollow_waitDone();
 	drive_stop();
 	_delay_ms(300);
+	return true;
+}
+
+static bool jumpFix(bool right) {
+	printf_P(PSTR("jumpFix!\n"));
+	
+	drive_stop();
+	_delay_ms(300);
+	turn(60, 45, !right);
+	drive_fd(60);
+	if (!nav_waitLineDist(0, 7, 40)) {
+		drive_stop();
+		printf_P(PSTR("Wat do? Jump fix fail\n"));
+		return false;
+	}
+	drive_waitDist(5);
+	drive_stop();
+	_delay_ms(300);
+	
+	turn(60, 20, right);
+	drive_stop();
 	return true;
 }
 
@@ -224,6 +276,7 @@ bool navfast_jump(bool right) {
 // better turn detection
 
 void navfast_end(bool right) {	// Run after a row of boxes to return to main line for loopback
+	_delay_ms(4000);
 	if (right) {				// If we're on the back right corner
 		drive_fd(60);				// Start going straight forward to intersect loopback line
 		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
