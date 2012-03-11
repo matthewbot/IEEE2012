@@ -502,6 +502,16 @@ void controlpanel_nav() {
 				navdeploy_lap();
 				break;
 
+			case 'p':
+				printf_P(PSTR("Pauses disabled\n"));
+				nav_setPauseEnabled(false);
+				break;
+				
+			case 'P':
+				printf_P(PSTR("Pauses enabled\n"));
+				nav_setPauseEnabled(true);
+				break;
+
 			case 'q':
 				return;
 				
@@ -517,6 +527,7 @@ void controlpanel_nav() {
 					"  g - magGo along heading for specific distance\n"
 					"  f - run a fast lap\n"
 					"  d - run a deploying lap\n"
+					" Pp - enable/disable pauses\n"
 					"  q - back";
 				puts_P(msg);
 				break;

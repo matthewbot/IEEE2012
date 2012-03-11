@@ -9,4 +9,7 @@ bool nav_linefollowRange(float range);
 bool nav_linefollowDist(float dist);
 bool nav_linefollow(float offset=0);
 
+void nav_pause();
+void nav_setPauseEnabled(bool pause);
+
 #endif

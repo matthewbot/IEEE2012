@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <util/delay.h>
 
+static bool pause;
+
 void nav_magGo(float heading_deg, float dist) {
 	if (dist > 0) {
 		magfollow_start(60, degtorad(heading_deg));
@@ -107,5 +109,14 @@ bool nav_linefollow(float offset) {
 		return false;
 	linefollow_waitDone();
 	return true;
+}
+
+void nav_setPauseEnabled(bool newpause) {
+	pause = newpause;
+}
+
+void nav_pause() {
+	if (pause)
+		_delay_ms(1000);
 }
 

@@ -8,19 +8,12 @@
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
-
-
 void navdeploy_lap() {
 	for (int i=0; i<2; i++) {
 		if (!navdeploy_loopback()) {
 			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
-		
-/*		if (i == 0) {		// Twitch for temperature box
-			_delay_ms(1000);
-			drive_lturn_deg(30, 5);
-		}*/
 		
 		navdeploy_deploy();
 		if (!navdeploy_aroundBox()) {
