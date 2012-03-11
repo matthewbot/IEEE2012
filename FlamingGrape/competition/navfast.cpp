@@ -26,8 +26,7 @@ void navfast_lap() {
 		
 		uint32_t val = tick_getCount();
 		bool right=((val&0x01) != 0);
-		//bool cross=((val&0x02) != 0);
-		bool cross=false;
+		bool cross=((val&0x02) != 0);
 		
 		printf_P(PSTR("Entering leftright\n"));
 		if (!navfast_leftright(right)) {
@@ -59,7 +58,7 @@ void navfast_lap() {
 bool navfast_loopback() {
 	if (!nav_linefollowTurns(1, 0.5))
 		return false;
-	_delay_ms(50);
+	_delay_ms(100);
 	if (!nav_linefollowDist(35))
 		return false;
 		
@@ -71,7 +70,7 @@ bool navfast_loopback() {
 
 bool navfast_leftright(bool right) {
 	if (right)
-		drive_rturnDeg(60, 38);
+		drive_rturnDeg(60, 42);
 	else
 		drive_lturnDeg(60, 45);
 	nav_pause();
@@ -85,8 +84,9 @@ bool navfast_leftright(bool right) {
 		return false;
 	}
 	
-	drive_waitDist(4);
+	drive_waitDist(6);
 	
+	bool noturn=false;
 	if (linefollow_getLine(0, 7)) { // if we still see the line
 		if (!nav_waitLineDist(sensor, sensor, 25)) { // do a long timeout
 			if (!linefollow_getLine(2, 6)) {
@@ -95,6 +95,7 @@ bool navfast_leftright(bool right) {
 				return false;
 			} else {
 				printf_P(PSTR("Missed second line, but still able to follow"));
+				noturn = true;
 			}
 		}
 	} else {
@@ -105,8 +106,10 @@ bool navfast_leftright(bool right) {
 	_delay_ms(300);
 	nav_pause();
 	
-	turn(60, 40, !right);
-	nav_pause();
+	if (!noturn) {
+		turn(60, 40, !right);
+		nav_pause();
+	}
 	
 	if (!nav_linefollow(right ? -.4 : .4))
 		return false;
@@ -158,9 +161,7 @@ bool navfast_cross(bool right) {
 		drive_stop();
 		nav_pause();
 	} else {
-		drive_waitDist(3);
-		drive_stop();
-		nav_pause();
+		drive_waitDist(4);
 	}
 	
 	if (!nav_linefollow(right ? .4 : -.4)) {
@@ -179,93 +180,83 @@ bool navfast_cross(bool right) {
 // handle line visible always (hit box, veered)
 // handle nicked corner
 
-static bool jumpFix(bool right);
-
 bool navfast_jump(bool right) {
 	nav_pause();
 	turn(60, 15, right);
 	
-	bool jumpfix=false;
-	nav_pause();
+	drive_stop();
+	_delay_ms(300);
+	
 	drive_fd(60);
 	drive_waitDist(4);
-	if (!nav_waitLineDist(0, 7, 25)) {
-		printf_P(PSTR("A"));
-		jumpfix = true;
-		if (!jumpFix(right))
-			return false;
+	bool outside = false;
+	bool inside = false;
+	
+	if (!nav_waitLineDist(0, 7, 30)) {
+		outside = true;
 	} else {
-		drive_waitDist(3);
-	}
-	
-	DriveDist dd;
-	drive_initDist(dd);
-	
-	if (!nav_linefollow(right ? -.4 : .4)) {
-		printf_P(PSTR("B"));
-		jumpfix = true;
-		if (!jumpFix(right))
-			return false;
-		if (!nav_linefollow(right ? -.4 : .4)) {
-			printf_P(PSTR("Line disappeared after nicked-corner jumpfix\n"));
-			return false;
+		_delay_ms(30);
+		LineFollowResults results = linefollow_readSensor();
+		
+		if ((right && results.center < -.9) || (!right && results.center > .9)) {
+			outside = true;
+		} else if (results.thresh_count >= 4) {
+			printf("Maybe intersection\n");
+			drive_waitDist(4);
+			if (!linefollow_getLine(2, 5))
+				inside = true;
+		} else {
+			drive_waitDist(3);
 		}
 	}
-	if (linefollow_getLastFeature() == FEATURE_INTERSECTION || (!jumpfix && drive_getDist(dd) < 10)) { // TODO not really good enough, use future drive measurement stuff
-		printf("Intersection/shortline fix!\n");
-		turn(60, 45, right);
-		nav_pause();
 		
+	if (outside) {
+		drive_stop();
+		_delay_ms(300);
+		printf_P(PSTR("Overshot outside\n"));
+		
+		turn(60, 55, !right);
 		drive_stop();
 		_delay_ms(300);
 		
 		drive_fd(60);
-		uint8_t sensor = right ? 7 : 0;
-		if (!nav_waitLineDist(sensor, sensor, 20)) {
-			printf_P(PSTR("No line after intersection/shortline fix, turning back to find line"));
-			
-			turn(60, 65, !right);
+		if (!nav_waitLineDist(3, 4, 35)) {
 			drive_stop();
-			_delay_ms(300);
-			
-			drive_fd(60);
-			if (!nav_waitLineDist(0, 7, 20) || !nav_linefollow(right ? -.4 : .4)) {
-				drive_stop();
-				printf_P(PSTR("Giving up on intersection/shortline\n"));
-				return false;
-			}
-		} else {
-			if (!nav_linefollow(right ? -.4 : .4)) {
-				printf_P(PSTR("Line disappeared after intersection/shortline fix\n"));
-				return false;
-			}
+			printf_P(PSTR("Couldn't find line after overshoot outside!\n"));
+			return false;
+		}
+		
+		if (!nav_linefollow(right ? -.4 : .4)) {
+			printf_P(PSTR("Line disappeared after overshoot outside!\n"));
+			return false;
+		}
+	} else if (inside) { // inside
+		drive_stop();
+		_delay_ms(300);
+		drive_stop();
+		printf_P(PSTR("Going to hit box!\n"));
+		
+		turn(60, 35, right);
+		drive_fd(60);
+		if (!nav_waitLineDist(3, 4, 15)) {
+			drive_stop();
+			printf_P(PSTR("Couldn't find line from the inside\n"));
+			return false;
+		}
+		
+		if (!nav_linefollow(right ? -.4 : .4)) {
+			drive_stop();
+			printf_P(PSTR("Line disappeared after inside\n"));
+			return false;
+		}
+	} else { // hit line correctly
+		if (!nav_linefollow(right ? -.4 : .4)) {
+			drive_stop();
+			printf_P(PSTR("Line disappeared!\n"));
+			return false;
 		}
 	}
-		
-	linefollow_waitDone();
-	drive_stop();
-	_delay_ms(300);
-	return true;
-}
-
-static bool jumpFix(bool right) {
-	printf_P(PSTR("jumpFix!\n"));
 	
-	drive_stop();
-	_delay_ms(300);
-	turn(60, 45, !right);
-	drive_fd(60);
-	if (!nav_waitLineDist(0, 7, 40)) {
-		drive_stop();
-		printf_P(PSTR("Wat do? Jump fix fail\n"));
-		return false;
-	}
-	drive_waitDist(5);
-	drive_stop();
-	_delay_ms(300);
-	
-	turn(60, 20, right);
-	drive_stop();
 	return true;
 }
 
@@ -276,7 +267,6 @@ static bool jumpFix(bool right) {
 // better turn detection
 
 void navfast_end(bool right) {	// Run after a row of boxes to return to main line for loopback
-	_delay_ms(4000);
 	if (right) {				// If we're on the back right corner
 		drive_fd(60);				// Start going straight forward to intersect loopback line
 		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on

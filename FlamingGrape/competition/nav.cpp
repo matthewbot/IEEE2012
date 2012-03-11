@@ -103,6 +103,8 @@ bool nav_linefollowDist(float dist) {
 }
 
 bool nav_linefollow(float offset) {
+	// TODO, attempt line follow starts multiple times
+	
 	if (!linefollow_start(60, offset))
 		return false;
 	linefollow_waitDone();
