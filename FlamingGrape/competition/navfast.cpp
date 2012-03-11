@@ -26,8 +26,7 @@ void navfast_lap() {
 		
 		uint32_t val = tick_getCount();
 		bool right=((val&0x01) != 0);
-		//bool cross=((val&0x02) != 0);
-		bool cross = true;
+		bool cross=((val&0x02) != 0);
 		
 		printf_P(PSTR("Entering leftright\n"));
 		if (!navfast_leftright(right)) {
@@ -71,7 +70,7 @@ bool navfast_loopback() {
 
 bool navfast_leftright(bool right) {
 	if (right)
-		drive_rturnDeg(60, 34);
+		drive_rturnDeg(60, 3);
 	else
 		drive_lturnDeg(60, 45);
 	nav_pause();
@@ -129,7 +128,7 @@ bool navfast_cross(bool right) {
 	_delay_ms(300);
 	nav_pause();
 	
-	turn(60, 100, right);
+	turn(60, 95, right);
 	nav_pause();
 
 	drive_fd(60);
@@ -151,7 +150,7 @@ bool navfast_cross(bool right) {
 		drive_stop();
 		nav_pause();
 	} else {
-		drive_waitDist(1);
+		drive_waitDist(3);
 		drive_stop();
 		nav_pause();
 	}
@@ -167,6 +166,10 @@ bool navfast_cross(bool right) {
 	debug_setLED(OTHERYELLOW_LED, false);
 	return true;
 }
+
+// TODO better corner finder
+// handle line visible always (hit box, veered)
+// handle nicked corner
 
 bool navfast_jump(bool right) {
 	nav_pause();
@@ -195,8 +198,11 @@ bool navfast_jump(bool right) {
 		drive_waitDist(3);
 	}
 	
-	if (!nav_linefollow(right ? -.4 : .4))
+	if (!nav_linefollow(right ? -.4 : .4)) {
+		printf_P(PSTR("Line gone???\n"));
+		drive_stop();
 		return false;
+	}
 	if (linefollow_getLastFeature() == FEATURE_INTERSECTION) { // TODO not really good enough, use future drive measurement stuff
 		printf("Intersection fix!\n");
 		turn(60, 15, right);
