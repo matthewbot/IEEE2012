@@ -97,11 +97,12 @@ bool navdeploy_middle() {		// Run when navigating the space between the two boxe
 }
 
 void navdeploy_end() {			// Run after second box has been navigated around on one side to get to loopback position
-	drive_rturnDeg(50, 40);	// turn right to intercept loopback line behind second box
-	drive_fd(60);				// drive forward towards line
-	drive_waitDist(10);		// go a little bit to make sure we don't intercept line we're already on (back corner of second box)
-	linefollow_waitLine(0, 3);	// wait until line (now we're on the loopback start line)
-	drive_stop();
-	_delay_ms(300);
-	drive_lturnDeg(50, 60);	// turn left to face the direction we want to go on the loopback line
+	drive_rturnDeg(50, 30);		// Turn to intersect loopback line
+	drive_fd(60);				// Start going towards the loopback line
+	drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
+	linefollow_waitLine(3, 4);	// Wait for the middle sensors to see a line, this is our first crossover
+	drive_waitDist(10);			// Keep going to get off that line
+	linefollow_waitLine(6, 7);	// Wait until the right side of the sensor is triggered (this will be loopback line to follow)
+	drive_cStop();
+	drive_rturnDeg(60, 45);		// Turn to face direction on new loopback line
 }
