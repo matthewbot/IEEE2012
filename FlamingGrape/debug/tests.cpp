@@ -96,9 +96,12 @@ void tests_linefollow() {
 		printf_P(PSTR("Canceled.\n"));
 		return;
 	}
+	
+	float offset=0;
+	controlpanel_prompt("Offset", "%f", &offset);
 		
 	printf_P(PSTR("Push any key to stop. "));
-	linefollow_start(vel);
+	linefollow_start(vel, offset);
 	getchar();
 	linefollow_stop();
 	putchar('\n');

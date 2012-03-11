@@ -108,12 +108,21 @@ void motorcontrol_tick() {
 		else if (out < -1)
 			out = -1;
 		
+		int16_t pwm = motor_getPWM(motnum);
+		if (out > 0) {
+			if (pwm < 0)
+				out = 0;
+		} else {
+			if (pwm > 0)
+				out = 0;
+		}
 		motor_setPWM(motnum, (int16_t)(out*motor_maxPWM)); // convert output to PWM, set it to the motor
 		
 		if (error > .5)
 			led = true;
 	}
 	
+	debug_println("L %.2f R %.2f", motinfo[0].RPS_measured, motinfo[1].RPS_measured);
 	debug_setLED(YELLOW_LED, led);
 }
 

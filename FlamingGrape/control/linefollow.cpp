@@ -112,12 +112,27 @@ LineFollowResults linefollow_readSensor() {
 	return results;
 }
 
-void linefollow_waitLine(int left, int right) {
+void linefollow_waitLine(int left, int right, bool inv) {
 	while (true) {
 		LineFollowResults results = linefollow_readSensor();
-		for (int i=left; i<=right; i++)
-			if (results.thresh[i])
+		
+		if (!inv) {
+			for (int i=left; i<=right; i++)
+				if (results.thresh[i])
+					return;
+		} else {
+			bool any=false;
+			for (int i=left; i<=right; i++) {
+				if (results.thresh[i]) {
+					any = true;
+					break;
+				}
+			}
+			
+			if (!any)
 				return;
+		}
+		
 		tick_wait();
 	}
 }

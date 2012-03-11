@@ -9,53 +9,57 @@
 #include <util/delay.h>
 #include <stdio.h>
 
+static void pause() {
+	//_delay_ms(1000);
+}
+
 void navfast_lap() {
-	if (!navfast_loopback()) {
-		printf_P(PSTR("Failed loopback\n"));
-		return;
-	}
-	
-	static bool right;
-	static bool cross;
-	
-	if (!right) {
-		right = true;
-	} else {
-		right = false;
-		cross = !cross;
-	}
-	
-	if (!navfast_leftright(right)) {
-		printf_P(PSTR("Failed leftright\n"));
-		return;
-	}
-	
-	if (cross) {
-		if (!navfast_cross(right)) {
-			printf_P(PSTR("Failed cross\n"));
+	for (int i=0; i<2; i++) {
+		printf_P(PSTR("Entering loopback\n"));
+		if (!navfast_loopback()) {
+			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
 		
-		navfast_end(!right); // we're on the opposite side of the board now
-	} else {
-		if (!navfast_jump(right)) {
-			printf_P(PSTR("Failed jump\n"));
+		uint32_t val = tick_getCount();
+		bool right=((val&0x01) != 0);
+		bool cross=((val&0x02) != 0);
+		
+		printf_P(PSTR("Entering leftright\n"));
+		if (!navfast_leftright(right)) {
+			printf_P(PSTR("Failed leftright\n"));
 			return;
 		}
 		
+		if (cross) {
+			printf_P(PSTR("Entering cross\n"));
+			if (!navfast_cross(right)) {
+				printf_P(PSTR("Failed cross\n"));
+				return;
+			}
+			
+			right = !right;// we're on the opposite side of the board now
+		} else {
+			printf_P(PSTR("Entering jump\n"));
+			if (!navfast_jump(right)) {
+				printf_P(PSTR("Failed jump\n"));
+				return;
+			}
+		}
+		
+		printf_P(PSTR("Entering end\n"));
 		navfast_end(right);
 	}
 }
 
 bool navfast_loopback() {
-	printf("A\n");
-	if (!nav_linefollowTurns(2))
+	if (!nav_linefollowTurns(2, 0.5))
 		return false;
-	
-	printf("B\n");
-	if (!nav_linefollowRange(35))
+	if (!nav_linefollowDist(35))
 		return false;
-			
+		
+	drive_stop();
+	_delay_ms(300);
 	return true;
 }
 
@@ -67,38 +71,69 @@ static void turn(float vel, float deg, bool right) {
 }
 
 bool navfast_leftright(bool right) {
-	turn(60, 55, right);
-
-	uint8_t sensor = right ? 0 : 7;		
-	drive_fd(60);				
-	drive_waitDist(12);
-	linefollow_waitLine(sensor, sensor);
-	drive_waitDist(2);
-	linefollow_waitLine(sensor, sensor);
-	drive_stop();				
-	_delay_ms(300);				
+	pause();
+	if (right)
+		drive_rturnDeg(60, 32);
+	else
+		drive_lturnDeg(60, 45);
+	pause();
 	
-	turn(60, 45, !right);
+	uint8_t sensor = right ? 0 : 7;
+	drive_fd(60);				
+	drive_waitDist(15);
+	linefollow_waitLine(sensor, sensor);
+	drive_waitDist(1); // FIXME
+	linefollow_waitLine(sensor, sensor, true); // wait till off the line
+	linefollow_waitLine(sensor, sensor);
+	drive_stop();
+	_delay_ms(300);
+	
+	pause();
+	turn(60, 40, !right);
+	pause();
+	
 	
 	if (!linefollow_start(60, right ? -.4 : .4))
 		return false;
 		
 	linefollow_waitDone();
+	drive_stop();
+	_delay_ms(300);
 	return true;
 }
-
+/*
 bool navfast_cross(bool right) {
-	drive_fdDist(60, 10);
-	turn(60, 90, !right);
+	pause();
+	if (right)
+		drive_rturnDeg(60, 5);
+	else
+		drive_lturnDeg(60, 15);
+	pause();
+	
+	pause();
+	drive_fdDist(60, 15);
+	pause();
+	if (right)
+		drive_lturnDeg(60, 95);
+	else
+		drive_rturnDeg(60, 85);
 	
 	drive_fd(60);
 	linefollow_waitLine();
-	drive_fdDist(60, 10);
+	drive_stop();
+	pause();
+	drive_fdDist(60, 25);
+	pause();
 	
-	turn(60, 90, right);
+	if (right)
+		drive_rturnDeg(60, 75);
+	else
+		drive_lturnDeg(60, 85);
+
+	pause();
 	drive_fd(60);
-	linefollow_waitLine();
-	drive_waitDist(2);
+	linefollow_waitLine(0, 7);
+	drive_waitDist(3);
 	
 	if (!linefollow_start(60, right ? .4 : -.4))
 		return false;
@@ -106,28 +141,101 @@ bool navfast_cross(bool right) {
 	linefollow_waitDone();
 	return true;
 }
+*/
+
+bool navfast_cross(bool right) {
+	debug_setLED(OTHERYELLOW_LED, true);
+	
+	pause();
+	turn(60, 60, !right);
+	pause();
+	
+	/*if (!nav_linefollowDist(23))
+		return false;
+	
+	debug_setLED(GREEN_LED, true);
+	drive_fdDist(60, 5, DM_BANG);
+	debug_setLED(GREEN_LED, false);*/
+	
+	if (!nav_linefollow(right ? -.6 : .6)) // follow to intersection
+		return false;
+	drive_fdDist(60, 5, DM_BANG); // go past intersection
+	if (!nav_linefollow(right ? -.6 : .6)) // follow to turn	
+		return false;
+	
+	drive_stop();
+	_delay_ms(300);
+	
+	pause();
+	turn(60, 100, right);
+
+	pause();
+	drive_fd(60);
+	linefollow_waitLine(0, 7);
+	drive_waitDist(5); // FIXME
+	drive_stop();
+	
+	pause();
+	if (!linefollow_start(60, right ? .4 : -.4)) {
+		printf("Special fix\n");
+		debug_setLED(GREEN_LED, true);
+		turn(60, 30, right);
+		drive_fd(20);
+		linefollow_waitLine(0, 7);
+		drive_waitDist(1);
+		if (!linefollow_start(60, right ? .4 : -.4))
+			return false;
+		debug_setLED(GREEN_LED, false);
+	}
+		
+	linefollow_waitDone();
+	drive_stop();
+	_delay_ms(300);
+	
+	debug_setLED(OTHERYELLOW_LED, false);
+	return true;
+}
 
 bool navfast_jump(bool right) {
-	drive_fd(60, DM_BANG); // Bang so we don't re-accelerate from 0 after the previous command
+	pause();
+	turn(60, 10, right);
+	
+	drive_fd(60);
 	drive_waitDist(4);
 	linefollow_waitLine(0, 7);
 	drive_waitDist(2);
 	
-	if (!linefollow_start(60, right ? -.4 : .4))
+	if (!nav_linefollow(right ? -.4 : .4))
 		return false;
+	if (linefollow_getLastFeature() == FEATURE_INTERSECTION) {
+		printf("Intersection fix!\n");
+		turn(60, 15, right);
+		drive_fdDist(60, 5, DM_BANG);
+		if (!nav_linefollow(right ? -.4 : .4))
+			return false;
+	}
 		
 	linefollow_waitDone();
+	drive_stop();
+	_delay_ms(300);
 	return true;
 }
 
-void navfast_end(bool right) {
-	turn(50, 40, !right);
+// TODO tonight
+// FIXMEs
+// slew rate limiting
+// waitLineDist
+// better turn detection
+
+void navfast_end(bool right) { // FIXME: skip last corner
+	turn(60, 40, !right);
 		
 	drive_fd(60);
-	drive_waitDist(10);
-	linefollow_waitLine(0, 3);
+	drive_waitDist(15);
+	linefollow_waitLine();
+	drive_waitDist(5);
 	drive_stop();
 	_delay_ms(300);
 	
-	turn(50, 60, right);
+	turn(60, 40, right);
 }

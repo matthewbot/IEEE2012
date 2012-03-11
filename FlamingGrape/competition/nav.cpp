@@ -4,6 +4,8 @@
 #include "control/magfollow.h"
 #include "hw/adc.h"
 #include "hw/tick.h"
+#include "hw/motor.h"
+#include "hw/enc.h"
 #include "debug/debug.h"
 #include "util.h"
 #include <stdio.h>
@@ -37,16 +39,18 @@ bool nav_linefollowIntersection() {
 	}
 }
 
-bool nav_linefollowTurns(int turncount) {
+bool nav_linefollowTurns(int turncount, float offset) {
 	while (true) {
-		if (!nav_linefollow())
+		if (!nav_linefollow(offset))
 			return false;
 		
 		if (linefollow_getLastTurn() == TURN_LEFT) {
+			printf("Got left\n");
 			drive_lturnDeg(50, 70, DM_BANG);
 			if (--turncount <= 0)
 				return true;
 		} else if (linefollow_getLastTurn() == TURN_RIGHT) {
+			printf("Got right\n");
 			drive_rturnDeg(50, 70, DM_BANG);
 			if (--turncount <= 0)
 				return true;
@@ -61,25 +65,45 @@ bool nav_linefollowRange(float range) {
 		return false;
 	_delay_ms(100);
 	
-	printf("C\n");
-	
 	float dist=0;
 	while (!linefollow_isDone()) {
 		float reading = adc_sampleRangeFinder(ADC_FRONT_LEFT_RANGE);
 		dist = .9f*dist + .1f*reading;
 		if (dist < range) {
-			printf("D %f\n", reading);
 			linefollow_stop();
 			return true;
 		}
 	}
 	
-	printf("E\n");
 	return false;
 }
 
-bool nav_linefollow() {
+static const float wheel_circumference = 16.3; // TODO drive library needs a distance measuring interface
+
+bool nav_linefollowDist(float dist) {
 	if (!linefollow_start(60))
+		return false;
+	_delay_ms(100);
+	
+	uint16_t leftenc = enc_get(MOTOR_LEFT);
+	uint16_t rightenc = enc_get(MOTOR_RIGHT);
+	
+	while (!linefollow_isDone()) {
+		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
+		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
+		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2) / enc_per_rotation;
+		
+		if (curdist >= dist) {
+			linefollow_stop();
+			return true;
+		}
+	}
+	
+	return false;	
+}
+
+bool nav_linefollow(float offset) {
+	if (!linefollow_start(60, offset))
 		return false;
 	linefollow_waitDone();
 	return true;
