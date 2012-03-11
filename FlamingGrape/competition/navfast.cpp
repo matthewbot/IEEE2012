@@ -62,8 +62,7 @@ bool navfast_loopback() {
 	if (!nav_linefollowDist(35))
 		return false;
 		
-	drive_stop();
-	_delay_ms(300);
+	drive_cStop();
 	nav_pause();
 	return true;
 }
@@ -102,8 +101,7 @@ bool navfast_leftright(bool right) {
 		printf_P(PSTR("Nicked corner!\n"));
 	}
 	
-	drive_stop();
-	_delay_ms(300);
+	drive_cStop();
 	nav_pause();
 	
 	if (!noturn) {
@@ -114,8 +112,7 @@ bool navfast_leftright(bool right) {
 	if (!nav_linefollow(right ? -.4 : .4))
 		return false;
 		
-	drive_stop();
-	_delay_ms(300);
+	drive_cStop();
 	nav_pause();
 	return true;
 }
@@ -135,8 +132,7 @@ bool navfast_cross(bool right) {
 	
 	if (!nav_linefollow(right ? -.6 : .6)) // follow to turn	
 		return false;
-	drive_stop();
-	_delay_ms(300);
+	drive_cStop();
 	nav_pause();
 	
 	turn(60, 95, right);
@@ -144,8 +140,7 @@ bool navfast_cross(bool right) {
 
 	drive_fd(60);
 	if (!nav_waitLineDist(0, 7, 25)) {
-		drive_stop();
-		_delay_ms(300);
+		drive_cStop();
 		turn(60, 45, right);
 		drive_fd(60);
 		if (!nav_waitLineDist(0, 7, 40)) {
@@ -154,8 +149,7 @@ bool navfast_cross(bool right) {
 			return false;
 		}
 		drive_waitDist(5);
-		drive_stop();
-		_delay_ms(300);
+		drive_cStop();
 		
 		turn(60, 30, !right);
 		drive_stop();
@@ -169,8 +163,7 @@ bool navfast_cross(bool right) {
 		return false;
 	}
 		
-	drive_stop();
-	_delay_ms(300);
+	drive_cStop();
 	
 	debug_setLED(OTHERYELLOW_LED, false);
 	return true;
@@ -184,8 +177,7 @@ bool navfast_jump(bool right) {
 	nav_pause();
 	turn(60, 15, right);
 	
-	drive_stop();
-	_delay_ms(300);
+	drive_cStop();
 	
 	drive_fd(60);
 	drive_waitDist(4);
@@ -211,13 +203,11 @@ bool navfast_jump(bool right) {
 	}
 		
 	if (outside) {
-		drive_stop();
-		_delay_ms(300);
+		drive_cStop();
 		printf_P(PSTR("Overshot outside\n"));
 		
 		turn(60, 55, !right);
-		drive_stop();
-		_delay_ms(300);
+		drive_cStop();
 		
 		drive_fd(60);
 		if (!nav_waitLineDist(3, 4, 35)) {
@@ -231,9 +221,7 @@ bool navfast_jump(bool right) {
 			return false;
 		}
 	} else if (inside) { // inside
-		drive_stop();
-		_delay_ms(300);
-		drive_stop();
+		drive_cStop();
 		printf_P(PSTR("Going to hit box!\n"));
 		
 		turn(60, 35, right);
@@ -271,8 +259,7 @@ void navfast_end(bool right) {	// Run after a row of boxes to return to main lin
 		drive_fd(60);				// Start going straight forward to intersect loopback line
 		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
 		linefollow_waitLine();		// Drive until we intersect loopback line
-		drive_stop();
-		_delay_ms(300);
+		drive_cStop();
 		drive_rturnDeg(60, 80);		// Turn to face direction of loopback
 	} else {					// If we're on the back left corner
 		drive_rturnDeg(60, 30);		// Turn to intersect loopback line
@@ -281,8 +268,7 @@ void navfast_end(bool right) {	// Run after a row of boxes to return to main lin
 		linefollow_waitLine(3, 4);	// Wait for the middle sensors to see a line, this is our first crossover
 		drive_waitDist(10);			// Keep going to get off that line
 		linefollow_waitLine(6, 7);	// Wait until the right side of the sensor is triggered (this will be loopback line to follow)
-		drive_stop();
-		_delay_ms(300);
+		drive_cStop();
 		drive_rturnDeg(60, 45);		// Turn to face direction on new loopback line
 	}
 }

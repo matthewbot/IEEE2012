@@ -11,6 +11,7 @@ enum DriveMode {
 void drive(float leftvel, float rightvel, DriveMode dm = DM_TRAJ);
 void drive_dist(float leftvel, float rightvel, float ldist, float rdist, DriveMode dm = DM_TRAJ);
 void drive_stop(DriveMode dm = DM_BANG);
+void drive_cStop();
 void drive_off();
 
 void drive_fd(float vel, DriveMode dm = DM_TRAJ);
