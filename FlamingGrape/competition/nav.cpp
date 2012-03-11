@@ -111,6 +111,24 @@ bool nav_linefollow(float offset) {
 	return true;
 }
 
+bool nav_waitLineDist(int left, int right, float dist) {
+	uint16_t leftenc = enc_get(MOTOR_LEFT);
+	uint16_t rightenc = enc_get(MOTOR_RIGHT);
+	
+	while (!linefollow_getLine(left, right)) {
+		int16_t leftdiff = enc_diff(enc_get(MOTOR_LEFT), leftenc);
+		int16_t rightdiff = enc_diff(enc_get(MOTOR_RIGHT), rightenc);
+		float curdist = (leftdiff + rightdiff) * (wheel_circumference/2) / enc_per_rotation;
+		
+		if (curdist >= dist) {
+			linefollow_stop();
+			return false;
+		}
+	}
+	
+	return true;
+}
+
 void nav_setPauseEnabled(bool newpause) {
 	pause = newpause;
 }

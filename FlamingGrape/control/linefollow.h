@@ -44,6 +44,7 @@ void linefollow_setDebug(bool debug);
 PIDGains linefollow_getGains();
 
 LineFollowResults linefollow_readSensor();
+bool linefollow_getLine(int left, int right);
 void linefollow_waitLine(int left, int right, bool inv=false);
 inline void linefollow_waitLine() { linefollow_waitLine(3, 4); }
 
