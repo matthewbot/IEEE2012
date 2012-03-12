@@ -43,11 +43,15 @@ void navfast_lap() {
 			
 			right = !right;// we're on the opposite side of the board now
 		} else {
-			printf_P(PSTR("Entering jump\n"));
-			if (!navfast_jump(right)) {
-				printf_P(PSTR("Failed jump\n"));
-				return;
-			}
+			nav_pause();
+			turn(60, 15, right);
+			drive_cStop();
+		}
+		
+		printf_P(PSTR("Entering jump\n"));
+		if (!navfast_jump(right)) {
+			printf_P(PSTR("Failed jump\n"));
+			return;
 		}
 		
 		printf_P(PSTR("Entering end\n"));
@@ -77,7 +81,7 @@ bool navfast_leftright(bool right) {
 	uint8_t sensor = right ? 0 : 7;
 	drive_fd(60);				
 	drive_waitDist(15);
-	if (!nav_waitLineDist(sensor, sensor, 20)) {
+	if (!nav_waitLineDist(sensor, sensor, 27)) {
 		drive_stop();
 		printf_P(PSTR("TODO Missed first line!"));
 		return false;
@@ -88,7 +92,7 @@ bool navfast_leftright(bool right) {
 	bool noturn=false;
 	if (linefollow_getLine(0, 7)) { // if we still see the line
 		if (!nav_waitLineDist(sensor, sensor, 25)) { // do a long timeout
-			if (!linefollow_getLine(2, 6)) {
+			if (!linefollow_getLine(0, 7)) {
 				drive_stop();
 				printf_P(PSTR("TODO Missed second line!"));
 				return false;
@@ -96,18 +100,27 @@ bool navfast_leftright(bool right) {
 				printf_P(PSTR("Missed second line, but still able to follow"));
 				noturn = true;
 			}
+		} else {
+			drive_cStop();
+			turn(60, 40, !right);
+			nav_pause();
 		}
 	} else {
 		printf_P(PSTR("Nicked corner!\n"));
+		drive_cStop();
+		turn(60, 60, !right);
+		drive_fd(60);
+		if (!nav_waitLineDist(3, 4, 20)) {
+			drive_stop();
+			printf_P("Failed to find line after nicked corner!\n");
+			return false;
+		}
+		
+		noturn = true;
 	}
 	
 	drive_cStop();
 	nav_pause();
-	
-	if (!noturn) {
-		turn(60, 40, !right);
-		nav_pause();
-	}
 	
 	if (!nav_linefollow(right ? -.4 : .4))
 		return false;
@@ -118,8 +131,6 @@ bool navfast_leftright(bool right) {
 }
 
 bool navfast_cross(bool right) {
-	debug_setLED(OTHERYELLOW_LED, true);
-	
 	turn(60, 60, !right);
 	nav_pause();
 	
@@ -137,36 +148,6 @@ bool navfast_cross(bool right) {
 	
 	turn(60, 95, right);
 	nav_pause();
-
-	drive_fd(60);
-	if (!nav_waitLineDist(0, 7, 25)) {
-		drive_cStop();
-		turn(60, 45, right);
-		drive_fd(60);
-		if (!nav_waitLineDist(0, 7, 40)) {
-			drive_stop();
-			printf_P(PSTR("Wat do?? Double cross fail\n"));
-			return false;
-		}
-		drive_waitDist(5);
-		drive_cStop();
-		
-		turn(60, 30, !right);
-		drive_stop();
-		nav_pause();
-	} else {
-		drive_waitDist(4);
-	}
-	
-	if (!nav_linefollow(right ? .4 : -.4)) {
-		printf(PSTR("Line gone??\n"));
-		drive_stop();
-		return false;
-	}
-		
-	drive_cStop();
-	
-	debug_setLED(OTHERYELLOW_LED, false);
 	return true;
 }
 
@@ -175,11 +156,6 @@ bool navfast_cross(bool right) {
 // handle nicked corner
 
 bool navfast_jump(bool right) {
-	nav_pause();
-	turn(60, 15, right);
-	
-	drive_cStop();
-	
 	drive_fd(60);
 	drive_waitDist(4);
 	bool outside = false;
@@ -188,7 +164,7 @@ bool navfast_jump(bool right) {
 	if (!nav_waitLineDist(0, 7, 33)) {
 		outside = true;
 	} else {
-		_delay_ms(30);
+		_delay_ms(60);
 		LineFollowResults results = linefollow_readSensor();
 		
 		if ((right && results.center < -.9) || (!right && results.center > .9) || (results.thresh_count == 0)) {
@@ -208,7 +184,6 @@ bool navfast_jump(bool right) {
 		printf_P(PSTR("Overshot outside\n"));// TODO occured when too far back from line, turned into the corner, went straight at it, read as a turn, jumped to end
 		
 		turn(60, 55, !right);
-		drive_cStop();
 		
 		drive_fd(60);
 		if (!nav_waitLineDist(3, 4, 35)) {
@@ -216,6 +191,9 @@ bool navfast_jump(bool right) {
 			printf_P(PSTR("Couldn't find line after overshoot outside!\n"));
 			return false;
 		}
+		drive_cStop();
+		
+		turn(60, 30, right);
 		
 		if (!nav_linefollow(right ? -.4 : .4)) {
 			printf_P(PSTR("Line disappeared after overshoot outside!\n"));

@@ -56,7 +56,7 @@ bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to
 	drive_fd(60);
 	drive_waitDist(10);
 	linefollow_waitLine(7, 7);
-	drive_waitDist(10);
+	drive_waitDist(5);
 	linefollow_waitLine(7, 7);
 	drive_cStop();
 	drive_rturnDeg(60, 45);		// at front left corner of first box, facing parralel to course
@@ -82,8 +82,14 @@ bool navdeploy_middle() {	// Run when navigating the space between the two boxes
 	drive_waitDist(2);
 	drive_cStop();
 	drive_lturnDeg(50, 60);		// on middle line facing second box
-	if (!linefollow_start(60))
-		return false;
+	if (!linefollow_start(60)) {
+		printf_P(PSTR("Overshot middle line!\n"));
+		drive_bkDist(60, 10);
+		if (!linefollow_start(60)) {
+			printf_P(PSTR("Still couldn't find middle line!\n"));
+			return false;
+		}
+	}
 	linefollow_waitDone();
 	drive_cStop();				// on intersection before second box
 	drive_bkDist(40, 14);
