@@ -184,13 +184,13 @@ bool navfast_jump(bool right) {
 	bool outside = false;
 	bool inside = false;
 	
-	if (!nav_waitLineDist(0, 7, 30)) {
+	if (!nav_waitLineDist(0, 7, 33)) {
 		outside = true;
 	} else {
 		_delay_ms(30);
 		LineFollowResults results = linefollow_readSensor();
 		
-		if ((right && results.center < -.9) || (!right && results.center > .9)) {
+		if ((right && results.center < -.9) || (!right && results.center > .9) || (results.thresh_count == 0)) {
 			outside = true;
 		} else if (results.thresh_count >= 4) {
 			printf("Maybe intersection\n");
@@ -204,7 +204,7 @@ bool navfast_jump(bool right) {
 		
 	if (outside) {
 		drive_cStop();
-		printf_P(PSTR("Overshot outside\n"));
+		printf_P(PSTR("Overshot outside\n"));// TODO occured when too far back from line, turned into the corner, went straight at it, read as a turn, jumped to end
 		
 		turn(60, 55, !right);
 		drive_cStop();
@@ -240,7 +240,7 @@ bool navfast_jump(bool right) {
 	} else { // hit line correctly
 		if (!nav_linefollow(right ? -.4 : .4)) {
 			drive_stop();
-			printf_P(PSTR("Line disappeared!\n"));
+			printf_P(PSTR("Line disappeared!\n"));	// TODO Hit this case when it looked like it should have been running great
 			return false;
 		}
 	}
@@ -259,8 +259,9 @@ void navfast_end(bool right) {	// Run after a row of boxes to return to main lin
 		drive_fd(60);				// Start going straight forward to intersect loopback line
 		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
 		linefollow_waitLine();		// Drive until we intersect loopback line
+		drive_waitDist(3);			// Go forward a few more centimeters to center on line when turned
 		drive_cStop();
-		drive_rturnDeg(60, 80);		// Turn to face direction of loopback
+		drive_rturnDeg(60, 90);		// Turn to face direction of loopback
 	} else {					// If we're on the back left corner
 		drive_rturnDeg(60, 30);		// Turn to intersect loopback line
 		drive_fd(60);				// Start going towards the loopback line
