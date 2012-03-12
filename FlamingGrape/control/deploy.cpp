@@ -49,9 +49,9 @@ bool deploy_isDone() {
 }
 
 void deploy_waitDone() {
-	//while (enabled) { }
-	_delay_ms(1000);
-	deploy_stop();
+	while (enabled) { }
+	//_delay_ms(1000);
+	//deploy_stop();
 }
 
 void deploy_tick() {
@@ -63,13 +63,8 @@ void deploy_tick() {
 	bool beambreak = deploy_getBeamBreak();
 	switch (state) {
 		case STATE_ENTER_BEAM:
-			if (beambreak)
-				state = STATE_LEAVE_BEAM;
-			break;
-			
-		case STATE_LEAVE_BEAM:
-			if (!beambreak) {
-				waitctr = 400;
+			if (beambreak) {
+				waitctr = 250;
 				state = STATE_WAIT_CTR;
 			}
 			break;

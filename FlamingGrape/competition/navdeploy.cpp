@@ -40,13 +40,9 @@ void navdeploy_deploy() {		// Run when encountering a box
 	deploy_out(true);			// release sensor
 	_delay_ms(2000);
 	
-	for (int i = 0; i < 2; i++) {	// Do 2 humps
-		drive_bkDist(20, 5);
-		deploy_off();
-		drive_fdDist(20, 7);
-	}
-	
 	drive_bk(4);				// drive backwards from box
+	_delay_ms(200);
+	deploy_off();
 	linefollow_waitLine();		// until the line is seen
 	
 	deploy_start();				// start priming next sensor on deployer
