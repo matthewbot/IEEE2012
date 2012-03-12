@@ -160,6 +160,7 @@ bool navfast_cross(bool right) {
 	
 	if (!nav_linefollow(right ? .4 : -.4)) {
 		printf(PSTR("Line gone??\n"));
+		drive_stop();
 		return false;
 	}
 		

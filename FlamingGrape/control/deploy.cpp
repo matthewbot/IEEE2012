@@ -34,7 +34,7 @@ bool deploy_getBeamBreak() {
 }
 
 void deploy_start() {
-	deploy_out();
+	deploy_out(true);
 	enabled = true;
 	state = STATE_ENTER_BEAM;
 }
@@ -64,7 +64,7 @@ void deploy_tick() {
 	switch (state) {
 		case STATE_ENTER_BEAM:
 			if (beambreak) {
-				waitctr = 300;
+				waitctr = 220;
 				state = STATE_WAIT_CTR;
 			}
 			break;

@@ -38,7 +38,9 @@ void navdeploy_deploy() {		// Run when encountering a box
 	_delay_ms(500);
 	drive_fdDist(20, 15);		// approach box
 	deploy_out(true);			// release sensor
-	_delay_ms(2000);
+	_delay_ms(500);
+	drive_bkDist(1, .25);
+	_delay_ms(500);
 	
 	drive_bk(4);				// drive backwards from box
 	_delay_ms(200);
