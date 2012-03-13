@@ -58,7 +58,7 @@ bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to
 	drive_fd(60);
 	drive_waitDist(10);
 	bool noturn=false;
-	if (!nav_waitLineDist(7, 7, 30)) {	// missed corner completely
+	if (!nav_waitLineDist(7, 7, 25)) {	// missed corner completely
 		drive_stop();
 		printf_P(PSTR("Missed first line!"));
 		drive_fdDist(60, 10);
