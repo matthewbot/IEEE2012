@@ -14,7 +14,9 @@ void navdeploy_lap() {
 			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
-		
+		if (i == 1) {
+			drive_lturnDeg(60, 5);
+		}
 		navdeploy_deploy();
 		if (!navdeploy_aroundBox()) {
 			printf_P(PSTR("Failed aroundbox\n"));
@@ -55,15 +57,66 @@ bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to
 	drive_lturnDeg(60, 55);
 	drive_fd(60);
 	drive_waitDist(10);
-	linefollow_waitLine(7, 7);
-	drive_waitDist(5);
-	linefollow_waitLine(7, 7);
+	bool noturn=false;
+	if (!nav_waitLineDist(7, 7, 30)) {	// missed corner completely
+		drive_stop();
+		printf_P(PSTR("Missed first line!"));
+		drive_fdDist(60, 10);
+		drive_rturnDeg(60, 95);			// turn to face line (hopefully)
+		drive_fd(60);
+		if (!nav_waitLineDist(0, 3, 30)) {
+			printf_P(PSTR("TODO: Timed out looking for line"));
+			drive_stop();
+			return false;
+		} else {
+			drive_cStop();
+			drive_lturnDeg(60, 20);
+			noturn = true;
+		}
+	} else {
+
+		drive_waitDist(6);
+
+		if (linefollow_getLine(0, 7)) { // if we still see the line
+			if (!nav_waitLineDist(7, 7, 25)) { // do a long timeout
+				if (!linefollow_getLine(2, 6)) {
+					drive_stop();
+					printf_P(PSTR("TODO Missed second line!"));
+					return false;
+				} else {
+					printf_P(PSTR("Missed second line, but still able to follow"));
+					noturn = true;
+				}
+			}
+		} else {
+			printf_P(PSTR("Nicked corner!\n"));
+			drive_fdDist(60, 10);
+			drive_rturnDeg(60, 95);			// turn to face line (hopefully)
+			drive_fd(60);
+			if (!nav_waitLineDist(0, 3, 30)) {
+				printf_P(PSTR("TODO: Timed out looking for line"));
+				drive_stop();
+				return false;
+			} else {
+				drive_cStop();
+				drive_lturnDeg(60, 20);
+				noturn = true;
+			}
+		}
+	}
 	drive_cStop();
-	drive_rturnDeg(60, 45);		// at front left corner of first box, facing parralel to course
+	nav_pause();
 	
-	if (!linefollow_start(60, .4))
+	if (!noturn) {
+		drive_rturnDeg(60, 40);
+		nav_pause();
+	}
+	
+	if (!nav_linefollow(.4))
 		return false;
-	linefollow_waitDone();		// at back left corner of first box
+		
+	drive_cStop();
+	nav_pause();
 	return true;
 }
 

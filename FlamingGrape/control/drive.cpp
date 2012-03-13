@@ -10,7 +10,7 @@
 // Motion Constants:
 static const float wheel_circumference = 16.3;
 static const float wheelbase_radius = 9; // distance between wheels (needs cal)
-static const uint16_t debounce = 100;	// ms needed for hard cstop to stop bouncing before next move
+static const uint16_t debounce = 200;	// ms needed for hard cstop to stop bouncing before next move
 
 static float traj_amax_rps=150 / wheel_circumference; // 100 cm/s^2
 
