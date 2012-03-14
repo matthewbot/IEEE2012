@@ -15,7 +15,7 @@ void navdeploy_lap() {
 			return;
 		}
 		if (i == 1) {
-			drive_lturnDeg(60, 5);
+			drive_lturnDeg(60, 15);
 		}
 		navdeploy_deploy();
 		if (!navdeploy_aroundBox()) {
@@ -43,12 +43,12 @@ void navdeploy_deploy() {		// Run when encountering a box
 	_delay_ms(500);
 	drive_bkDist(1, .25);
 	_delay_ms(500);
-	
+
 	drive_bk(4);				// drive backwards from box
 	_delay_ms(200);
 	deploy_off();
 	linefollow_waitLine();		// until the line is seen
-	
+
 	deploy_start();				// start priming next sensor on deployer
 }
 
@@ -111,17 +111,16 @@ bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to
 		drive_rturnDeg(60, 40);
 		nav_pause();
 	}
-	
+
 	if (!nav_linefollow(.4))
 		return false;
-		
+
 	drive_cStop();
 	nav_pause();
 	return true;
 }
 
 bool navdeploy_loopback() {	// Run when leaving one row of boxes to loop back to the other row of boxes
-	deploy_start();				// start priming sensor on deployer
 	if (!nav_linefollowIntersection())	// linefollow until intersection before first box is reached
 		return false;
 	return true;
