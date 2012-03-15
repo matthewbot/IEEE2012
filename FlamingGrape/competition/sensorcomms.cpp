@@ -8,7 +8,6 @@
 #include <stdio.h>
 
 // constants
-static const int reading_maxlen = 20; // maximum length of a reading
 static const unsigned int timeout_ticks = TICK_HZ/2; // maximum number of ticks before an update times out
 
 // board updating information
@@ -24,7 +23,7 @@ static volatile uint32_t assignstart; // the time we started attempting to assig
 // per board Data
 struct BoardData {
 	volatile BoardStatus status;
-	uint8_t reading[reading_maxlen];
+	uint8_t reading[sensorcomms_readinglen];
 	bool reading_valid;
 };
 
@@ -165,7 +164,7 @@ static bool in(uint8_t byte) {
 		
 		return false;
 	} else if (recvstate == STATE_READINGLEN) {
-		if (byte < reading_maxlen) { // reading too big, probably corrupt
+		if (byte <= sensorcomms_readinglen) { // reading too big, probably corrupt
 			readinglen = byte;
 			readingpos = 0;
 			recvstate = STATE_READINGDATA;
