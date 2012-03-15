@@ -14,6 +14,7 @@ void init_interrupts() {
 	sei();
 }
 
+#include "competition/sensorcomms.h"
 #include "debug/controlpanel.h"
 #include "debug/debug.h"
 #include "control/motorcontrol.h"
@@ -36,6 +37,7 @@ void init_modules() {
 	linesensor_init();
 	mag_init();
 	motorcontrol_init();
+	sensorcomms_init();
 	controlpanel_init();
 }
 

@@ -5,6 +5,7 @@
 
 static const int sensorcomms_readinglen = 20; // maximum length of a reading
 
+void sensorcomms_init();
 void sensorcomms_tick();
 bool sensorcomms_gotByte(uint8_t byte);
 void sensorcomms_reset();
