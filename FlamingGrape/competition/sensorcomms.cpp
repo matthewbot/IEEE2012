@@ -3,6 +3,7 @@
 #include "hw/tick.h"
 #include "debug/debug.h"
 #include <avr/pgmspace.h>
+#include <util/delay.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -85,12 +86,18 @@ void sensorcomms_updateBoard(BoardNum board) {
 	recvstate = STATE_COMMAND;
 }
 
-void sensorcomms_waitBoard(BoardNum board) {
-	while (data[board].status != BOARDSTATUS_READY) { }
+bool sensorcomms_waitBoard(BoardNum board, int msecs) {
+	BoardData &bd = data[board];
+	while (bd.status != BOARDSTATUS_READY && --msecs > 0) { _delay_ms(1); }
+	return bd.status == BOARDSTATUS_READY;
 }
 
-void sensorcomms_getBoardReading(uint8_t *buf, uint8_t buflen, BoardNum board) {
-	memcpy(buf, data[board].reading, buflen);
+void sensorcomms_cancelUpdate() {
+	updatestart = 0;
+}
+
+const uint8_t *sensorcomms_getBoardReading(BoardNum board) {
+	return data[board].reading;
 }
 
 bool sensorcomms_getBoardReadingValid(BoardNum board) {

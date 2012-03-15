@@ -28,8 +28,9 @@ uint8_t sensorcomms_getOnlineBoardCount();
 void sensorcomms_setOnlineBoardCount(uint8_t ctr);
 BoardStatus sensorcomms_getBoardStatus(BoardNum board);
 void sensorcomms_updateBoard(BoardNum board);
-void sensorcomms_waitBoard(BoardNum board);
-void sensorcomms_getBoardReading(uint8_t *buf, uint8_t buflen, BoardNum board);
+bool sensorcomms_waitBoard(BoardNum board, int msecs);
+void sensorcomms_cancelUpdate();
+const uint8_t *sensorcomms_getBoardReading(BoardNum board);
 bool sensorcomms_getBoardReadingValid(BoardNum board);
 
 
