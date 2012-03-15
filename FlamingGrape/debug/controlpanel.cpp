@@ -718,7 +718,7 @@ void controlpanel_sensorcomms() {
 				const uint8_t *buf;
 				for (int board=0; board < BOARDNUM_MAX; board++) {
 					buf = sensorcomms_getBoardReading((BoardNum)board);
-					for (int i=0; i<sizeof(buf); i++)
+					for (int i=0; i<sensorcomms_readinglen; i++)
 						printf_P(PSTR("%02x "), buf[i]);
 					if (sensorcomms_getBoardReadingValid((BoardNum)board))
 						printf_P(PSTR(" - valid\n"));
