@@ -25,6 +25,7 @@ enum BoardNum {
 };
 
 uint8_t sensorcomms_getOnlineBoardCount();
+void sensorcomms_setOnlineBoardCount(uint8_t ctr);
 BoardStatus sensorcomms_getBoardStatus(BoardNum board);
 void sensorcomms_updateBoard(BoardNum board);
 void sensorcomms_waitBoard(BoardNum board);

@@ -659,6 +659,17 @@ void controlpanel_sensorcomms() {
 				printf_P(PSTR("Board count: %d\n"), sensorcomms_getOnlineBoardCount());
 				break;
 				
+			case 'C': {
+				int count;
+				if (controlpanel_prompt("Board Count", "%d", &count) != 1) {
+					printf_P(PSTR("Cancelled.\n"));
+				} else {
+					sensorcomms_setOnlineBoardCount((uint8_t)count);
+					printf_P(PSTR("Overrode board count to %d\n"), count);
+				}
+				break;
+			}
+				
 			case 's': {
 				static const char symbols[] = {'V', 'C', 'T', 'S'};
 				for (int board=0; board < BOARDNUM_MAX; board++) {

@@ -69,6 +69,10 @@ uint8_t sensorcomms_getOnlineBoardCount() {
 	return nextnum;
 }
 
+void sensorcomms_setOnlineBoardCount(uint8_t num) {
+	nextnum = (BoardNum)num;
+}
+
 BoardStatus sensorcomms_getBoardStatus(BoardNum board) {
 	return data[board].status;
 }
