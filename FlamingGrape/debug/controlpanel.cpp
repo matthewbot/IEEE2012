@@ -700,7 +700,7 @@ void controlpanel_sensorcomms() {
 				break;
 				
 			case 'd': {
-				uint8_t buf[10];
+				uint8_t buf[20];
 				for (int board=0; board < BOARDNUM_MAX; board++) {
 					sensorcomms_getBoardReading(buf, sizeof(buf), (BoardNum)board);
 					for (int i=0; i<sizeof(buf); i++)

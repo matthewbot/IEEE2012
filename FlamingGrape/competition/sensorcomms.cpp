@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 // constants
-static const int reading_maxlen = 10; // maximum length of a reading
+static const int reading_maxlen = 20; // maximum length of a reading
 static const unsigned int timeout_ticks = TICK_HZ/2; // maximum number of ticks before an update times out
 
 // board updating information
