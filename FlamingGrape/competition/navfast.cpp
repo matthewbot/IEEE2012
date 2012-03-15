@@ -73,7 +73,7 @@ bool navfast_loopback() {
 
 bool navfast_leftright(bool right) {
 	if (right)
-		drive_rturnDeg(60, 42);
+		drive_rturnDeg(60, 45);
 	else
 		drive_lturnDeg(60, 45);
 	nav_pause();
@@ -112,7 +112,7 @@ bool navfast_leftright(bool right) {
 		drive_fd(60);
 		if (!nav_waitLineDist(3, 4, 20)) {
 			drive_stop();
-			printf_P("Failed to find line after nicked corner!\n");
+			printf_P(PSTR("Failed to find line after nicked corner!\n"));
 			return false;
 		}
 		
@@ -164,17 +164,17 @@ bool navfast_jump(bool right) {
 	if (!nav_waitLineDist(0, 7, 33)) {
 		outside = true;
 	} else {
-		_delay_ms(60);
+		_delay_ms(30);
 		LineFollowResults results = linefollow_readSensor();
 		
-		if ((right && results.center < -.9) || (!right && results.center > .9) || (results.thresh_count == 0)) {
-			outside = true;
-		} else if (results.thresh_count >= 4) {
+		if (results.thresh_count >= 5) {
 			printf("Maybe intersection\n");
 			drive_waitDist(4);
 			if (!linefollow_getLine(2, 5))
 				inside = true;
-		} else {
+		} else if ((right && results.center < -.9) || (!right && results.center > .9) || (results.thresh_count == 0)) {
+			outside = true;
+		} else  {
 			drive_waitDist(3);
 		}
 	}
@@ -203,9 +203,9 @@ bool navfast_jump(bool right) {
 		drive_cStop();
 		printf_P(PSTR("Going to hit box!\n"));
 		
-		turn(60, 35, right);
+		turn(60, 45, right);
 		drive_fd(60);
-		if (!nav_waitLineDist(3, 4, 15)) {
+		if (!nav_waitLineDist(2, 5, 20)) {
 			drive_stop();
 			printf_P(PSTR("Couldn't find line from the inside\n"));
 			return false;
@@ -219,8 +219,13 @@ bool navfast_jump(bool right) {
 	} else { // hit line correctly
 		if (!nav_linefollow(right ? -.4 : .4)) {
 			drive_stop();
-			printf_P(PSTR("Line disappeared!\n"));	// TODO Hit this case when it looked like it should have been running great
-			return false;
+			printf_P(PSTR("Line disappeared, turning right!\n"));	// TODO Hit this case when it looked like it should have been running great
+			
+			turn(60, 10, right);
+			if (!nav_linefollow(right ? -.4 : .4)) {
+				printf_P(PSTR("Line still gone, bailing\n"));
+				return false;
+			}
 		}
 	}
 	

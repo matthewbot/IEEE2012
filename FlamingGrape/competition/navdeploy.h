@@ -3,7 +3,7 @@
 
 void navdeploy_lap();
 
-void navdeploy_deploy();
+void navdeploy_deploy(bool lastbox=false);
 bool navdeploy_aroundBox();
 
 bool navdeploy_loopback();

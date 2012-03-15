@@ -26,7 +26,7 @@ void navdeploy_lap() {
 			printf_P(PSTR("Failed middle\n"));
 			return;
 		}
-		navdeploy_deploy();
+		navdeploy_deploy(i == 1);
 		if (!navdeploy_aroundBox()) {
 			printf("Failed aroundbox\n");
 			return;
@@ -35,7 +35,7 @@ void navdeploy_lap() {
 	}
 }
 
-void navdeploy_deploy() {		// Run when encountering a box
+void navdeploy_deploy(bool lastbox) {		// Run when encountering a box
 	deploy_waitDone();			// prime sensor on deployer
 	_delay_ms(500);
 	drive_fdDist(20, 15);		// approach box
@@ -49,12 +49,13 @@ void navdeploy_deploy() {		// Run when encountering a box
 	deploy_off();
 	linefollow_waitLine();		// until the line is seen
 
-	deploy_start();				// start priming next sensor on deployer
+	if (!lastbox)
+		deploy_start();				// start priming next sensor on deployer
 }
 
 bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to navigate around box to next box or loopback
 	drive_bkDist(30, 10);		// in front of first box
-	drive_lturnDeg(60, 55);
+	drive_lturnDeg(60, 50);
 	drive_fd(60);
 	drive_waitDist(10);
 	bool noturn=false;
@@ -62,7 +63,7 @@ bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to
 		drive_stop();
 		printf_P(PSTR("Missed first line!"));
 		drive_fdDist(60, 10);
-		drive_rturnDeg(60, 95);			// turn to face line (hopefully)
+		drive_rturnDeg(60, 105);			// turn to face line (hopefully)
 		drive_fd(60);
 		if (!nav_waitLineDist(0, 3, 30)) {
 			printf_P(PSTR("TODO: Timed out looking for line"));
@@ -127,7 +128,7 @@ bool navdeploy_loopback() {	// Run when leaving one row of boxes to loop back to
 }
 
 bool navdeploy_middle() {	// Run when navigating the space between the two boxes on either row of the course
-	drive_rturnDeg(50, 43);		// on back left corner of first box
+	drive_rturnDeg(50, 50);		// on back left corner of first box
 	drive_fd(60);
 	drive_waitDist(12);
 	linefollow_waitLine(3, 4);	// on middle line connecting two boxes
