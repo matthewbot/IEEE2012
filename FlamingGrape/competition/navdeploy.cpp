@@ -38,11 +38,13 @@ void navdeploy_lap() {
 void navdeploy_deploy(bool lastbox) {		// Run when encountering a box
 	deploy_waitDone();			// prime sensor on deployer
 	_delay_ms(500);
-	drive_fdDist(20, 15);		// approach box
+	drive_fd(20);		// approach box
+	drive_waitDist(15);
 	deploy_out(true);			// release sensor
-	_delay_ms(500);
+	_delay_ms(2500);
+	drive_stop();
 	drive_bkDist(1, .25);
-	_delay_ms(500);
+	_delay_ms(2500);
 
 	drive_bk(4);				// drive backwards from box
 	_delay_ms(200);

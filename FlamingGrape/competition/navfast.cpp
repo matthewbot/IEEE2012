@@ -131,7 +131,7 @@ bool navfast_leftright(bool right) {
 }
 
 bool navfast_cross(bool right) {
-	turn(60, 60, !right);
+	turn(60, 70, !right);
 	nav_pause();
 	
 	if (!nav_linefollow(right ? -.6 : .6)) // follow to intersection

@@ -11,6 +11,7 @@
 #include "competition/navfast.h"
 #include "competition/navdeploy.h"
 #include "competition/sensorcomms.h"
+#include "competition/sensordecision.h"
 #include "hw/motor.h"
 #include "hw/mag.h"
 #include "hw/enc.h"
@@ -696,7 +697,10 @@ void controlpanel_sensorcomms() {
 				for (int board=0; board < sensorcomms_getOnlineBoardCount(); board++) {
 					sensorcomms_updateBoard((BoardNum)board);
 					printf_P(PSTR("Updating board %d\n"), board);
-					sensorcomms_waitBoard((BoardNum)board);
+					if (!sensorcomms_waitBoard((BoardNum)board, 1000)) {
+						printf_P(PSTR("board %d timed out\n"), board);
+						sensorcomms_cancelUpdate();
+					}
 				}
 				printf_P(PSTR("Done!\n"));
 				
@@ -711,15 +715,32 @@ void controlpanel_sensorcomms() {
 				break;
 				
 			case 'd': {
-				uint8_t buf[20];
+				const uint8_t *buf;
 				for (int board=0; board < BOARDNUM_MAX; board++) {
-					sensorcomms_getBoardReading(buf, sizeof(buf), (BoardNum)board);
-					for (int i=0; i<sizeof(buf); i++)
+					buf = sensorcomms_getBoardReading((BoardNum)board);
+					for (int i=0; i<sensorcomms_readinglen; i++)
 						printf_P(PSTR("%02x "), buf[i]);
 					if (sensorcomms_getBoardReadingValid((BoardNum)board))
 						printf_P(PSTR(" - valid\n"));
 					else
 						printf_P(PSTR(" - invalid\n"));
+				}
+				break;
+			}
+			
+			case 'D': {
+				int decision;
+				if (controlpanel_prompt("Decision", "%d", &decision) != 1) {
+					printf_P(PSTR("Cancelled.\n"));
+					break;
+				}
+				
+				sensordecision_prepare((uint8_t)decision);
+				if (!sensordecision_wait()) {
+					printf_P(PSTR("Decision timed out\n"));
+					sensorcomms_cancelUpdate();
+				} else {
+					printf_P(PSTR("Decision: %s\n"), sensordecision_isRight() ? "Right" : "Left");
 				}
 				break;
 			}
