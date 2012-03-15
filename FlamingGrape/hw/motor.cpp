@@ -9,7 +9,7 @@ static PORT_t &PWMport = PORTF;
 static const int PWMpins_mask = 0x0F;
 static TC0_t &PWMtim = TCF0;
 
-static const bool flip[4] = {true, false, false, false}; // LRDF
+static const bool flip[4] = {true, false, true, false}; // LRDF
 static const uint8_t port[4] = {2, 3, 1, 0}; // LRDF
 
 void motor_init() {
