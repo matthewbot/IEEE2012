@@ -89,6 +89,13 @@ void drive_bkDist(float vel, float dist, DriveMode dm) {
 	drive_dist(-vel, -vel, -dist, -dist, dm);
 }
 
+void drive_turn(float vel, float deg, bool right) {
+	if (right)
+		drive_rturnDeg(vel, deg);
+	else
+		drive_lturnDeg(vel, deg);
+}
+
 void drive_lturn(float vel, DriveMode dm) {
 	drive(-vel, vel, dm);
 }

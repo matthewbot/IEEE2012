@@ -9,29 +9,40 @@
 #include <stdio.h>
 
 void navdeploy_lap() {
+	bool box1 = true;
+	bool box2 = true;
+	bool box3 = true;
+	bool box4 = true;
 	for (int i=0; i<2; i++) {
+		bool choice1;
+		bool choice2;
 		if (!navdeploy_loopback()) {
 			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
 		if (i == 1) {
-			drive_lturnDeg(60, 15);
+			choice1 = box1;
+			choice2 = box2;
+		} else {
+			drive_lturnDeg(60, 7);
+			choice1 = box3;
+			choice2 = box4;
 		}
 		navdeploy_deploy();
-		if (!navdeploy_aroundBox()) {
+		if (!navdeploy_aroundBox(choice1)) {
 			printf_P(PSTR("Failed aroundbox\n"));
 			return;
 		}
-		if (!navdeploy_middle()) {
+		if (!navdeploy_middle(choice1)) {
 			printf_P(PSTR("Failed middle\n"));
 			return;
 		}
 		navdeploy_deploy(i == 1);
-		if (!navdeploy_aroundBox()) {
+		if (!navdeploy_aroundBox(choice2)) {
 			printf("Failed aroundbox\n");
 			return;
 		}
-		navdeploy_end();
+		navdeploy_end(choice2);
 	}
 }
 
@@ -53,25 +64,28 @@ void navdeploy_deploy(bool lastbox) {		// Run when encountering a box
 		deploy_start();				// start priming next sensor on deployer
 }
 
-bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to navigate around box to next box or loopback
+bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one sensor off, to navigate around box to next box or loopback
 	drive_bkDist(30, 10);		// in front of first box
-	drive_lturnDeg(60, 50);
+	drive_turn(60, 50, same);
 	drive_fd(60);
 	drive_waitDist(10);
 	bool noturn=false;
-	if (!nav_waitLineDist(7, 7, 25)) {	// missed corner completely
+	uint16_t sensor = !same ? 7 : 0;
+	if (!nav_waitLineDist(sensor, sensor, 25)) {	// missed corner completely
 		drive_stop();
-		printf_P(PSTR("Missed first line!"));
+		printf_P(PSTR("Missed first line!\n"));
 		drive_fdDist(60, 10);
-		drive_rturnDeg(60, 105);			// turn to face line (hopefully)
+		drive_turn(60, 105, !same);			// turn to face line (hopefully)
 		drive_fd(60);
-		if (!nav_waitLineDist(0, 3, 30)) {
-			printf_P(PSTR("TODO: Timed out looking for line"));
+		uint16_t sensorl = !same ? 0 : 4;
+		uint16_t sensorr = !same ? 3 : 7;
+		if (!nav_waitLineDist(sensorl, sensorr, 30)) {
+			printf_P(PSTR("TODO: Timed out looking for line\n"));
 			drive_stop();
 			return false;
 		} else {
 			drive_cStop();
-			drive_lturnDeg(60, 20);
+			drive_turn(60, 20, same);
 			noturn = true;
 		}
 	} else {
@@ -79,41 +93,46 @@ bool navdeploy_aroundBox() {// Run immediately after dropping one sensor off, to
 		drive_waitDist(6);
 
 		if (linefollow_getLine(0, 7)) { // if we still see the line
-			if (!nav_waitLineDist(7, 7, 25)) { // do a long timeout
-				if (!linefollow_getLine(2, 6)) {
+			if (!nav_waitLineDist(sensor, sensor, 25)) { // do a long timeout
+				uint16_t sensorl = !same ? 2 : 1;
+				uint16_t sensorr = !same ? 6 : 5;
+				if (!linefollow_getLine(sensorl, sensorr)) {
 					drive_stop();
-					printf_P(PSTR("TODO Missed second line!"));
+					printf_P(PSTR("TODO Missed second line!\n"));
 					return false;
 				} else {
-					printf_P(PSTR("Missed second line, but still able to follow"));
+					printf_P(PSTR("Missed second line, but still able to follow\n"));
 					noturn = true;
 				}
 			}
 		} else {
 			printf_P(PSTR("Nicked corner!\n"));
 			drive_fdDist(60, 10);
-			drive_rturnDeg(60, 95);			// turn to face line (hopefully)
+			drive_turn(60, 95, !same);			// turn to face line (hopefully)
 			drive_fd(60);
-			if (!nav_waitLineDist(0, 3, 30)) {
-				printf_P(PSTR("TODO: Timed out looking for line"));
+			uint16_t sensorl = !same ? 0 : 4;
+			uint16_t sensorr = !same ? 3 : 7;
+			if (!nav_waitLineDist(sensorl, sensorr, 30)) {
+				printf_P(PSTR("TODO: Timed out looking for line\n"));
 				drive_stop();
 				return false;
 			} else {
 				drive_cStop();
-				drive_lturnDeg(60, 20);
+				drive_turn(60, 20, same);
 				noturn = true;
 			}
 		}
 	}
 	drive_cStop();
 	nav_pause();
-	
+
 	if (!noturn) {
-		drive_rturnDeg(60, 40);
+		drive_turn(60, 40, !same);
 		nav_pause();
 	}
 
-	if (!nav_linefollow(.4))
+	float offset = !same ? 0.4 : -0.4;
+	if (!nav_linefollow(offset))
 		return false;
 
 	drive_cStop();
@@ -127,14 +146,14 @@ bool navdeploy_loopback() {	// Run when leaving one row of boxes to loop back to
 	return true;
 }
 
-bool navdeploy_middle() {	// Run when navigating the space between the two boxes on either row of the course
-	drive_rturnDeg(50, 50);		// on back left corner of first box
+bool navdeploy_middle(bool same) {	// Run when navigating the space between the two boxes on either row of the course
+	drive_turn(50, 50, !same);		// on back left corner of first box
 	drive_fd(60);
 	drive_waitDist(12);
 	linefollow_waitLine(3, 4);	// on middle line connecting two boxes
 	drive_waitDist(2);
 	drive_cStop();
-	drive_lturnDeg(50, 60);		// on middle line facing second box
+	drive_turn(50, 60, same);		// on middle line facing second box
 	if (!linefollow_start(60)) {
 		printf_P(PSTR("Overshot middle line!\n"));
 		drive_bkDist(60, 10);
@@ -153,13 +172,15 @@ bool navdeploy_middle() {	// Run when navigating the space between the two boxes
 	return true;
 }
 
-void navdeploy_end() {		// Run after second box has been navigated around on one side to get to loopback position
-	drive_rturnDeg(50, 30);		// back left corner, second box
+void navdeploy_end(bool same) {		// Run after second box has been navigated around on one side to get to loopback position
+	drive_turn(50, 30, !same);		// back left corner, second box
 	drive_fd(60);
 	drive_waitDist(10);
 	linefollow_waitLine(3, 4);	// crossing first loopback line
 	drive_waitDist(10);
-	linefollow_waitLine(6, 7);
+	uint16_t sensorl = !same ? 6 : 0;
+	uint16_t sensorr = !same ? 7 : 1;
+	linefollow_waitLine(sensorl, sensorr);
 	drive_cStop();				// on main loopback line
-	drive_rturnDeg(60, 45);
+	drive_turn(60, 45, !same);
 }
