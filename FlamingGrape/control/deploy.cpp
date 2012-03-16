@@ -64,7 +64,7 @@ void deploy_tick() {
 	switch (state) {
 		case STATE_ENTER_BEAM:
 			if (beambreak) {
-				waitctr = 650;
+				waitctr = 625;
 				state = STATE_WAIT_CTR;
 			}
 			break;

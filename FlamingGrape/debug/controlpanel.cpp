@@ -651,7 +651,7 @@ void controlpanel_deploy() {
 				_delay_ms(10);
 				while(deploy_getBeamBreak()) {
 				}
-				_delay_ms(1000);
+				_delay_ms(8000);
 				deploy_stop();
 				break;
 			case 'q':
