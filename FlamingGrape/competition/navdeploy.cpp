@@ -1,5 +1,6 @@
 #include "competition/navdeploy.h"
 #include "competition/nav.h"
+#include "competition/sensordecision.h"
 #include "control/drive.h"
 #include "control/deploy.h"
 #include "control/linefollow.h"
@@ -11,44 +12,39 @@
 
 void navdeploy_lap() {
 	uint32_t count = tick_getCount();
-	bool box1 = (count & 0x01) != 0;
-	bool box2 = (count & 0x02) != 0;
-	bool box3 = (count & 0x04) != 0;
-	bool box4 = (count & 0x08) != 0;
+	uint16_t box = 0;
 	for (int i=0; i<2; i++) {
-		bool choice1;
-		bool choice2;
 		if (!navdeploy_loopback()) {
 			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
-		if (i == 1) {
-			choice1 = box1;
-			choice2 = box2;
-		} else {
+		if (i == 0){
 			drive_lturnDeg(60, 5);
-			choice1 = box3;
-			choice2 = box4;
+			box = 0;
+		} else {
+			box = 2;
 		}
-		navdeploy_deploy();
-		if (!navdeploy_aroundBox(choice1)) {
+		navdeploy_deploy(box);
+		bool right = sensordecision_isRight();
+		if (!navdeploy_aroundBox(right)) {
 			printf_P(PSTR("Failed aroundbox\n"));
 			return;
 		}
-		if (!navdeploy_middle(choice1)) {
+		if (!navdeploy_middle(right)) {
 			printf_P(PSTR("Failed middle\n"));
 			return;
 		}
-		navdeploy_deploy(i == 1);
-		if (!navdeploy_aroundBox(choice2)) {
+		navdeploy_deploy(box + 1, i == 1);
+		right = sensordecision_isRight();
+		if (!navdeploy_aroundBox(right)) {
 			printf("Failed aroundbox\n");
 			return;
 		}
-		navdeploy_end(choice2);
+		navdeploy_end(right);
 	}
 }
 
-void navdeploy_deploy(bool lastbox) {		// Run when encountering a box
+void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 	deploy_waitDone();			// prime sensor on deployer
 	_delay_ms(500);
 	drive_fd(20);		// approach box
@@ -62,10 +58,12 @@ void navdeploy_deploy(bool lastbox) {		// Run when encountering a box
 	drive_bk(4);				// drive backwards from box
 	_delay_ms(200);
 	deploy_off();
+	sensordecision_prepare(box);
 	linefollow_waitLine();		// until the line is seen
 
 	if (!lastbox)
 		deploy_start();				// start priming next sensor on deployer
+	sensordecision_wait();
 }
 
 bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one sensor off, to navigate around box to next box or loopback
