@@ -108,6 +108,11 @@ static void receive(UARTNum num) {
 	UARTData &data = uartdata[num];
 	uint8_t byte = uarts[num]->DATA;
 	
+	if (num == UART_XBEE) {
+		if (sensorcomms_gotByte(byte))
+			return;
+	}
+	
 	if (byte == 27 || byte == '!' || byte == '`') {		// E-Stop is ESC key, !, or `
 		cli();
 		motor_allOff();
@@ -117,14 +122,8 @@ static void receive(UARTNum num) {
 		debug_setLED(ERROR_LED, true);
 	}
 		
-
 	if (data.inbuf_pos >= sizeof(data.inbuf))
 		return;
-		
-	if (num == UART_XBEE) {
-		if (sensorcomms_gotByte(byte))
-			return;
-	}
 		
 	data.inbuf[data.inbuf_pos++] = byte;
 }

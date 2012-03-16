@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+void sensordecision_setRandomMode(bool random);
+
 bool sensordecision_verifyOk(); // checks to make sure all four sensors are online and responding
 void sensordecision_prepare(uint8_t decision); // decision is 0 to 3
 bool sensordecision_available(); // true if decision is available

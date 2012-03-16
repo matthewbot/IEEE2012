@@ -1,12 +1,21 @@
 #include "competition/sensordecision.h"
 #include "competition/sensorcomms.h"
 #include "debug/debug.h"
+#include "hw/tick.h"
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
 static BoardNum curboard;
+static bool random;
+
+void sensordecision_setRandomMode(bool newrandom) {
+	random = newrandom;
+}
 
 bool sensordecision_verifyOk() {
+	if (random)
+		return true;
+	
 	bool ok = true;
 	
 	for (int i=0; i<BOARDNUM_MAX; i++) {
@@ -30,19 +39,31 @@ bool sensordecision_verifyOk() {
 }
 
 void sensordecision_prepare(uint8_t decision) {
+	if (random)
+		return;
+		
 	curboard = (BoardNum)decision;
 	sensorcomms_updateBoard(curboard);
 }
 
 bool sensordecision_available() {
+	if (random)
+		return true;
 	return sensorcomms_getBoardStatus(curboard) == BOARDSTATUS_READY;
 }
 
 bool sensordecision_wait() {
+	if (random)
+		return true;
+	
 	return sensorcomms_waitBoard(curboard, 1000);
 }
 
 bool sensordecision_isRight() {
+	if (random) {
+		return (tick_getCount() & 0x01) != 0;
+	}
+	
 	if (!sensordecision_available())
 		return true;
 		
@@ -51,7 +72,7 @@ bool sensordecision_isRight() {
 	switch (curboard) {
 		case BOARDNUM_VOLTAGE: {
 			uint16_t voltage = (data[0] << 8) | data[1];
-			return voltage > 0x0100;
+			return voltage > 0x02b0;
 		}
 			
 		case BOARDNUM_CAPACITANCE: {

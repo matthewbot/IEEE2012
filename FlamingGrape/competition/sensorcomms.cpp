@@ -17,7 +17,7 @@ static volatile uint8_t readinglen; // the length of the reading we're receiving
 static volatile uint8_t readingpos; // the current position we are in receiving the reading
 
 // board ID assignment information
-static volatile BoardNum nextnum; // the next number to assign
+static volatile int8_t nextnum; // the next number to assign
 static volatile uint32_t assignstart; // the time we started attempting to assign nextnum. 0 if we're not assigning
 
 // per board Data
@@ -53,8 +53,12 @@ static bool in(uint8_t byte);
 
 // public interface
 
+void sensorcomms_init() {
+	sensorcomms_reset();
+}
+
 void sensorcomms_reset() {
-	nextnum = (BoardNum)0;
+	nextnum = BOARDNUM_SIGNAL;
 	assignstart = false;
 	updatestart = 0;
 	recvstate = STATE_COMMAND;
@@ -66,11 +70,15 @@ void sensorcomms_reset() {
 }
 
 uint8_t sensorcomms_getOnlineBoardCount() {
-	return nextnum;
+	uint8_t ctr=0;
+	for (int i=0; i<BOARDNUM_MAX; i++)
+		if (data[i].status != BOARDSTATUS_OFFLINE)
+			ctr++;
+	return ctr;
 }
 
 void sensorcomms_setOnlineBoardCount(uint8_t num) {
-	nextnum = (BoardNum)num;
+	nextnum = (BoardNum)(BOARDNUM_MAX-1-num);
 }
 
 BoardStatus sensorcomms_getBoardStatus(BoardNum board) {
@@ -138,7 +146,11 @@ static bool in(uint8_t byte) {
 	if (recvstate == STATE_COMMAND) {
 		switch (byte) {
 			case BYTE_WANTID:
-				if (nextnum >= BOARDNUM_MAX) {
+				if (nextnum < 0) {
+					static bool once=false;
+					if (!once)
+						printf_P(PSTR("Got WantID, but no IDs left!\n"));
+					once = true;
 					debug_setLED(ERROR_LED, true); 
 					return true;
 				}
@@ -154,7 +166,7 @@ static bool in(uint8_t byte) {
 
 				data[nextnum].status = BOARDSTATUS_READY;
 				assignstart = 0;
-				nextnum = (BoardNum)(nextnum+1);
+				nextnum--;
 				return true;
 				
 			case BYTE_READINGSTART:

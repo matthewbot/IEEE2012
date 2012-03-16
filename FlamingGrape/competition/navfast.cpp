@@ -1,5 +1,7 @@
 #include "competition/navfast.h"
 #include "competition/nav.h"
+#include "competition/sensorcomms.h"
+#include "competition/sensordecision.h"
 #include "control/drive.h"
 #include "control/linefollow.h"
 #include "hw/adc.h"
@@ -17,23 +19,22 @@ static void turn(float vel, float deg, bool right) {
 }
 
 void navfast_lap() {
-	for (int i=0; i<2; i++) {
+	uint8_t halflap=0;
+	for (int i=0; i<2; i++, halflap++) {
 		printf_P(PSTR("Entering loopback\n"));
-		if (!navfast_loopback()) {
+		if (!navfast_loopback(halflap)) {
 			printf_P(PSTR("Failed loopback\n"));
 			return;
 		}
 		
-		uint32_t val = tick_getCount();
-		bool right=((val&0x01) != 0);
-		bool cross=((val&0x02) != 0);
-		
+		bool right = sensordecision_isRight();
 		printf_P(PSTR("Entering leftright\n"));
-		if (!navfast_leftright(right)) {
+		if (!navfast_leftright(right, halflap)) {
 			printf_P(PSTR("Failed leftright\n"));
 			return;
 		}
 		
+		bool cross = sensordecision_isRight() != right;
 		if (cross) {
 			printf_P(PSTR("Entering cross\n"));
 			if (!navfast_cross(right)) {
@@ -59,10 +60,13 @@ void navfast_lap() {
 	}
 }
 
-bool navfast_loopback() {
+bool navfast_loopback(uint8_t hlap) {
 	if (!nav_linefollowTurns(1, 0.5))
 		return false;
 	_delay_ms(100);
+	
+	sensordecision_prepare((hlap & 0x01) == 0 ? 0 : 2);
+		
 	if (!nav_linefollowDist(35))
 		return false;
 		
@@ -71,7 +75,7 @@ bool navfast_loopback() {
 	return true;
 }
 
-bool navfast_leftright(bool right) {
+bool navfast_leftright(bool right, uint8_t halflap) {
 	if (right)
 		drive_rturnDeg(60, 45);
 	else
@@ -121,6 +125,8 @@ bool navfast_leftright(bool right) {
 	
 	drive_cStop();
 	nav_pause();
+	
+	sensordecision_prepare((halflap & 0x01 == 0) ? 1 : 3);
 	
 	if (!nav_linefollow(right ? -.4 : .4))
 		return false;
