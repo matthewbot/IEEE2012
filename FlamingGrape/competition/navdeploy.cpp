@@ -50,7 +50,11 @@ void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 	drive_fd(20);		// approach box
 	drive_waitDist(15);
 	deploy_out(true);			// release sensor
-	_delay_ms(3000);
+	if (box == 0) {
+		_delay_ms(3000);
+	} else {
+		_delay_ms(3500);
+	}
 	drive_stop();
 	drive_bkDist(1, .25);
 	_delay_ms(2500);
@@ -58,11 +62,11 @@ void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 	drive_bk(4);				// drive backwards from box
 	_delay_ms(200);
 	deploy_off();
-	sensordecision_prepare(box);
 	linefollow_waitLine();		// until the line is seen
 
 	if (!lastbox)
 		deploy_start();				// start priming next sensor on deployer
+	sensordecision_prepare(0);		// TODO Replace 0 with box!!
 	sensordecision_wait();
 }
 

@@ -30,7 +30,7 @@ void deploy_off() {
 }
 
 bool deploy_getBeamBreak() {
-	return beambreak_filtered > 3000;
+	return beambreak_filtered > 1000;
 }
 
 void deploy_start() {
@@ -64,7 +64,7 @@ void deploy_tick() {
 	switch (state) {
 		case STATE_ENTER_BEAM:
 			if (beambreak) {
-				waitctr = 700;
+				waitctr = 650;
 				state = STATE_WAIT_CTR;
 			}
 			break;

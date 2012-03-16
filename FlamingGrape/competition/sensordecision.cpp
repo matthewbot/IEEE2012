@@ -72,12 +72,13 @@ bool sensordecision_isRight() {
 	switch (curboard) {
 		case BOARDNUM_VOLTAGE: {
 			uint16_t voltage = (data[0] << 8) | data[1];
-			return voltage > 0x0283;
+			return voltage > 0x0283;		// Calibrated Value
 		}
 			
 		case BOARDNUM_CAPACITANCE: {
 			uint16_t volt3 = (data[4] << 8) | data[5];
-			return volt3 > 0x0100;
+			return true;		// FOR TESTING ONLY
+//			return volt3 > 0x0100;
 		}
 		
 		case BOARDNUM_TEMPERATURE: {
