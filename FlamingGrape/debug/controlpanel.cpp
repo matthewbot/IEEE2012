@@ -586,6 +586,16 @@ void controlpanel_tests() {
 			case 't':
 				printf_P(PSTR("Tick Length %u us\n"), tick_getLength());
 				break;
+				
+			case 'r':
+				printf_P(PSTR("Random mode disabled\n"));
+				sensordecision_setRandomMode(false);
+				break;
+				
+			case 'R':
+				printf_P(PSTR("Random mode enabled\n"));
+				sensordecision_setRandomMode(true);
+				break;
 
 			default:
 				puts_P(unknown_str);
