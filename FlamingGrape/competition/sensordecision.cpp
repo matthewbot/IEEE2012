@@ -88,11 +88,11 @@ bool sensordecision_isRight() {
 			uint8_t ctr=0;
 			for (int i=0;i<10;i++) {
 				uint16_t val = (data[2*i] << 8) | data[2*i+1];
-				if (val > 20)
+				if (val > 0x100)
 					ctr++;
 			}
 			
-			return ctr < 4;
+			return ctr < 3;
 		}
 		
 		default:

@@ -20,6 +20,7 @@ void navfast_lap() {
 			return;
 		}
 		
+		sensordecision_wait();
 		bool right = sensordecision_isRight();
 		printf_P(PSTR("Entering leftright\n"));
 		if (!navfast_leftright(right, halflap)) {
@@ -27,6 +28,7 @@ void navfast_lap() {
 			return;
 		}
 		
+		sensordecision_wait();
 		bool cross = sensordecision_isRight() != right;
 		if (cross) {
 			printf_P(PSTR("Entering cross\n"));
@@ -218,7 +220,7 @@ bool navfast_jump(bool right) {
 		}
 	} else { // hit line correctly
 		if (!nav_linefollow(right ? -.4 : .4)) {
-			drive_stop();
+			drive_cStop();
 			printf_P(PSTR("Line disappeared, turning right!\n"));	// TODO Hit this case when it looked like it should have been running great
 			
 			drive_turn(60, 10, right);
