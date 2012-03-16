@@ -15,7 +15,7 @@ void navdeploy_lap() {
 			return;
 		}
 		if (i == 1) {
-			drive_lturnDeg(60, 15);
+//			drive_lturnDeg(60, 5);
 		}
 		navdeploy_deploy();
 		if (!navdeploy_aroundBox()) {
@@ -41,7 +41,7 @@ void navdeploy_deploy(bool lastbox) {		// Run when encountering a box
 	drive_fd(20);		// approach box
 	drive_waitDist(15);
 	deploy_out(true);			// release sensor
-	_delay_ms(2500);
+	_delay_ms(3000);
 	drive_stop();
 	drive_bkDist(1, .25);
 	_delay_ms(2500);
