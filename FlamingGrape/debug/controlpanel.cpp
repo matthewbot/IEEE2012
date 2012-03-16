@@ -763,8 +763,48 @@ void controlpanel_sensorcomms() {
 			case 'p':
 				sensorcomms_setDebug(false);
 				printf_P(PSTR("Comm prints disabled\n"));
-				break;				
+				break;
+
+			case '0':
+				sensordecision_prepare(0);
+				sensordecision_wait();
+				if (sensordecision_isRight()) {
+					printf_P(PSTR("Right!\n"));
+				} else {
+					printf_P(PSTR("Left!\n"));
+				}
+				break;
 			
+			case '1':
+				sensordecision_prepare(1);
+				sensordecision_wait();
+				if (sensordecision_isRight()) {
+					printf_P(PSTR("Right!\n"));
+				} else {
+					printf_P(PSTR("Left!\n"));
+				}
+				break;
+
+			case '2':
+				sensordecision_prepare(2);
+				sensordecision_wait();
+				if (sensordecision_isRight()) {
+					printf_P(PSTR("Right!\n"));
+				} else {
+					printf_P(PSTR("Left!\n"));
+				}
+				break;
+
+			case '3':
+				sensordecision_prepare(3);
+				sensordecision_wait();
+				if (sensordecision_isRight()) {
+					printf_P(PSTR("Right!\n"));
+				} else {
+					printf_P(PSTR("Left!\n"));
+				}
+				break;
+
 			case 'q':
 				return;
 				
