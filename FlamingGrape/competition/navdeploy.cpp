@@ -51,22 +51,22 @@ void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 	drive_waitDist(15);
 	deploy_out(true);			// release sensor
 	if (box == 0) {
-		_delay_ms(3000);
+		_delay_ms(3250);
 	} else {
-		_delay_ms(3500);
+		_delay_ms(3750);
 	}
 	drive_stop();
 	drive_bkDist(1, .25);
 	_delay_ms(2500);
 
 	drive_bk(4);				// drive backwards from box
-	_delay_ms(200);
-	deploy_off();
 	linefollow_waitLine();		// until the line is seen
+	deploy_off();
+	drive_cStop();
 
 	if (!lastbox)
 		deploy_start();				// start priming next sensor on deployer
-	sensordecision_prepare(0);		// TODO Replace 0 with box!!
+	sensordecision_prepare(box);
 	sensordecision_wait();
 }
 
@@ -170,7 +170,7 @@ bool navdeploy_middle(bool same) {	// Run when navigating the space between the 
 	}
 	linefollow_waitDone();
 	drive_cStop();				// on intersection before second box
-	drive_bkDist(40, 14);
+	drive_bkDist(40, 13);
 	if (!linefollow_start(60))
 		return false;
 	linefollow_waitDone();		// on intersection after re-align

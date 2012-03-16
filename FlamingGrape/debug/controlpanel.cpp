@@ -644,6 +644,16 @@ void controlpanel_deploy() {
 			case ' ':
 				deploy_stop();
 				break;
+			case 'l':
+				deploy_in();
+				while(!deploy_getBeamBreak()) {
+				}
+				_delay_ms(10);
+				while(deploy_getBeamBreak()) {
+				}
+				_delay_ms(1000);
+				deploy_stop();
+				break;
 			case 'q':
 				deploy_stop();
 				return;

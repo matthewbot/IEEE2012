@@ -77,8 +77,7 @@ bool sensordecision_isRight() {
 			
 		case BOARDNUM_CAPACITANCE: {
 			uint16_t volt3 = (data[4] << 8) | data[5];
-			return true;		// FOR TESTING ONLY
-//			return volt3 > 0x0100;
+			return volt3 < 0x0100;
 		}
 		
 		case BOARDNUM_TEMPERATURE: {
@@ -86,7 +85,14 @@ bool sensordecision_isRight() {
 		}
 		
 		case BOARDNUM_SIGNAL: {
-			return false;
+			uint8_t ctr=0;
+			for (int i=0;i<10;i++) {
+				uint16_t val = (data[2*i] << 8) | data[2*i+1];
+				if (val > 20)
+					ctr++;
+			}
+			
+			return ctr < 4;
 		}
 		
 		default:
