@@ -4,15 +4,17 @@
 #include "control/deploy.h"
 #include "control/linefollow.h"
 #include "debug/debug.h"
+#include "hw/tick.h"
 #include <util/delay.h>
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
 void navdeploy_lap() {
-	bool box1 = true;
-	bool box2 = true;
-	bool box3 = true;
-	bool box4 = true;
+	uint32_t count = tick_getCount();
+	bool box1 = (count & 0x01) != 0;
+	bool box2 = (count & 0x02) != 0;
+	bool box3 = (count & 0x04) != 0;
+	bool box4 = (count & 0x08) != 0;
 	for (int i=0; i<2; i++) {
 		bool choice1;
 		bool choice2;
@@ -171,16 +173,23 @@ bool navdeploy_middle(bool same) {	// Run when navigating the space between the 
 	drive_cStop();
 	return true;
 }
-
+// TODO Make nav_end shared in deploy/fast
 void navdeploy_end(bool same) {		// Run after second box has been navigated around on one side to get to loopback position
-	drive_turn(50, 30, !same);		// back left corner, second box
-	drive_fd(60);
-	drive_waitDist(10);
-	linefollow_waitLine(3, 4);	// crossing first loopback line
-	drive_waitDist(10);
-	uint16_t sensorl = !same ? 6 : 0;
-	uint16_t sensorr = !same ? 7 : 1;
-	linefollow_waitLine(sensorl, sensorr);
-	drive_cStop();				// on main loopback line
-	drive_turn(60, 45, !same);
+	if (same) {				// If we're on the back right corner
+		drive_fd(60);				// Start going straight forward to intersect loopback line
+		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
+		linefollow_waitLine();		// Drive until we intersect loopback line
+		drive_waitDist(3);			// Go forward a few more centimeters to center on line when turned
+		drive_cStop();
+		drive_rturnDeg(60, 90);		// Turn to face direction of loopback
+	} else {					// If we're on the back left corner
+		drive_rturnDeg(60, 30);		// Turn to intersect loopback line
+		drive_fd(60);				// Start going towards the loopback line
+		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
+		linefollow_waitLine(3, 4);	// Wait for the middle sensors to see a line, this is our first crossover
+		drive_waitDist(10);			// Keep going to get off that line
+		linefollow_waitLine(6, 7);	// Wait until the right side of the sensor is triggered (this will be loopback line to follow)
+		drive_cStop();
+		drive_rturnDeg(60, 45);		// Turn to face direction on new loopback line
+	}
 }
