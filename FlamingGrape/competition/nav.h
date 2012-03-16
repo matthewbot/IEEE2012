@@ -14,4 +14,6 @@ bool nav_waitLineDist(int left, int right, float dist);
 void nav_pause();
 void nav_setPauseEnabled(bool pause);
 
+void nav_go(); // gogogogogogo
+
 #endif

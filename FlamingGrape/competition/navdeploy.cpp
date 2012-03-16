@@ -10,13 +10,13 @@
 #include <avr/pgmspace.h>
 #include <stdio.h>
 
-void navdeploy_lap() {
+bool navdeploy_lap() {
 	uint32_t count = tick_getCount();
 	uint16_t box = 0;
 	for (int i=0; i<2; i++) {
 		if (!navdeploy_loopback()) {
 			printf_P(PSTR("Failed loopback\n"));
-			return;
+			return false;
 		}
 		if (i == 0){
 			drive_lturnDeg(60, 5);
@@ -28,20 +28,22 @@ void navdeploy_lap() {
 		bool right = sensordecision_isRight();
 		if (!navdeploy_aroundBox(right)) {
 			printf_P(PSTR("Failed aroundbox\n"));
-			return;
+			return false;
 		}
 		if (!navdeploy_middle(right)) {
 			printf_P(PSTR("Failed middle\n"));
-			return;
+			return false;
 		}
 		navdeploy_deploy(box + 1, i == 1);
 		right = sensordecision_isRight();
 		if (!navdeploy_aroundBox(right)) {
 			printf("Failed aroundbox\n");
-			return;
+			return false;
 		}
 		navdeploy_end(right);
 	}
+	
+	return true;
 }
 
 void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box

@@ -11,13 +11,13 @@
 #include <util/delay.h>
 #include <stdio.h>
 
-void navfast_lap() {
+bool navfast_lap() {
 	uint8_t halflap=0;
 	for (int i=0; i<2; i++, halflap++) {
 		printf_P(PSTR("Entering loopback\n"));
 		if (!navfast_loopback(halflap)) {
 			printf_P(PSTR("Failed loopback\n"));
-			return;
+			return false;
 		}
 		
 		sensordecision_wait();
@@ -25,7 +25,7 @@ void navfast_lap() {
 		printf_P(PSTR("Entering leftright\n"));
 		if (!navfast_leftright(right, halflap)) {
 			printf_P(PSTR("Failed leftright\n"));
-			return;
+			return false;
 		}
 		
 		sensordecision_wait();
@@ -34,7 +34,7 @@ void navfast_lap() {
 			printf_P(PSTR("Entering cross\n"));
 			if (!navfast_cross(right)) {
 				printf_P(PSTR("Failed cross\n"));
-				return;
+				return false;
 			}
 			
 			right = !right;// we're on the opposite side of the board now
@@ -47,7 +47,7 @@ void navfast_lap() {
 		printf_P(PSTR("Entering jump\n"));
 		if (!navfast_jump(right)) {
 			printf_P(PSTR("Failed jump\n"));
-			return;
+			return false;
 		}
 		
 		printf_P(PSTR("Entering end\n"));

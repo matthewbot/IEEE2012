@@ -26,11 +26,13 @@ void init_interrupts() {
 #include "hw/linesensor.h"
 #include "hw/tick.h"
 #include "hw/uart.h"
+#include "hw/startbutton.h"
 
 void init_modules() {
 	uart_init();
 	debug_init();
 	motor_init();
+	startbutton_init();
 	enc_init();
 	adc_init();
 	tick_init();

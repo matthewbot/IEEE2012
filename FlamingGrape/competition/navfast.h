@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void navfast_lap();
+bool navfast_lap();
 
 bool navfast_loopback(uint8_t hlap);
 bool navfast_leftright(bool right, uint8_t hlap);

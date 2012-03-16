@@ -6,7 +6,7 @@
 
 void controlpanel_init();
 
-void controlpanel();
+bool controlpanel(); // returns true for go, false for quit
 void controlpanel_sensor();
 void controlpanel_gains();
 void controlpanel_motor();

@@ -51,6 +51,7 @@ uint16_t tick_getLength() { // in uS
 #include "control/deploy.h"
 #include "debug/debug.h"
 #include "hw/linesensor.h"
+#include "hw/startbutton.h"
 #include "debug/debug.h"
 #include <util/delay.h>
 
@@ -67,6 +68,7 @@ ISR(TIMOVFVEC) {
 	debug_tick();
 	deploy_tick();
 	sensorcomms_tick();
+	startbutton_tick();
 
 	debug_setLED(BOARD_LED, false);
 	ticklength = tim.CNT - start;

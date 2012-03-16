@@ -32,7 +32,7 @@ void controlpanel_init() {
 
 static const char unknown_str[] PROGMEM = "Unknown. ? for help.";
 
-void controlpanel() {
+bool controlpanel() {
 	while (true) {
 		switch (controlpanel_promptChar("Main")) {
 			case 'd':
@@ -59,6 +59,8 @@ void controlpanel() {
 			case 'D':
 				controlpanel_deploy();
 				break;
+			case 'G': // go
+				return true;
 			default:
 				puts_P(unknown_str);
 				break;

@@ -98,6 +98,15 @@ int uart_get(UARTNum num) {
 	return ch;
 }
 
+void uart_putch(UARTNum num, char ch) {
+	UARTData &data = uartdata[num];
+	
+	if (data.inbuf_pos >= sizeof(data.inbuf))
+		return;
+		
+	data.inbuf[data.inbuf_pos++] = ch;	
+}
+
 // GCC doesn't want to inline these, but its a huge win because num is eliminated and
 // all the memory addresses get calculated at compile time.
 #pragma GCC optimize("3")

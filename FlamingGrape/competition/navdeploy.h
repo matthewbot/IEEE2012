@@ -1,7 +1,7 @@
 #ifndef NAVDEPLOY_H
 #define NAVDEPLOY_H
 
-void navdeploy_lap();
+bool navdeploy_lap();
 
 void navdeploy_deploy(int box, bool lastbox=false);
 bool navdeploy_aroundBox(bool same);

@@ -136,3 +136,17 @@ void nav_pause() {
 		_delay_ms(1000);
 }
 
+#include "competition/navdeploy.h"
+#include "competition/navfast.h"
+#include "competition/sensordecision.h"
+
+void nav_go() {
+	if (!sensordecision_verifyOk())
+		return;
+	
+	if (!navdeploy_lap())
+		return;
+	
+	while (navfast_lap()) { }
+}
+
