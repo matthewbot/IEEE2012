@@ -51,13 +51,13 @@ void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 	drive_waitDist(15);
 	deploy_out(true);			// release sensor
 	if (box == 0) {
-		_delay_ms(3250);
+		_delay_ms(1000);
 	} else {
 		_delay_ms(3750);
 	}
 	drive_stop();
 	drive_bkDist(1, .25);
-	_delay_ms(2500);
+	_delay_ms(3000);
 
 	drive_bk(4);				// drive backwards from box
 	linefollow_waitLine();		// until the line is seen
@@ -71,7 +71,7 @@ void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 }
 
 bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one sensor off, to navigate around box to next box or loopback
-	drive_bkDist(30, 10);		// in front of first box
+	drive_bkDist(30, 9.5);		// in front of first box
 	drive_turn(60, 50, same);
 	drive_fd(60);
 	drive_waitDist(10);
