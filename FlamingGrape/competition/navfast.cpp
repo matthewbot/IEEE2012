@@ -11,13 +11,6 @@
 #include <util/delay.h>
 #include <stdio.h>
 
-static void turn(float vel, float deg, bool right) {
-	if (right)
-		drive_rturnDeg(vel, deg);
-	else
-		drive_lturnDeg(vel, deg);
-}
-
 void navfast_lap() {
 	uint8_t halflap=0;
 	for (int i=0; i<2; i++, halflap++) {
@@ -45,7 +38,7 @@ void navfast_lap() {
 			right = !right;// we're on the opposite side of the board now
 		} else {
 			nav_pause();
-			turn(60, 15, right);
+			drive_turn(60, 15, right);
 			drive_cStop();
 		}
 		
@@ -106,13 +99,13 @@ bool navfast_leftright(bool right, uint8_t halflap) {
 			}
 		} else {
 			drive_cStop();
-			turn(60, 40, !right);
+			drive_turn(60, 40, !right);
 			nav_pause();
 		}
 	} else {
 		printf_P(PSTR("Nicked corner!\n"));
 		drive_cStop();
-		turn(60, 60, !right);
+		drive_turn(60, 60, !right);
 		drive_fd(60);
 		if (!nav_waitLineDist(3, 4, 20)) {
 			drive_stop();
@@ -137,7 +130,7 @@ bool navfast_leftright(bool right, uint8_t halflap) {
 }
 
 bool navfast_cross(bool right) {
-	turn(60, 70, !right);
+	drive_turn(60, 70, !right);
 	nav_pause();
 	
 	if (!nav_linefollow(right ? -.6 : .6)) // follow to intersection
@@ -152,7 +145,7 @@ bool navfast_cross(bool right) {
 	drive_cStop();
 	nav_pause();
 	
-	turn(60, 95, right);
+	drive_turn(60, 95, right);
 	nav_pause();
 	return true;
 }
@@ -189,7 +182,7 @@ bool navfast_jump(bool right) {
 		drive_cStop();
 		printf_P(PSTR("Overshot outside\n"));// TODO occured when too far back from line, turned into the corner, went straight at it, read as a turn, jumped to end
 		
-		turn(60, 55, !right);
+		drive_turn(60, 55, !right);
 		
 		drive_fd(60);
 		if (!nav_waitLineDist(3, 4, 35)) {
@@ -199,7 +192,7 @@ bool navfast_jump(bool right) {
 		}
 		drive_cStop();
 		
-		turn(60, 30, right);
+		drive_turn(60, 30, right);
 		
 		if (!nav_linefollow(right ? -.4 : .4)) {
 			printf_P(PSTR("Line disappeared after overshoot outside!\n"));
@@ -209,7 +202,8 @@ bool navfast_jump(bool right) {
 		drive_cStop();
 		printf_P(PSTR("Going to hit box!\n"));
 		
-		turn(60, 45, right);
+		drive_turn(60, 45, right);
+
 		drive_fd(60);
 		if (!nav_waitLineDist(2, 5, 20)) {
 			drive_stop();
@@ -227,7 +221,7 @@ bool navfast_jump(bool right) {
 			drive_stop();
 			printf_P(PSTR("Line disappeared, turning right!\n"));	// TODO Hit this case when it looked like it should have been running great
 			
-			turn(60, 10, right);
+			drive_turn(60, 10, right);
 			if (!nav_linefollow(right ? -.4 : .4)) {
 				printf_P(PSTR("Line still gone, bailing\n"));
 				return false;
