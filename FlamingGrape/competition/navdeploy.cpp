@@ -108,6 +108,7 @@ bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one senso
 			noturn = true;
 		}
 	} else {
+		printf_P(PSTR("Hit line."));
 
 		drive_waitDist(6);
 
@@ -123,6 +124,11 @@ bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one senso
 					printf_P(PSTR("Missed second line, but still able to follow\n"));
 					noturn = true;
 				}
+			} else {
+				printf_P(PSTR("Can't Find line anymore!\n"));
+				drive_fd(60);
+				nav_waitLineDist(0, 7, 20);
+				noturn = true;
 			}
 		} else {
 			printf_P(PSTR("Nicked corner!\n"));
@@ -193,6 +199,7 @@ bool navdeploy_middle(bool same) {	// Run when navigating the space between the 
 // TODO Make nav_end shared in deploy/fast
 void navdeploy_end(bool same) {		// Run after second box has been navigated around on one side to get to loopback position
 	if (same) {				// If we're on the back right corner
+		drive_rturnDeg(60, 10);
 		drive_fd(60);				// Start going straight forward to intersect loopback line
 		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
 		linefollow_waitLine();		// Drive until we intersect loopback line

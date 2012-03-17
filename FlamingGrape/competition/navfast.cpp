@@ -246,6 +246,7 @@ bool navfast_jump(bool right) {
 
 void navfast_end(bool right) {	// Run after a row of boxes to return to main line for loopback
 	if (right) {				// If we're on the back right corner
+		drive_rturnDeg(60, 10);
 		drive_fd(60);				// Start going straight forward to intersect loopback line
 		drive_waitDist(10);			// Wait a little before looking for the line to escape line currently on
 		linefollow_waitLine();		// Drive until we intersect loopback line

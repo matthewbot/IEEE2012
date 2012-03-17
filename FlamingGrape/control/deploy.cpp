@@ -50,9 +50,9 @@ bool deploy_isDone() {
 }
 
 void deploy_waitDone() {
-	while (enabled) { }
-//	_delay_ms(1000);
-//	deploy_stop();
+//	while (enabled) { }
+	_delay_ms(1000);
+	deploy_stop();
 }
 
 void deploy_tick() {
