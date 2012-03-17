@@ -53,6 +53,8 @@ bool navfast_lap() {
 		printf_P(PSTR("Entering end\n"));
 		navfast_end(right);
 	}
+	
+	return true;
 }
 
 bool navfast_loopback(uint8_t hlap) {
@@ -230,6 +232,8 @@ bool navfast_jump(bool right) {
 			}
 		}
 	}
+	
+	drive_turn(60, 5, right);
 	
 	return true;
 }

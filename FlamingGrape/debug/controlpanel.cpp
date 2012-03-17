@@ -641,7 +641,10 @@ void controlpanel_deploy() {
 				printf("Beambreak: %d\n", deploy_getBeamBreak());
 				break;
 			case 'd':
-				deploy_start();
+				deploy_start(false);
+				break;
+			case 'D':
+				deploy_start(true);
 				break;
 			case ' ':
 				deploy_stop();
@@ -660,6 +663,7 @@ void controlpanel_deploy() {
 				deploy_stop();
 				return;
 			default:
+				deploy_stop();
 				puts_P(unknown_str);
 				static const char msg[] PROGMEM = 
 					"Deploy commands\n"

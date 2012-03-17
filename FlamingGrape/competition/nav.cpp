@@ -141,9 +141,7 @@ void nav_pause() {
 #include "competition/sensordecision.h"
 
 void nav_go() {
-	if (!sensordecision_verifyOk())
-		return;
-	
+	_delay_ms(500);
 	if (!navdeploy_lap())
 		return;
 	
