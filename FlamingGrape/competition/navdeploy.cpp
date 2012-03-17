@@ -84,7 +84,7 @@ void navdeploy_deploy(int box, bool lastbox) {		// Run when encountering a box
 }
 
 bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one sensor off, to navigate around box to next box or loopback
-	drive_bkDist(30, 9.5);		// in front of first box
+	drive_bkDist(30, 15);		// in front of first box
 	drive_turn(60, 50, same);
 	drive_fd(60);
 	drive_waitDist(10);
@@ -124,12 +124,7 @@ bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one senso
 					printf_P(PSTR("Missed second line, but still able to follow\n"));
 					noturn = true;
 				}
-			} else {
-				printf_P(PSTR("Can't Find line anymore!\n"));
-				drive_fd(60);
-				nav_waitLineDist(0, 7, 20);
-				noturn = true;
-			}
+			} 
 		} else {
 			printf_P(PSTR("Nicked corner!\n"));
 			drive_fdDist(60, 10);
@@ -156,7 +151,7 @@ bool navdeploy_aroundBox(bool same) {// Run immediately after dropping one senso
 		nav_pause();
 	}
 
-	float offset = !same ? 0.4 : -0.4;
+	float offset = !same ? 0.6 : -0.6;
 	if (!nav_linefollow(offset))
 		return false;
 
@@ -172,7 +167,7 @@ bool navdeploy_loopback() {	// Run when leaving one row of boxes to loop back to
 }
 
 bool navdeploy_middle(bool same) {	// Run when navigating the space between the two boxes on either row of the course
-	drive_turn(50, 50, !same);		// on back left corner of first box
+	drive_turn(50, 60, !same);		// on back left corner of first box
 	drive_fd(60);
 	drive_waitDist(12);
 	linefollow_waitLine(3, 4);	// on middle line connecting two boxes
